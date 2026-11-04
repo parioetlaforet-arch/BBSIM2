@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Pure Breadboard Module - 1k Ohm Resistor Snap Integrated</title>
+
+   <!-- ====================================================================== -->
+   <!-- BLOCK-01: [CSS / Style] UI・インスペクター・トグル・デザイン装飾       -->
+   <!-- ====================================================================== -->
+   <style>
+    body {
+       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+       background: #181825;
+       color: #cdd6f4;
+       padding: 20px;
+       margin: 0;
+       display: flex;
+       flex-direction: column;
+       align-items: flex-start;
+     }
+     h1 { color: #89b4fa; font-size: 20px; margin-bottom: 4px; }
+     p.subtitle { color: #a6adc8; font-size: 12px; margin-bottom: 16px; }
+
+     /* トグルUIコントロールバー */
+     .control-bar {
+       background: #1e1e2e;
+       border: 1px solid #45475a;
+       border-radius: 8px;
+       padding: 10px 16px;
+       width: 900px;
+       box-sizing: border-box;
+       display: flex;
+       justify-content: space-between;
+       align-items: center;
+       margin-bottom: 16px;
+     }
+     .toggle-group { display: flex; gap: 16px; align-items: center; }
+     .toggle-label { font-size: 12px; font-weight: bold; color: #b4befe; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+     .toggle-checkbox { cursor: pointer; accent-color: #89b4fa; width: 16px; height: 16px; }
+
+     /* メイン2カラムレイアウト */
+     .workspace-grid {
+       display: flex;
+       gap: 16px;
+       width: 900px;
+       margin-bottom: 16px;
+     }
+
+   /* 左側: インスペクター小窓 (縦伸長・スクロールフリー版) */
+     .inspector-panel {
+       width: 260px;
+       min-height: 720px; /* ★ ブレッドボード＋オシロスコープの全高に合わせて縦に伸ばす */
+       background: #1e1e2e;
+       border: 1px solid #45475a;
+       border-radius: 12px;
+       padding: 16px;
+       box-sizing: border-box;
+       display: flex;
+       flex-direction: column;
+       gap: 12px;
+       flex-shrink: 0;
+     }
+     .panel-title { font-size: 13px; font-weight: bold; color: #89b4fa; border-bottom: 1px solid #313244; padding-bottom: 6px; }
+     .part-info-box { background: #181825; border-radius: 6px; padding: 10px; font-size: 11px; line-height: 1.5; color: #a6adc8; }
+     .part-info-title { font-size: 12px; font-weight: bold; color: #a6e3a1; margin-bottom: 4px; }
+
+     /* オシロスコープキャンバス枠 */
+     .scope-box { background: #11111b; border: 1px solid #313244; border-radius: 6px; padding: 8px; text-align: center; }
+     .scope-title { font-size: 10px; font-weight: bold; color: #f9e2af; margin-bottom: 4px; text-align: left; }
+     canvas#scope-canvas { background: #000000; border-radius: 4px; display: block; margin: 0 auto; }
+
+     /* 右側: ブレッドボード表示エリア */
+     .board-card {
+       flex-grow: 1;
+       background: #1e1e2e;
+       border: 1px solid #45475a;
+       border-radius: 12px;
+       padding: 16px;
+       box-sizing: border-box;
+     }
+     canvas#breadboard-canvas { display: block; border-radius: 8px; cursor: crosshair; }
+
+     .info-panel {
+       margin-top: 12px;
+       background: #313244;
+       border-radius: 6px;
+       padding: 8px 12px;
+       font-family: monospace;
+       font-size: 11px;
+       display: flex;
+       justify-content: space-between;
+       color: #a6e3a1;
+     }
+     .status-badge { padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+     .status-badge.POWER_ON { background: #059669; color: #ffffff; }
+
+     /* 開発ログ用スタイル */
+     .log-card { background: #1e1e2e; border: 1px solid #45475a; border-radius: 12px; padding: 16px 20px; width: 900px; box-sizing: border-box; }
+     .log-title { font-size: 13px; font-weight: bold; color: #89b4fa; margin-bottom: 12px; }
+     .log-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+     .log-item { background: #181825; border: 1px solid #313244; border-left: 4px solid #a6e3a1; border-radius: 4px; padding: 8px 12px; font-size: 11px; }
+     .log-header { display: flex; justify-content: space-between; margin-bottom: 4px; font-family: monospace; }
+     .log-tag { background: #45475a; color: #a6e3a1; padding: 2px 6px; border-radius: 3px; font-weight: bold; font-size: 9px; }
+     .log-date { color: #6c7086; font-size: 10px; }
+     .log-body { color: #cdd6f4; line-height: 1.4; }
+     .log-body ul { margin: 4px 0 0 16px; padding: 0; color: #a6adc8; }
+   </style>
+</head>
+<body>
+
+   <!-- ====================================================================== -->
+   <!-- BLOCK-02: [HTML Layout] 画面構造・コントロール・レイアウト             -->
+   <!-- ====================================================================== -->
+   <h1>🍞 ブレッドボード (マルチパーツ＆リアルタイムカラーコード統合版)</h1>
+   <p class="subtitle">※ パーツ自由追加・インスペクター動的連動 ＆ 表示切替（F12: ALL PASS）</p>
+
+   <!-- 上部: 表示レイヤー設定バー -->
+   <div class="control-bar">
+     <div style="font-size: 12px; font-weight: bold; color: #89b4fa;">⚙️ 表示レイヤー設定</div>
+
+     <div class="toggle-group">
+       <!-- 軸 1: 内部裏側透過 (X-Ray) -->
+       <label class="toggle-label">
+         <input type="checkbox" id="toggle-xray" class="toggle-checkbox" onchange="updateDisplayToggles()">
+         👁️ 内部裏側透過 (X-Ray)
+       </label>
+       <!-- 軸 2: パーツ表示 (リアル ⇔ 回路図記号) -->
+       <label class="toggle-label">
+         <input type="checkbox" id="toggle-symbol" class="toggle-checkbox" onchange="updateDisplayToggles()">
+         📐 パーツ表示: 回路図記号 (JIS/IEC)
+       </label>
+     </div>
+   </div>
+
+   <!-- メインワークスペース (2カラム) -->
+   <div class="workspace-grid">
+
+    <!-- 左側: インスペクターパネル -->
+     <div class="panel">
+       <h2 class="panel-title">🔍 パーツ・回路インスペクター</h2>
+
+       <!-- ★ 9V POWER SUPPLY (一番上へ移動!) -->
+       <div style="background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 8px 10px; margin-bottom: 10px;">
+         <h3 id="inspector-part-title" class="panel-subtitle" style="color: #a6e3a1; margin-top: 0; margin-bottom: 4px;">9V POWER SUPPLY</h3>
+
+         <p id="inspector-part-desc" class="panel-desc" style="margin: 0; font-size: 10px; color: #94a3b8;">定格 9.0V 直流電源 (6LR61/006P)。ブレッドボードの上下パワーレールへ電力を給電中。</p>
+
+<!-- バッテリー4種盛り ドロップダウン (超薄型・コンパクトデザイン) -->
+         <select id="battery-voltage-select" style="background: #0f172a; color: #38bdf8; border: 1px solid #45475a; border-radius: 4px; padding: 2px 4px; font-size: 10px; font-weight: bold; cursor: pointer; outline: none; flex-grow: 1; text-align: right;" onchange="onBatteryChange(this.value)">
+           <option value="9.0" selected>9.0V (006P角形)</option>
+           <option value="5.0">5.0V (USB/Arduino)</option>
+           <option value="3.0">3.0V (単3×2本)</option>
+           <option value="1.5">1.5V (単3×1本/実験)</option>
+         </select>
+       </div>
+
+
+
+
+       <!-- 選択パーツの拡大イラストプレビュー -->
+       <div id="inspector-canvas-box" style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px; margin-bottom: 12px; text-align: center;">
+         <canvas id="inspector-preview-canvas" width="220" height="90" style="display: block; margin: 0 auto;"></canvas>
+       </div>
+
+
+
+    <!-- インスペクター操作コントロール ＆ 全情報網羅データシート -->
+       <div id="inspector-controls" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+
+
+
+        <!-- 選択パーツの属性変更パラメータ (枠ごと非表示化対応) -->
+         <div id="inspector-attr-box" style="display: none; align-items: center; justify-content: space-between; background: #1e293b; padding: 6px 10px; border-radius: 4px; border: 1px solid #334155;">
+
+
+          <label for="select-resistor-val" style="font-size: 11px; color: #38bdf8; font-weight: bold; white-space: nowrap; flex-shrink: 0;">⚡ 属性（抵抗値）変更:</label>
+
+           <select id="select-resistor-val" style="background: #0f172a; color: #38bdf8; border: 1px solid #0284c7; border-radius: 4px; padding: 3px 6px; font-size: 11px; font-weight: bold; cursor: pointer; max-width: 170px;">
+             <option value="100">100 Ω (茶黒茶金)</option>
+             <option value="330">330 Ω (橙橙茶金)</option>
+             <option value="1000" selected>1.0k Ω (茶黒赤金)</option>
+             <option value="10000">10k Ω (茶黒橙金)</option>
+             <option value="100000">100k Ω (茶黒黄金)</option>
+           </select>
+         </div>
+
+         <!-- 📄 パーツ完全仕様書データシート（全情報表示コンテナ） -->
+         <div id="inspector-spec-box" style="background: #0f172a; padding: 10px; border-radius: 6px; font-size: 10px; color: #94a3b8; border: 1px solid #334155; line-height: 1.5; max-height: 360px; overflow-y: auto;">
+
+
+
+
+           <!-- 1. 基本諸元 ＆ 電気的定格 -->
+           <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px; font-size: 11px;">📊 電気的定格 ＆ 基本諸元</div>
+           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px 6px; margin-bottom: 8px; color: #cbd5e1;">
+             <div>・品名: 炭素皮膜抵抗器</div>
+             <div>・定格電力: 0.25 W (1/4W)</div>
+             <div>・公称抵抗値: <span id="spec-res-val" style="color: #f59e0b; font-weight: bold;">1.0k Ω</span></div>
+             <div>・許容差: ±5% (J級)</div>
+             <div>・最高使用電圧: 250 V</div>
+             <div>・使用温度: -55℃〜+155℃</div>
+           </div>
+
+           <!-- 2. カラーコード完全解読 -->
+           <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px; font-size: 11px;">🎨 カラーコード完全解読</div>
+           <div id="spec-color-code" style="background: #1e293b; padding: 5px 8px; border-radius: 4px; color: #f8fafc; font-weight: bold; margin-bottom: 8px; border-left: 3px solid #38bdf8;">
+             茶(1) ・ 黒(0) ・ 赤(10²) ・ 金(±5%) = 1,000 Ω
+           </div>
+
+           <!-- 3. リアルタイム動作解析 -->
+           <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px; font-size: 11px;">⚡ リアルタイム動作解析 (9V印加時)</div>
+           <div style="margin-bottom: 8px; color: #cbd5e1; background: #181825; padding: 6px; border-radius: 4px;">
+             <div>・通過電流 ($I$): <span id="spec-current" style="color: #4ade80; font-weight: bold;">9.00 mA</span></div>
+             <div>・消費電力 ($P$): <span id="spec-power" style="color: #4ade80; font-weight: bold;">81.0 mW</span></div>
+             <div>・定格負荷率: <span id="spec-load-rate" style="color: #4ade80; font-weight: bold;">32.4 %</span> (安全圏)</div>
+           </div>
+
+           <!-- 4. 役割 ＆ 技師テクニカルメモ -->
+           <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px; font-size: 11px;">💡 役割 ＆ 技師テクニカルメモ</div>
+           <div style="color: #a6adc8; font-size: 9.5px; line-height: 1.4;">
+             ・<b>主な役割</b>: 回路内の電流値を適正に制限し、LEDや半導体素子を過電流破壊から保護する。または分圧回路として利用。<br>
+             ・<b>実装上の注意</b>: ブレッドボード挿入時はリード線を直角に整えること。定格負荷率が80%を超える場合は発熱に注意。
+           </div>
+
+         </div>
+       </div>
+
+  </div>
+
+     <!-- 右側: メインブレッドボード エリア -->
+     <div class="board-card">
+
+   <!-- ★ パーツ追加 ＆ 操作ヘッダー (削除ボタン撤去・レイアウト最適化版) -->
+       <div style="background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+
+         <!-- グループ1: パーツ選択ドロップダウン -->
+         <div style="display: flex; align-items: center; gap: 6px;">
+           <label for="select-category" style="font-size: 11px; color: #f59e0b; font-weight: bold;">📦 分類:</label>
+           <select id="select-category" style="background: #0f172a; color: #38bdf8; border: 1px solid #0284c7; border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer;">
+             <option value="PASSIVE">受動部品 (抵抗/コンデンサ)</option>
+             <option value="OPTO">発光・表示素子 (LED/ブザー)</option>
+             <option value="SWITCH">スイッチ・入力</option>
+             <option value="IC">半導体・IC・ダイオード</option>
+           </select>
+
+           <label for="select-add-part" style="font-size: 11px; color: #a6e3a1; font-weight: bold; margin-left: 4px;">パーツ:</label>
+          <select id="select-add-part" style="background: #0f172a; color: #f8fafc; border: 1px solid #475569; border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer;">
+             <optgroup label="受動部品">
+               <option value="RESISTOR">1/4W 炭素皮膜抵抗器 (1kΩ)</option>
+               <option value="CAPACITOR_10UF">⚡ 電解コンデンサ (10µF/50V)</option>
+               <option value="POTENTIOMETER_10K">🎛️ 可変抵抗器 (10kΩ ボリューム)</option>
+             </optgroup>
+            <optgroup label="スイッチ・入力">
+               <option value="SWITCH">トグルスイッチ (SPST)</option>
+               <option value="SWITCH_SPDT">3路トグルスイッチ (SPDT / 階段SW)</option>
+               <option value="SPDT_SLIDE">スライドスイッチ (SPDT / 3ピン)</option>
+             </optgroup>
+           </select>
+
+           <button id="btn-add-part" style="background: #059669; color: #ffffff; border: none; padding: 5px 12px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s;">➕ 追加</button>
+         </div>
+
+         <!-- 区分用縦バー -->
+         <div style="width: 1px; height: 18px; background: #475569;"></div>
+
+        <!-- グループ2: プリセット ＆ 操作ボタン (動的アナライザー対応版) -->
+         <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+          <span style="font-size: 10px; color: #38bdf8; font-weight: bold; margin-right: 2px;">⚡ ステージ:</span>
+           <!-- 1〜10番の連番ボタングループ (2回押しで回答トグル) -->
+           <div id="preset-button-group" style="display: inline-flex; gap: 4px;">
+             <button class="stage-btn" onclick="handlePresetClick(1)" id="btn-stage-1" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">1</button>
+             <button class="stage-btn" onclick="handlePresetClick(2)" id="btn-stage-2" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">2</button>
+             <button class="stage-btn" onclick="handlePresetClick(3)" id="btn-stage-3" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">3</button>
+             <button class="stage-btn" onclick="handlePresetClick(4)" id="btn-stage-4" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">4</button>
+             <button class="stage-btn" onclick="handlePresetClick(5)" id="btn-stage-5" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">5</button>
+             <button class="stage-btn" onclick="handlePresetClick(6)" id="btn-stage-6" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">6</button>
+            <button class="stage-btn" onclick="handlePresetClick(7)" id="btn-stage-7" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">7</button>
+
+<!-- ★ Stage 7 専用 サブステージ展開コンテナ (初期状態: 非表示) -->
+<div id="sub-stage-container" style="display: none; width: 100%; margin-top: 6px; padding: 3px 6px; background: #0f172a; border-radius: 4px; border: 1px solid #334155; align-items: center; gap: 4px; flex-wrap: wrap;">
+   <span style="font-size: 10px; color: #38bdf8; font-weight: bold; margin-right: 2px;">⚡ ブリッジ進化:</span>
+   <button class="sub-stage-btn" onclick="handlePresetClick('7-1')" id="btn-sub-7-1" style="padding: 2px 6px; font-size: 10px; font-weight: bold; background: #1e293b; color: #94a3b8; border: 1px solid #475569; border-radius: 3px; cursor: pointer;">7-1 分圧の壁</button>
+   <button class="sub-stage-btn" onclick="handlePresetClick('7-2')" id="btn-sub-7-2" style="padding: 2px 6px; font-size: 10px; font-weight: bold; background: #1e293b; color: #94a3b8; border: 1px solid #475569; border-radius: 3px; cursor: pointer;">7-2 並列ツイン</button>
+   <button class="sub-stage-btn" onclick="handlePresetClick('7-3')" id="btn-sub-7-3" style="padding: 2px 6px; font-size: 10px; font-weight: bold; background: #1e293b; color: #94a3b8; border: 1px solid #475569; border-radius: 3px; cursor: pointer;">7-3 禁断の横糸</button>
+   <button class="sub-stage-btn" onclick="handlePresetClick('7-4')" id="btn-sub-7-4" style="padding: 2px 6px; font-size: 10px; font-weight: bold; background: #1e293b; color: #94a3b8; border: 1px solid #475569; border-radius: 3px; cursor: pointer;">7-4 平衡の奇跡</button>
+   <button class="sub-stage-btn" onclick="handlePresetClick('7-5')" id="btn-sub-7-5" style="padding: 2px 6px; font-size: 10px; font-weight: bold; background: #1e293b; color: #94a3b8; border: 1px solid #475569; border-radius: 3px; cursor: pointer;">7-5 極致の完成</button>
+</div>
+
+             <button class="stage-btn" onclick="handlePresetClick(8)" id="btn-stage-8" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">8</button>
+             <button class="stage-btn" onclick="handlePresetClick(9)" id="btn-stage-9" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">9</button>
+             <button class="stage-btn" onclick="handlePresetClick(10)" id="btn-stage-10" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">10</button>
+           </div>
+           <button id="btn-rotate" style="background: #334155; color: #f8fafc; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin-left: 4px;">🔄 回転</button>
+
+
+         </div>
+
+       </div>
+
+     <!-- 左右2カラム分割コンテナ (左: ボード＋計測群 / 右: 天井〜床貫通ツリー) -->
+       <div style="display: flex; gap: 12px; align-items: stretch; justify-content: flex-start;">
+
+         <!-- ◀ 左カラム: ブレッドボード ＆ 計測・ログ群 (幅600pxにスッキリ集約) -->
+         <div style="width: 600px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;">
+
+          <!-- 1. メインブレッドボード Canvas -->
+           <canvas id="breadboard-canvas" width="600" height="420" style="display: block; border-radius: 8px;"></canvas>
+
+           <!-- 2. 📈 リアルタイム・オシロスコープ (BB直下へピタッと引き上げ密着) -->
+           <div style="margin-top: -140px; position: relative; z-index: 2; background: #11111b; border: 1px solid #313244; border-radius: 8px; padding: 6px 10px; box-sizing: border-box;">
+             <div style="font-size: 11px; font-weight: bold; color: #f9e2af; margin-bottom: 3px; display: flex; align-items: center; justify-content: space-between;">
+
+               <span>📈 リアルタイム・オシロスコープ (CH1: 電圧波形モニタ)</span>
+               <span style="font-size: 10px; color: #a6e3a1; font-family: monospace;">SAMPLING: 60 FPS</span>
+             </div>
+             <!-- Canvas解像度を幅580pxに最適化 (高密度・シャープ波形) -->
+             <canvas id="scope-canvas" width="580" height="90" style="background: #000000; border-radius: 4px; display: block; margin: 0 auto; border: 1px solid #1e293b;"></canvas>
+           </div>
+
+           <!-- 3. ⚡ BBリアルタイム物理解説テキストログパネル -->
+           <div id="circuit-event-log" style="background: #0f172a; border: 1px solid #334155; border-left: 4px solid #38bdf8; border-radius: 6px; padding: 10px 12px; font-size: 11px; line-height: 1.6; color: #cbd5e1; font-family: monospace; min-height: 48px; box-sizing: border-box;">
+             🔌 <b>[待機状態]:</b> 回路が遮断されています (OPEN)。スイッチをONにするか配線を接続してください。
+           </div>
+
+           <!-- 4. ステータス・ノード情報バー -->
+           <div class="info-panel" style="margin-top: 0;">
+             <div>ステータス: <span id="power-status" class="status-badge POWER_ON">9V DYNAMIC ACTIVE</span></div>
+             <div>ホバー穴: <span id="hover-hole-id">NONE</span></div>
+             <div>ノードID: <span id="hover-node-id">NONE</span></div>
+           </div>
+
+         </div>
+
+         <!-- ▶ 右カラム：⚡ 電流経路・分圧ツリー (一番下まで完全に縦伸長・トールパネル) -->
+         <div id="circuit-tree-panel" style="width: 290px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; font-family: monospace; font-size: 11px; color: #cbd5e1; overflow-y: auto; flex-shrink: 0; align-self: stretch;">
+           <div style="font-weight: bold; color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+             <span>⚡ 電流経路・分圧ツリー</span>
+             <span id="tree-status-badge" style="font-size: 10px; background: #334155; color: #94a3b8; padding: 2px 6px; border-radius: 4px;">STANDBY</span>
+           </div>
+           <div id="circuit-tree-content" style="flex: 1; display: flex; flex-direction: column; gap: 6px; padding-top: 4px;">
+             <div style="color: #64748b; font-style: italic;">
+               🔌 回路遮断 (OPEN)<br><br>
+               配線を接続して通電させると、電源(+9V)からGND(0V)へ至る全パーツの電圧降下と通過電流が自動計算され、ツリー表示されます。
+             </div>
+           </div>
+         </div>
+
+       </div>
+     </div>
+   </div>
+
+   <!-- 最下段：開発記録ログパネル -->
+   <div class="log-card">
+     <div class="log-title">📜 開発・構築ログ (Development Log)　parioetlaforet@gmail.com</div>
+     <ul id="dev-log-container" class="log-list">
+       <!-- JavaScriptから動的描画 -->
+     </ul>
+   </div>
+
+   <!-- 外部ロジックファイル (頭脳) の読み込み -->
+   <script src="app.js"></script>
+</body>
+</html>
