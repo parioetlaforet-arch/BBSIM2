@@ -251,10 +251,18 @@
                <option value="CAPACITOR_10UF">⚡ 電解コンデンサ (10µF/50V)</option>
                <option value="POTENTIOMETER_10K">🎛️ 可変抵抗器 (10kΩ ボリューム)</option>
              </optgroup>
-            <optgroup label="スイッチ・入力">
+          <optgroup label="スイッチ・入力">
                <option value="SWITCH">トグルスイッチ (SPST)</option>
                <option value="SWITCH_SPDT">3路トグルスイッチ (SPDT / 階段SW)</option>
                <option value="SPDT_SLIDE">スライドスイッチ (SPDT / 3ピン)</option>
+             </optgroup>
+             <optgroup label="発光・表示・音響素子">
+               <option value="BUZZER_PIEZO">圧電ブザー (2.4kHz 自励発振型)</option>
+             </optgroup>
+             <optgroup label="半導体・トランジスタ">
+               <option value="DIODE_1N4007">整流ダイオード (1N4007)</option>
+               <option value="TRANSISTOR_2SC1815">NPNトランジスタ (2SC1815)</option>
+               <option value="MOSFET_2N7000">NチャネルMOSFET (2N7000)</option>
              </optgroup>
            </select>
 
@@ -288,9 +296,25 @@
 </div>
 
              <button class="stage-btn" onclick="handlePresetClick(8)" id="btn-stage-8" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">8</button>
+
+
              <button class="stage-btn" onclick="handlePresetClick(9)" id="btn-stage-9" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">9</button>
              <button class="stage-btn" onclick="handlePresetClick(10)" id="btn-stage-10" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">10</button>
+
+  <button class="stage-btn" onclick="handlePresetClick(11)" id="btn-stage-11" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">11</button>
+
+
+  <button class="stage-btn" onclick="handlePresetClick(12)" id="btn-stage-12" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">12</button>
+
+  <button class="stage-btn" onclick="handlePresetClick(13)" id="btn-stage-13" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">13</button>
+
+
            </div>
+
+
+
+
+
            <button id="btn-rotate" style="background: #334155; color: #f8fafc; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin-left: 4px;">🔄 回転</button>
 
 
