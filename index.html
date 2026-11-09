@@ -158,19 +158,25 @@
 
 
 
-       <!-- 選択パーツの拡大イラストプレビュー -->
+   <!-- 選択パーツの拡大イラストプレビュー -->
        <div id="inspector-canvas-box" style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px; margin-bottom: 12px; text-align: center;">
          <canvas id="inspector-preview-canvas" width="220" height="90" style="display: block; margin: 0 auto;"></canvas>
        </div>
 
-
-
-    <!-- インスペクター操作コントロール ＆ 全情報網羅データシート -->
+     <!-- インスペクター操作コントロール ＆ 全情報網羅データシート -->
        <div id="inspector-controls" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
 
+         <!-- 選択パーツ操作ボタングループ (2列配置) -->
+         <div id="inspector-action-box" style="display: none; grid-template-columns: 1fr 1fr; gap: 8px;">
+           <button id="btn-inspector-rotate" type="button" style="padding: 8px 6px; background: #0284c7; color: #ffffff; border: 1px solid #38bdf8; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center;">
+             [パーツ回転]
+           </button>
+           <button id="btn-inspector-delete" type="button" style="padding: 8px 6px; background: #b91c1c; color: #ffffff; border: 1px solid #ef4444; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center;">
+             [パーツ削除]
+           </button>
+         </div>
 
-
-        <!-- 選択パーツの属性変更パラメータ (枠ごと非表示化対応) -->
+         <!-- 選択パーツの属性変更パラメータ (枠ごと非表示化対応) -->
          <div id="inspector-attr-box" style="display: none; align-items: center; justify-content: space-between; background: #1e293b; padding: 6px 10px; border-radius: 4px; border: 1px solid #334155;">
 
 

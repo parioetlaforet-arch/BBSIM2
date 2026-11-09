@@ -47,453 +47,1202 @@ const ROWS_BOTTOM = ["F", "G", "H", "I", "J"];
 const CIRCUIT_PRESETS = {
 
 
-// Stage 1: 基本点灯回路 (ゾーン分割動的ランダムジェネレータ)
+// Stage 1: 基本点灯回路 (3大構図マルチパターン・ツッコミ配置ジェネレータ)
   BASIC_LED: () => {
-    // 左ゾーン(列2〜8)と右ゾーン(列16〜24)からランダム開始列を決定
-    const rCol = Math.floor(Math.random() * 7) + 2; // 2〜8
-    const ledCol = Math.floor(Math.random() * 9) + 16; // 16〜24
+    // 3つの劇的に異なるトポロジー構図からランダム抽選 (0:溝跨ぎ抵抗, 1:溝跨ぎLED, 2:右上左下逆走)
+    const pattern = Math.floor(Math.random() * 3);
 
-    return {
-      name: "基本点灯回路 (1kΩ + 赤LED / ランダム配置)",
-      desc: "左ゾーン(抵抗)と右ゾーン(LED)へランダムに散開配置されます。中央の空間を渡るジャンパ線によって回路が成立します。",
-      components: [
-        { id: "R_PRESET_1", type: "resistor", val_ohm: 1000, pinA: `C${rCol}`, pinB: `C${rCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 保護抵抗", desc: "LEDへの過電流を防ぐ電流制限抵抗" },
-        { id: "LED_PRESET_1", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: true, name: "赤色LED (5mm)", desc: "順方向電圧2.0Vの標準的な赤色LED" }
-      ],
-      answerWires: [
-        { id: "W_BASE_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `A${rCol}`, color: "#ef4444" },
-        { id: "W_BASE_R_TO_LED", fromHole: `A${rCol + 4}`, toHole: `A${ledCol}`, color: "#eab308" },
-        { id: "W_BASE_GND", fromHole: `E${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
-      ]
-    };
+    if (pattern === 0) {
+      // パターンA: 抵抗が中央溝跨ぎ(縦) ＆ LEDが右下最果て(横)
+      const rCol = Math.floor(Math.random() * 5) + 3; // 3〜7
+      const ledCol = Math.floor(Math.random() * 5) + 21; // 21〜25
+      return {
+        name: "基本点灯回路 (構図A: 溝跨ぎ抵抗 ＆ 最果てLED)",
+        desc: "抵抗が中央溝(E-F行)をダイナミックに跨ぎ、LEDが右下J行に追いやられた対角線配線です。",
+        components: [
+          { id: "R_PRESET_1", type: "resistor", val_ohm: 1000, pinA: `E${rCol}`, pinB: `F${rCol}`, isVertical: true, spanCols: 1, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 保護抵抗", desc: "中央溝を跨いで配置された電流制限抵抗" },
+          { id: "LED_PRESET_1", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `J${ledCol}`, pinB: `J${ledCol + 2}`, isOn: true, name: "赤色LED (5mm)", desc: "右下の最果てに配置された赤色LED" }
+        ],
+        answerWires: [
+          { id: "W_BASE_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `A${rCol}`, color: "#ef4444" },
+          { id: "W_BASE_R_TO_LED", fromHole: `G${rCol}`, toHole: `I${ledCol}`, color: "#eab308" },
+          { id: "W_BASE_GND", fromHole: `H${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // パターンB: 抵抗が最上段A行(横) ＆ LEDが中央溝跨ぎ(縦)
+      const rCol = Math.floor(Math.random() * 5) + 2; // 2〜6
+      const ledCol = Math.floor(Math.random() * 6) + 16; // 16〜21
+      return {
+        name: "基本点灯回路 (構図B: キワキワ抵抗 ＆ 溝跨ぎLED)",
+        desc: "抵抗が電源レール直近のA行に横たわり、LEDが中央溝(E-F行)を豪快に跨ぐ縦挿し配置です。",
+        components: [
+          { id: "R_PRESET_1", type: "resistor", val_ohm: 1000, pinA: `A${rCol}`, pinB: `A${rCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 保護抵抗", desc: "最上部A行に配置された電流制限抵抗" },
+          { id: "LED_PRESET_1", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `E${ledCol}`, pinB: `F${ledCol}`, isVertical: true, spanCols: 1, isOn: true, name: "赤色LED (5mm)", desc: "中央溝を跨いで縦に直刺しされた赤色LED" }
+        ],
+        answerWires: [
+          { id: "W_BASE_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `B${rCol}`, color: "#ef4444" },
+          { id: "W_BASE_R_TO_LED", fromHole: `C${rCol + 4}`, toHole: `B${ledCol}`, color: "#eab308" },
+          { id: "W_BASE_GND", fromHole: `J${ledCol}`, toHole: `BUS_BOTTOM_MINUS_${ledCol}`, color: "#3b82f6" }
+        ]
+      };
+    } else {
+      // パターンC: 抵抗が右上僻地(横) ＆ LEDが左下僻地(横) 【大逆走レイアウト】
+      const rCol = Math.floor(Math.random() * 5) + 20; // 20〜24
+      const ledCol = Math.floor(Math.random() * 5) + 3; // 3〜7
+      return {
+        name: "基本点灯回路 (構図C: 右上抵抗 ＆ 左下LED 大逆走配置)",
+        desc: "右上に置かれた抵抗から、左下のLEDへと盤面を大きく逆走して電力を送り込む長距離パズル配置です。",
+        components: [
+          { id: "R_PRESET_1", type: "resistor", val_ohm: 1000, pinA: `B${rCol}`, pinB: `B${rCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 保護抵抗", desc: "右上に配置された電流制限抵抗" },
+          { id: "LED_PRESET_1", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `I${ledCol}`, pinB: `I${ledCol + 2}`, isOn: true, name: "赤色LED (5mm)", desc: "左下に配置された赤色LED" }
+        ],
+        answerWires: [
+          { id: "W_BASE_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `A${rCol}`, color: "#ef4444" },
+          { id: "W_BASE_R_TO_LED", fromHole: `C${rCol + 4}`, toHole: `F${ledCol}`, color: "#eab308" },
+          { id: "W_BASE_GND", fromHole: `J${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
+        ]
+      };
+    }
   },
 
 
- // Stage 2: 可変抵抗調光回路 (3ゾーン分割動的ランダムジェネレータ)
+// Stage 2: 可変抵抗調光回路 (3大構図マルチパターン・ツッコミ配置ジェネレータ)
   POT_DIMMER: () => {
-    const potCol = Math.floor(Math.random() * 5) + 2; // 左ゾーン: 列2〜6
-    const rCol = Math.floor(Math.random() * 5) + 12;  // 中央ゾーン: 列12〜16
-    const ledCol = Math.floor(Math.random() * 5) + 22; // 右ゾーン: 列22〜26
+    // 3つのトポロジー構図からランダム抽選 (0:左上VR＆右下LED, 1:下段中央VR＆最上段LED, 2:右上VR＆左下LED逆走)
+    const pattern = Math.floor(Math.random() * 3);
 
-    return {
-      name: "可変抵抗調光回路 (10kΩPot + 赤LED / ランダム配置)",
-      desc: "可変抵抗器、保護抵抗、LEDが独立ゾーンへランダム散開配置されます。ワイパー端子からの分圧出力をジャンパ線で中継し、調光回路を完成させます。",
-      components: [
-        { id: "POT_PRESET_1", type: "potentiometer", val_max_ohm: 10000, cur_ratio: 0.1, val_ohm: 1000, pinA: `C${potCol}`, pinB: `C${potCol + 4}`, pinC: `E${potCol + 2}`, pinWiper: `E${potCol + 2}`, spanCols: 4, name: "可変抵抗器 (10kΩ)", desc: "分圧・電流調整用ポテンショメータ" },
-        { id: "R_PRESET_POT", type: "resistor", val_ohm: 100, pinA: `C${rCol}`, pinB: `C${rCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#78350f", "#d97706"], name: "100Ω 固定抵抗器", desc: "100Ω 電流制限保護抵抗" },
-        { id: "LED_PRESET_POT", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: true, name: "赤色LED (5mm)", desc: "順方向電圧2.0Vの標準的な赤色LED" }
-      ],
-      answerWires: [
-        { id: "W_POT_VCC", fromHole: `BUS_TOP_PLUS_${potCol}`, toHole: `A${potCol}`, color: "#ef4444" },
-        { id: "W_POT_WIPER_TO_R", fromHole: `E${potCol + 2}`, toHole: `A${rCol}`, color: "#38bdf8" },
-        { id: "W_POT_R_TO_LED", fromHole: `A${rCol + 4}`, toHole: `A${ledCol}`, color: "#eab308" },
-        { id: "W_POT_GND", fromHole: `E${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
-      ]
-    };
+    if (pattern === 0) {
+      // 構図A: 左上ポテンショメータ ＆ 右下最果てLED
+      const potCol = Math.floor(Math.random() * 4) + 2; // 2〜5
+      const ledCol = Math.floor(Math.random() * 5) + 22; // 22〜26
+      return {
+        name: "可変抵抗調光回路 (構図A: 左上VR ＆ 右下最果てLED)",
+        desc: "左上の可変抵抗器から、右下最果てのLEDへ対角線を描いて電力を送る長距離調光回路です。",
+        components: [
+          { id: "POT_PRESET_1", type: "potentiometer", val_max_ohm: 10000, cur_ratio: 0.5, pinA: `C${potCol}`, pinB: `C${potCol + 4}`, pinC: `E${potCol + 2}`, name: "10kΩ 半固定抵抗", desc: "調光ボリューム" },
+          { id: "LED_PRESET_2", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `J${ledCol}`, pinB: `J${ledCol + 2}`, isOn: true, name: "赤色LED", desc: "調光表示用赤色LED" }
+        ],
+        answerWires: [
+          { id: "W_POT_VCC", fromHole: `BUS_TOP_PLUS_${potCol}`, toHole: `A${potCol}`, color: "#ef4444" },
+          { id: "W_POT_WIPER_TO_LED", fromHole: `E${potCol + 2}`, toHole: `I${ledCol}`, color: "#eab308" },
+          { id: "W_POT_GND", fromHole: `H${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
+        ]
+      };
+   } else if (pattern === 1) {
+      // 構図B: 下段中央ポテンショメータ ＆ 最上段A行キワキワLED
+      const potCol = Math.floor(Math.random() * 5) + 12; // 12〜16
+      const ledCol = Math.floor(Math.random() * 5) + 3; // 3〜7
+      return {
+        name: "可変抵抗調光回路 (構図B: 下段中央VR ＆ 最上段LED)",
+        desc: "下段に鎮座した可変抵抗器から、最上段A行のLEDへ中央溝を飛び越えて給電する上下反転回路です。",
+        components: [
+          { id: "POT_PRESET_1", type: "potentiometer", val_max_ohm: 10000, cur_ratio: 0.5, pinA: `G${potCol}`, pinB: `G${potCol + 4}`, pinC: `I${potCol + 2}`, pinWiper: `I${potCol + 2}`, name: "10kΩ 半固定抵抗", desc: "調光ボリューム" },
+          { id: "LED_PRESET_2", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `B${ledCol}`, pinB: `B${ledCol + 2}`, isOn: true, name: "赤色LED", desc: "調光表示用赤色LED" }
+        ],
+        answerWires: [
+          { id: "W_POT_VCC", fromHole: `BUS_TOP_PLUS_${potCol}`, toHole: `F${potCol}`, color: "#ef4444" },
+          { id: "W_POT_WIPER_TO_LED", fromHole: `J${potCol + 2}`, toHole: `A${ledCol}`, color: "#eab308" },
+          { id: "W_POT_GND", fromHole: `C${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
+        ]
+      };
+
+
+
+    } else {
+      // 構図C: 右上ポテンショメータ ＆ 左下LED (大逆走レイアウト)
+      const potCol = Math.floor(Math.random() * 4) + 20; // 20〜23
+      const ledCol = Math.floor(Math.random() * 5) + 4; // 4〜8
+      return {
+        name: "可変抵抗調光回路 (構図C: 右上VR ＆ 左下LED 大逆走配置)",
+        desc: "右上に置かれた可変抵抗器から、左下のLEDへと盤面を斜めに大逆走して配線するパズル配置です。",
+        components: [
+          { id: "POT_PRESET_1", type: "potentiometer", val_max_ohm: 10000, cur_ratio: 0.5, pinA: `B${potCol}`, pinB: `B${potCol + 4}`, pinC: `D${potCol + 2}`, name: "10kΩ 半固定抵抗", desc: "調光ボリューム" },
+          { id: "LED_PRESET_2", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `I${ledCol}`, pinB: `I${ledCol + 2}`, isOn: true, name: "赤色LED", desc: "調光表示用赤色LED" }
+        ],
+        answerWires: [
+          { id: "W_POT_VCC", fromHole: `BUS_TOP_PLUS_${potCol}`, toHole: `A${potCol}`, color: "#ef4444" },
+          { id: "W_POT_WIPER_TO_LED", fromHole: `D${potCol + 2}`, toHole: `G${ledCol}`, color: "#eab308" },
+          { id: "W_POT_GND", fromHole: `J${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
+        ]
+      };
+    }
   },
 
 
 
-// Stage 3: 階段スイッチ (1階下段/2階上段 立体ランダムジェネレータ)
+// Stage 3: 階段スイッチ (プロパティ整合性修正済み 3大初見殺しマルチ構図ジェネレータ)
   STAIRCASE_SWITCH: () => {
-    const sw1Col = Math.floor(Math.random() * 4) + 2;   // 1階(下段): 列2〜5
-    const sw2Col = Math.floor(Math.random() * 4) + 11;  // 2階(上段): 列11〜14
-    const rCol = Math.floor(Math.random() * 3) + 19;    // 抵抗(上段): 列19〜21
-    const ledCol = Math.floor(Math.random() * 2) + 26;  // 照明(上段): 列26〜27
+    // 3つのトポロジー構図からランダム抽選 (0:下段1階＆上段2階, 1:上段1階＆下段2階上下反転, 2:超長距離大逆走クロス)
+    const pattern = Math.floor(Math.random() * 3);
 
-    return {
-      name: "階段スイッチ (2連3路XOR回路 / 1階・2階立体配置)",
-      desc: "下段に1階スイッチ、上段に2階スイッチを立体配置した実用レイアウトです。中央溝をまたぐ渡り線によって、どちらの階からでも照明を操作できるXOR回路を再現します。",
-      components: [
-        // 1階スイッチ (下段 H行に配置)
-        { id: "stair-sw1", name: "1階スイッチ (SW1)", type: "switch_spdt", pinA: `H${sw1Col}`, pinCom: `H${sw1Col + 2}`, pinB: `H${sw1Col + 4}`, state: "L1" },
-        // 2階スイッチ (上段 C行に配置)
-        { id: "stair-sw2", name: "2階スイッチ (SW2)", type: "switch_spdt", pinA: `C${sw2Col}`, pinCom: `C${sw2Col + 2}`, pinB: `C${sw2Col + 4}`, state: "L1" },
-        // 階段照明系統 (上段 C行に配置)
-        { id: "stair-r1", name: "R1 (1.0kΩ)", type: "resistor", val_ohm: 1000, pinA: `C${rCol}`, pinB: `C${rCol + 3}`, colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
-        { id: "stair-led1", name: "階段照明 (赤色LED)", type: "led", vf: 2.0, color: "red", pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: true }
-      ],
-     answerWires: [
-        // 1. 上部+9V給電レール ➔ 中央溝をまたぎ1階スイッチコモン(F行)へ給電
-        { id: "W_STAIR_VCC", fromHole: `BUS_TOP_PLUS_${sw1Col + 2}`, toHole: `F${sw1Col + 2}`, color: "#ef4444" },
-        // 2. 渡り線1 (端子A同士): 下段F行 ➔ 中央溝横断 ➔ 上段A行
-        { id: "W_STAIR_L1", fromHole: `F${sw1Col}`, toHole: `A${sw2Col}`, color: "#eab308" },
-        // 3. 渡り線2 (端子B同士): 下段F行 ➔ 中央溝横断 ➔ 上段E行
-        { id: "W_STAIR_L2", fromHole: `F${sw1Col + 4}`, toHole: `E${sw2Col + 4}`, color: "#06b6d4" },
-        // 4. 2階スイッチコモン ➔ 抵抗R1入力
-        { id: "W_STAIR_SW2_TO_R", fromHole: `A${sw2Col + 2}`, toHole: `A${rCol}`, color: "#a855f7" },
-        // 5. 抵抗R1出力 ➔ LEDアノード
-        { id: "W_STAIR_R_TO_LED", fromHole: `A${rCol + 3}`, toHole: `A${ledCol}`, color: "#22c55e" },
-        // 6. 接地: LEDカソード(E行) ➔ 下部マイナスレール(GND)
-        { id: "W_STAIR_GND", fromHole: `E${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
-      ]
-    };
+    if (pattern === 0) {
+      // 構図A: 下段1階スイッチ ＆ 上段2階スイッチ (中央溝クロス架橋)
+      const sw1Col = Math.floor(Math.random() * 4) + 2;   // 下段: 列2〜5
+      const sw2Col = Math.floor(Math.random() * 4) + 11;  // 上段: 列11〜14
+      const rCol = Math.floor(Math.random() * 3) + 19;    // 上段: 列19〜21
+      const ledCol = Math.floor(Math.random() * 2) + 26;  // 上段: 列26〜27
+      return {
+        name: "階段スイッチ (構図A: 下段1階 ＆ 上段2階 中央溝クロス架橋)",
+        desc: "下段から上段へ渡り線が中央溝を斜めに交差する標準迷路レイアウトです。COM端子の位置を見抜く必要があります。",
+        components: [
+          { id: "stair-sw1", name: "1階スイッチ (SW1)", type: "switch_spdt", pinA: `H${sw1Col}`, pinCOM: `H${sw1Col + 2}`, pinB: `H${sw1Col + 4}`, state: "L1" },
+          { id: "stair-sw2", name: "2階スイッチ (SW2)", type: "switch_spdt", pinA: `C${sw2Col}`, pinCOM: `C${sw2Col + 2}`, pinB: `C${sw2Col + 4}`, state: "L1" },
+          { id: "stair-r1", name: "R1 (1.0kΩ)", type: "resistor", val_ohm: 1000, pinA: `C${rCol}`, pinB: `C${rCol + 3}`, colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "stair-led1", name: "階段照明 (赤色LED)", type: "led", vf: 2.0, color: "red", pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: true }
+        ],
+        answerWires: [
+          { id: "W_STAIR_VCC", fromHole: `BUS_TOP_PLUS_${sw1Col + 2}`, toHole: `F${sw1Col + 2}`, color: "#ef4444" },
+          { id: "W_STAIR_L1", fromHole: `F${sw1Col}`, toHole: `A${sw2Col}`, color: "#eab308" },
+          { id: "W_STAIR_L2", fromHole: `F${sw1Col + 4}`, toHole: `E${sw2Col + 4}`, color: "#06b6d4" },
+          { id: "W_STAIR_SW2_TO_R", fromHole: `A${sw2Col + 2}`, toHole: `A${rCol}`, color: "#a855f7" },
+          { id: "W_STAIR_R_TO_LED", fromHole: `A${rCol + 3}`, toHole: `A${ledCol}`, color: "#22c55e" },
+          { id: "W_STAIR_GND", fromHole: `E${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // 構図B: 上段1階スイッチ ＆ 下段2階スイッチ (上下反転・逆落とし迷路)
+      const sw1Col = Math.floor(Math.random() * 4) + 2;   // 上段: 列2〜5
+      const sw2Col = Math.floor(Math.random() * 4) + 11;  // 下段: 列11〜14
+      const rCol = Math.floor(Math.random() * 3) + 19;    // 下段: 列19〜21
+      const ledCol = Math.floor(Math.random() * 2) + 26;  // 下段: 列26〜27
+      return {
+        name: "階段スイッチ (構図B: 上段1階 ＆ 下段2階 上下反転逆落とし)",
+        desc: "1階スイッチが上段、2階スイッチが下段に反転配置され、渡り線が中央溝を上から下へ叩き落とされるレイアウトです。",
+        components: [
+          { id: "stair-sw1", name: "1階スイッチ (SW1)", type: "switch_spdt", pinA: `B${sw1Col}`, pinCOM: `B${sw1Col + 2}`, pinB: `B${sw1Col + 4}`, state: "L1" },
+          { id: "stair-sw2", name: "2階スイッチ (SW2)", type: "switch_spdt", pinA: `I${sw2Col}`, pinCOM: `I${sw2Col + 2}`, pinB: `I${sw2Col + 4}`, state: "L1" },
+          { id: "stair-r1", name: "R1 (1.0kΩ)", type: "resistor", val_ohm: 1000, pinA: `I${rCol}`, pinB: `I${rCol + 3}`, colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "stair-led1", name: "階段照明 (赤色LED)", type: "led", vf: 2.0, color: "red", pinA: `I${ledCol}`, pinB: `I${ledCol + 2}`, isOn: true }
+        ],
+        answerWires: [
+          { id: "W_STAIR_VCC", fromHole: `BUS_TOP_PLUS_${sw1Col + 2}`, toHole: `A${sw1Col + 2}`, color: "#ef4444" },
+          { id: "W_STAIR_L1", fromHole: `E${sw1Col}`, toHole: `F${sw2Col}`, color: "#eab308" },
+          { id: "W_STAIR_L2", fromHole: `C${sw1Col + 4}`, toHole: `G${sw2Col + 4}`, color: "#06b6d4" },
+          { id: "W_STAIR_SW2_TO_R", fromHole: `J${sw2Col + 2}`, toHole: `J${rCol}`, color: "#a855f7" },
+          { id: "W_STAIR_R_TO_LED", fromHole: `J${rCol + 3}`, toHole: `J${ledCol}`, color: "#22c55e" },
+          { id: "W_STAIR_GND", fromHole: `G${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
+        ]
+      };
+    } else {
+      // 構図C: 左下1階スイッチ ＆ 右上2階スイッチ ＆ 左上照明 (超長距離大逆走クロス)
+      const sw1Col = Math.floor(Math.random() * 4) + 2;   // 下段: 列2〜5
+      const sw2Col = Math.floor(Math.random() * 4) + 20;  // 上段: 列20〜23
+      const rCol = Math.floor(Math.random() * 3) + 9;     // 上段: 列9〜11
+      const ledCol = Math.floor(Math.random() * 2) + 15;  // 上段: 列15〜16
+      return {
+        name: "階段スイッチ (構図C: 左下1階 ＆ 右上2階 ＆ 左上照明 超長距離逆走)",
+        desc: "盤面を対角線上に大横断する渡り線と、右上の2階スイッチから左上の照明系統へと電力が大きく逆走する最高難度パズルです。",
+        components: [
+          { id: "stair-sw1", name: "1階スイッチ (SW1)", type: "switch_spdt", pinA: `H${sw1Col}`, pinCOM: `H${sw1Col + 2}`, pinB: `H${sw1Col + 4}`, state: "L1" },
+          { id: "stair-sw2", name: "2階スイッチ (SW2)", type: "switch_spdt", pinA: `B${sw2Col}`, pinCOM: `B${sw2Col + 2}`, pinB: `B${sw2Col + 4}`, state: "L1" },
+          { id: "stair-r1", name: "R1 (1.0kΩ)", type: "resistor", val_ohm: 1000, pinA: `C${rCol}`, pinB: `C${rCol + 3}`, colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "stair-led1", name: "階段照明 (赤色LED)", type: "led", vf: 2.0, color: "red", pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: true }
+        ],
+        answerWires: [
+          { id: "W_STAIR_VCC", fromHole: `BUS_TOP_PLUS_${sw1Col + 2}`, toHole: `F${sw1Col + 2}`, color: "#ef4444" },
+          { id: "W_STAIR_L1", fromHole: `F${sw1Col}`, toHole: `A${sw2Col}`, color: "#eab308" },
+          { id: "W_STAIR_L2", fromHole: `F${sw1Col + 4}`, toHole: `E${sw2Col + 4}`, color: "#06b6d4" },
+          { id: "W_STAIR_SW2_TO_R", fromHole: `C${sw2Col + 2}`, toHole: `A${rCol}`, color: "#a855f7" },
+          { id: "W_STAIR_R_TO_LED", fromHole: `A${rCol + 3}`, toHole: `A${ledCol}`, color: "#22c55e" },
+          { id: "W_STAIR_GND", fromHole: `E${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
+        ]
+      };
+    }
   },
 
 
 
 
-
- // Stage 4: RC過渡応答回路 (4ゾーン分割動的ランダムジェネレータ)
+// Stage 4: RC過渡応答回路 (極性厳格担保 3大マルチツッコミ配置ジェネレータ)
   RC_TRANSIENT: () => {
-    const swCol = Math.floor(Math.random() * 3) + 2;   // ゾーン1: 列2〜4
-    const rCol = Math.floor(Math.random() * 4) + 8;    // ゾーン2: 列8〜11
-    const capCol = Math.floor(Math.random() * 3) + 17; // ゾーン3: 列17〜19
-    const ledCol = Math.floor(Math.random() * 3) + 23; // ゾーン4: 列23〜25
+    // 3つのトポロジー構図からランダム抽選 (0:溝跨ぎ抵抗上下蛇行, 1:溝跨ぎコンデンサ跳ね上がり, 2:右上左下大逆走クロス)
+    const pattern = Math.floor(Math.random() * 3);
 
-    return {
-      name: "RC時定数・過渡応答回路 (Cap 10µF + 緑LED / ランダム配置)",
-      desc: "スイッチ、充電抵抗、電解コンデンサ、LEDが独立ゾーンへ散開配置されます。ジャンパ線で結線し、スイッチON直後の過渡充電特性をオシロスコープで観測します。",
-      components: [
-        { id: "SW_PRESET_RC", type: "switch", pinA: `C${swCol}`, pinB: `C${swCol + 2}`, isOn: true, name: "トグルスイッチ", desc: "充電開始用スイッチ" },
-        { id: "R_PRESET_RC", type: "resistor", val_ohm: 1000, pinA: `C${rCol}`, pinB: `C${rCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 充電抵抗", desc: "時定数を決定する電流制限抵抗" },
-        { id: "CAP_PRESET_1", type: "capacitor", subType: "electrolytic", val_uF: 1000, pinA: `C${capCol}`, pinB: `C${capCol + 2}`, name: "電解コンデンサ (1000µF)", desc: "過渡応答の減衰を目視しやすい大容量コンデンサ" },
-        { id: "LED_PRESET_RC", type: "led", colorType: "green", color: "#22c55e", vf: 2.2, pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: true, name: "緑色LED (5mm)", desc: "過渡充電電流を可視化する表示素子" }
-      ],
-     answerWires: [
-        { id: "W_RC_VCC", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `A${swCol}`, color: "#ef4444" },
-        { id: "W_RC_SW_TO_R", fromHole: `A${swCol + 2}`, toHole: `A${rCol}`, color: "#eab308" },
-        { id: "W_RC_R_TO_CAP", fromHole: `A${rCol + 4}`, toHole: `A${capCol}`, color: "#38bdf8" },
-        { id: "W_RC_CAP_TO_LED", fromHole: `A${capCol + 2}`, toHole: `A${ledCol}`, color: "#a855f7" },
-        { id: "W_RC_GND", fromHole: `E${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
-      ]
-    };
+    if (pattern === 0) {
+      // 構図A: スイッチ上段 ＆ 抵抗溝跨ぎ(縦) ＆ コンデンサ下段 ＆ 右下最果てLED (上下蛇行)
+      const swCol = Math.floor(Math.random() * 3) + 2;   // 上段: 列2〜4
+      const rCol = Math.floor(Math.random() * 4) + 8;    // 溝跨ぎ: 列8〜11
+      const capCol = Math.floor(Math.random() * 3) + 15; // 下段: 列15〜17
+      const ledCol = Math.floor(Math.random() * 3) + 23; // 下段最果て: 列23〜25
+      return {
+        name: "RC過渡応答回路 (構図A: 溝跨ぎ抵抗 ＆ 下段這いずり ＆ 最果てLED)",
+        desc: "抵抗が中央溝を跨いで電力を下段へ叩き落とし、コンデンサを経由して右下J行のLEDへ這いずる蛇行配線です。",
+        components: [
+          { id: "SW_PRESET_RC", type: "switch", pinA: `C${swCol}`, pinB: `C${swCol + 2}`, isOn: true, name: "トグルスイッチ", desc: "充電開始用スイッチ" },
+          { id: "R_PRESET_RC", type: "resistor", val_ohm: 1000, pinA: `E${rCol}`, pinB: `F${rCol}`, isVertical: true, spanCols: 1, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 充電抵抗", desc: "中央溝を跨ぐ電流制限抵抗" },
+          { id: "CAP_PRESET_1", type: "capacitor", subType: "electrolytic", val_uF: 1000, pinA: `H${capCol}`, pinB: `H${capCol + 2}`, name: "電解コンデンサ (1000µF)", desc: "大容量コンデンサ" },
+          { id: "LED_PRESET_RC", type: "led", colorType: "green", color: "#22c55e", vf: 2.2, pinA: `J${ledCol}`, pinB: `J${ledCol + 2}`, isOn: true, name: "緑色LED (5mm)", desc: "過渡充電表示素子" }
+        ],
+        answerWires: [
+          { id: "W_RC_VCC", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `A${swCol}`, color: "#ef4444" },
+          { id: "W_RC_SW_TO_R", fromHole: `A${swCol + 2}`, toHole: `A${rCol}`, color: "#eab308" },
+          { id: "W_RC_R_TO_CAP", fromHole: `G${rCol}`, toHole: `F${capCol}`, color: "#38bdf8" },
+          { id: "W_RC_CAP_TO_LED", fromHole: `J${capCol + 2}`, toHole: `I${ledCol}`, color: "#a855f7" },
+          { id: "W_RC_GND", fromHole: `H${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // 構図B: スイッチ・抵抗下段 ＆ コンデンサ溝跨ぎ(縦) ＆ 最上段A行LED (下克上跳ね上がり)
+      const swCol = Math.floor(Math.random() * 3) + 2;   // 下段: 列2〜4
+      const rCol = Math.floor(Math.random() * 3) + 7;    // 下段: 列7〜9
+      const capCol = Math.floor(Math.random() * 4) + 14; // 溝跨ぎ: 列14〜17 (F陽極, E陰極)
+      const ledCol = Math.floor(Math.random() * 3) + 21; // 最上段: 列21〜23
+      return {
+        name: "RC過渡応答回路 (構図B: 下段スタート ＆ 溝跨ぎコンデンサ ＆ 最上段LED)",
+        desc: "下段から電解コンデンサが中央溝(F-E行)を突き抜けて上段へ跳ね上がり、最上段A行のLEDで光る反転レイアウトです。",
+        components: [
+          { id: "SW_PRESET_RC", type: "switch", pinA: `I${swCol}`, pinB: `I${swCol + 2}`, isOn: true, name: "トグルスイッチ", desc: "充電開始用スイッチ" },
+          { id: "R_PRESET_RC", type: "resistor", val_ohm: 1000, pinA: `I${rCol}`, pinB: `I${rCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 充電抵抗", desc: "下段配置の充電抵抗" },
+          { id: "CAP_PRESET_1", type: "capacitor", subType: "electrolytic", val_uF: 1000, pinA: `F${capCol}`, pinB: `E${capCol}`, isVertical: true, spanCols: 1, name: "電解コンデンサ (1000µF)", desc: "中央溝を跨ぎ上段へ抜けるコンデンサ" },
+          { id: "LED_PRESET_RC", type: "led", colorType: "green", color: "#22c55e", vf: 2.2, pinA: `A${ledCol}`, pinB: `A${ledCol + 2}`, isOn: true, name: "緑色LED (5mm)", desc: "最上段配置の表示素子" }
+        ],
+        answerWires: [
+          { id: "W_RC_VCC", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `F${swCol}`, color: "#ef4444" },
+          { id: "W_RC_SW_TO_R", fromHole: `J${swCol + 2}`, toHole: `J${rCol}`, color: "#eab308" },
+          { id: "W_RC_R_TO_CAP", fromHole: `J${rCol + 4}`, toHole: `J${capCol}`, color: "#38bdf8" },
+          { id: "W_RC_CAP_TO_LED", fromHole: `A${capCol}`, toHole: `C${ledCol}`, color: "#a855f7" },
+          { id: "W_RC_GND", fromHole: `B${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
+        ]
+      };
+
+
+   } else {
+      // 構図C: 右上スイッチ ＆ 抵抗上段 ＆ 左下僻地コンデンサ ＆ 中央LED (超長距離大逆走クロス)
+      // スイッチ(列24〜25: 占有24〜27) と 抵抗(列14〜16: 占有14〜20) を完全分離して衝突を根絶
+      const swCol = Math.floor(Math.random() * 2) + 24;  // 上段: 列24〜25
+      const rCol = Math.floor(Math.random() * 3) + 14;   // 上段: 列14〜16
+      const capCol = Math.floor(Math.random() * 3) + 3;  // 下段: 列3〜5
+      const ledCol = Math.floor(Math.random() * 3) + 10; // 下段: 列10〜12
+      return {
+        name: "RC過渡応答回路 (構図C: 右上SW ＆ 左下コンデンサ ＆ 中央LED 大逆走クロス)",
+        desc: "右上のスイッチから左下のコンデンサへ盤面を斜めに大横断し、中央のLEDへ電力が折り返す最高難度パズル配置です。",
+        components: [
+          { id: "SW_PRESET_RC", type: "switch", pinA: `B${swCol}`, pinB: `B${swCol + 2}`, isOn: true, name: "トグルスイッチ", desc: "充電開始用スイッチ" },
+          { id: "R_PRESET_RC", type: "resistor", val_ohm: 1000, pinA: `B${rCol + 4}`, pinB: `B${rCol}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 充電抵抗", desc: "逆走中継用の充電抵抗" },
+
+
+          { id: "CAP_PRESET_1", type: "capacitor", subType: "electrolytic", val_uF: 1000, pinA: `I${capCol}`, pinB: `I${capCol + 2}`, name: "電解コンデンサ (1000µF)", desc: "左下僻地のコンデンサ" },
+          { id: "LED_PRESET_RC", type: "led", colorType: "green", color: "#22c55e", vf: 2.2, pinA: `I${ledCol}`, pinB: `I${ledCol + 2}`, isOn: true, name: "緑色LED (5mm)", desc: "中央配置の表示素子" }
+        ],
+        answerWires: [
+          { id: "W_RC_VCC", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `A${swCol}`, color: "#ef4444" },
+          { id: "W_RC_SW_TO_R", fromHole: `C${swCol + 2}`, toHole: `A${rCol + 4}`, color: "#eab308" },
+          { id: "W_RC_R_TO_CAP", fromHole: `C${rCol}`, toHole: `F${capCol}`, color: "#38bdf8" },
+          { id: "W_RC_CAP_TO_LED", fromHole: `J${capCol + 2}`, toHole: `J${ledCol}`, color: "#a855f7" },
+          { id: "W_RC_GND", fromHole: `F${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
+        ]
+      };
+    }
   },
 
 
 
-
- // Stage 5: トランジスタ電子スイッチング回路 (5ゾーン分割動的ランダムジェネレータ)
+// Stage 5: トランジスタ電子スイッチング回路 (穴衝突根絶 3大マルチツッコミ配置ジェネレータ)
   TRANSISTOR_SWITCH: () => {
-    const rcCol = Math.floor(Math.random() * 3) + 2;   // ゾーン1: 列2〜4
-    const ledCol = Math.floor(Math.random() * 3) + 9;  // ゾーン2: 列9〜11
-    const trCol = Math.floor(Math.random() * 3) + 14;  // ゾーン3: 列14〜16 (E: trCol, C: +1, B: +2)
-    const swCol = Math.floor(Math.random() * 3) + 20;  // ゾーン4: 列20〜22
-    const rbCol = Math.floor(Math.random() * 2) + 25;  // ゾーン5: 列25〜26
+    // 3つのトポロジー構図からランダム抽選 (0:溝跨ぎ抵抗＆下段TR＆右上SW大逆走, 1:最上段LED＆下段TR二重降下, 2:左右大逆転中央Xクロス)
+    const pattern = Math.floor(Math.random() * 3);
 
-    return {
-      name: "トランジスタ・スイッチング回路 (2SC1815 + LED / ランダム配置)",
-      desc: "コレクタ主回路とベース制御回路が独立ゾーンへ散開配置されます。ベーススイッチをONにしてわずかなベース電流を流すことで、大電流のコレクタ主回路をドライブします。",
-      components: [
-        { id: "R_PRESET_TR_C", type: "resistor", val_ohm: 1000, pinA: `C${rcCol}`, pinB: `C${rcCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "コレクタ電流制限抵抗" },
-        { id: "LED_PRESET_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: true, name: "赤色LED (5mm)", desc: "コレクタ電流で点灯するLED" },
-        { id: "TR_PRESET_1", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `C${trCol}`, pinC: `C${trCol + 1}`, pinB: `C${trCol + 2}`, pinA: `C${trCol}`, name: "NPNトランジスタ (2SC1815)", desc: "ベース電流でコレクタ電流を開閉するスイッチング素子" },
-        { id: "SW_PRESET_TR", type: "switch", pinA: `C${swCol}`, pinB: `C${swCol + 2}`, isOn: true, name: "ベース制御スイッチ", desc: "ベース電流を投入・遮断するスイッチ" },
-        { id: "R_PRESET_TR_B", type: "resistor", val_ohm: 10000, pinA: `C${rbCol}`, pinB: `C${rbCol + 3}`, isVertical: false, colors: ["#78350f", "#000000", "#ea580c", "#d97706"], name: "10kΩ ベース抵抗", desc: "ベース電流を微小に制限する保護抵抗" }
-      ],
-      answerWires: [
-        // 1. コレクタ主電源: +9Vレール ➔ 1kΩ負荷抵抗
-        { id: "W_TR_VCC1", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
-        // 2. 負荷抵抗 ➔ LEDアノード
-        { id: "W_TR_RC_TO_LED", fromHole: `A${rcCol + 4}`, toHole: `A${ledCol}`, color: "#eab308" },
-        // 3. LEDカソード ➔ トランジスタ コレクタ端子(C)
-        { id: "W_TR_LED_TO_C", fromHole: `A${ledCol + 2}`, toHole: `A${trCol + 1}`, color: "#f97316" },
-        // 4. トランジスタ エミッタ端子(E) ➔ GND接地
-        { id: "W_TR_GND", fromHole: `E${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
-        // 5. ベース制御電源: +9Vレール ➔ スイッチ入力
-        { id: "W_TR_VCC2", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `A${swCol}`, color: "#ef4444" },
-        // 6. スイッチ ➔ 10kΩベース抵抗入力
-        { id: "W_TR_SW_TO_RB", fromHole: `A${swCol + 2}`, toHole: `A${rbCol}`, color: "#06b6d4" },
-        // 7. ベース抵抗出力 ➔ トランジスタ ベース端子(B)
-        { id: "W_TR_RB_TO_B", fromHole: `E${rbCol + 3}`, toHole: `E${trCol + 2}`, color: "#a855f7" }
-      ]
-    };
+    if (pattern === 0) {
+      // 構図A: 溝跨ぎ負荷抵抗 ＆ 下段LED・TR ＆ 右上ベーススイッチ大逆走
+      const rcCol = Math.floor(Math.random() * 3) + 2;   // 溝跨ぎ: 列2〜4
+      const ledCol = Math.floor(Math.random() * 3) + 7;  // 下段: 列7〜9 (占有7〜11)
+      const trCol = Math.floor(Math.random() * 3) + 13;  // 下段: 列13〜15 (E:13, C:14, B:15)
+      const swCol = Math.floor(Math.random() * 2) + 20;  // 上段: 列20〜21 (占有20〜23)
+      const rbCol = Math.floor(Math.random() * 2) + 25;  // 上段: 列25〜26 (占有25〜28)
+      return {
+        name: "トランジスタ回路 (構図A: 溝跨ぎ負荷抵抗 ＆ 下段TR ＆ 右上SW大逆走)",
+        desc: "コレクタ主回路が中央溝を越えて下段へ叩き落とされる一方、ベース制御スイッチが右上の僻地から中央溝を越えて長距離信号を送るレイアウトです。",
+        components: [
+          { id: "R_PRESET_TR_C", type: "resistor", val_ohm: 1000, pinA: `E${rcCol}`, pinB: `F${rcCol}`, isVertical: true, spanCols: 1, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "中央溝を跨ぐコレクタ抵抗" },
+          { id: "LED_PRESET_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `H${ledCol}`, pinB: `H${ledCol + 2}`, isOn: true, name: "赤色LED (5mm)", desc: "コレクタ電流で点灯するLED" },
+          { id: "TR_PRESET_1", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `H${trCol}`, pinC: `H${trCol + 1}`, pinB: `H${trCol + 2}`, pinA: `H${trCol}`, name: "NPNトランジスタ (2SC1815)", desc: "下段に配置されたスイッチング素子" },
+          { id: "SW_PRESET_TR", type: "switch", pinA: `B${swCol}`, pinB: `B${swCol + 2}`, isOn: true, name: "ベース制御スイッチ", desc: "右上に配置された制御スイッチ" },
+          { id: "R_PRESET_TR_B", type: "resistor", val_ohm: 10000, pinA: `B${rbCol}`, pinB: `B${rbCol + 3}`, isVertical: false, colors: ["#78350f", "#000000", "#ea580c", "#d97706"], name: "10kΩ ベース抵抗", desc: "右上配置の保護抵抗" }
+        ],
+        answerWires: [
+          { id: "W_TR_VCC1", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
+          { id: "W_TR_RC_TO_LED", fromHole: `G${rcCol}`, toHole: `J${ledCol}`, color: "#eab308" },
+          { id: "W_TR_LED_TO_C", fromHole: `J${ledCol + 2}`, toHole: `J${trCol + 1}`, color: "#f97316" },
+          { id: "W_TR_GND", fromHole: `I${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
+          { id: "W_TR_VCC2", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `A${swCol}`, color: "#ef4444" },
+          { id: "W_TR_SW_TO_RB", fromHole: `C${swCol + 2}`, toHole: `A${rbCol}`, color: "#06b6d4" },
+          { id: "W_TR_RB_TO_B", fromHole: `C${rbCol + 3}`, toHole: `F${trCol + 2}`, color: "#a855f7" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // 構図B: 最上段A行LED ＆ 下段TR・SW (二重降下立体レイアウト)
+      const rcCol = Math.floor(Math.random() * 3) + 2;   // 上段: 列2〜4 (占有2〜6)
+      const ledCol = Math.floor(Math.random() * 3) + 8;  // 上段最上行: 列8〜10 (占有8〜12)
+      const swCol = Math.floor(Math.random() * 3) + 15;  // 下段: 列15〜17 (占有15〜19)
+      const rbCol = Math.floor(Math.random() * 2) + 20;  // 下段: 列20〜21 (占有20〜23)
+      const trCol = Math.floor(Math.random() * 2) + 25;  // 下段: 列25〜26 (E:25, C:26, B:27)
+      return {
+        name: "トランジスタ回路 (構図B: 最上段LED ＆ 下段TR 二重降下レイアウト)",
+        desc: "LEDが最上段の隙間に配置され、LEDカソードから中央溝を飛び越えて下段のトランジスタコレクタへ急降下するレイアウトです。",
+        components: [
+          { id: "R_PRESET_TR_C", type: "resistor", val_ohm: 1000, pinA: `B${rcCol}`, pinB: `B${rcCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "上段配置の負荷抵抗" },
+          { id: "LED_PRESET_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `A${ledCol}`, pinB: `A${ledCol + 2}`, isOn: true, name: "赤色LED (5mm)", desc: "最上段A行の表示LED" },
+          { id: "SW_PRESET_TR", type: "switch", pinA: `H${swCol}`, pinB: `H${swCol + 2}`, isOn: true, name: "ベース制御スイッチ", desc: "下段配置の制御スイッチ" },
+          { id: "R_PRESET_TR_B", type: "resistor", val_ohm: 10000, pinA: `H${rbCol}`, pinB: `H${rbCol + 3}`, isVertical: false, colors: ["#78350f", "#000000", "#ea580c", "#d97706"], name: "10kΩ ベース抵抗", desc: "下段配置の保護抵抗" },
+          { id: "TR_PRESET_1", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `H${trCol}`, pinC: `H${trCol + 1}`, pinB: `H${trCol + 2}`, pinA: `H${trCol}`, name: "NPNトランジスタ (2SC1815)", desc: "下段右寄りのスイッチング素子" }
+        ],
+        answerWires: [
+          { id: "W_TR_VCC1", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
+          { id: "W_TR_RC_TO_LED", fromHole: `C${rcCol + 4}`, toHole: `C${ledCol}`, color: "#eab308" },
+          { id: "W_TR_LED_TO_C", fromHole: `E${ledCol + 2}`, toHole: `F${trCol + 1}`, color: "#f97316" },
+          { id: "W_TR_GND", fromHole: `J${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
+          { id: "W_TR_VCC2", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `F${swCol}`, color: "#ef4444" },
+          { id: "W_TR_SW_TO_RB", fromHole: `J${swCol + 2}`, toHole: `J${rbCol}`, color: "#06b6d4" },
+          { id: "W_TR_RB_TO_B", fromHole: `J${rbCol + 3}`, toHole: `J${trCol + 2}`, color: "#a855f7" }
+        ]
+      };
+    } else {
+      // 構図C: 主回路右上 ＆ 制御回路左下 ＆ 中央TR (左右大逆転・中央Xクロス)
+      const swCol = Math.floor(Math.random() * 2) + 2;   // 制御SW(下段): 列2〜3 (占有2〜5)
+      const rbCol = Math.floor(Math.random() * 2) + 7;   // 制御RB(下段): 列7〜8 (占有7〜11)
+      const trCol = Math.floor(Math.random() * 2) + 14;  // 中央TR(上段): 列14〜15 (E:14, C:15, B:16)
+      const rcCol = Math.floor(Math.random() * 2) + 19;  // 主回路RC(上段): 列19〜20 (占有19〜24)
+      const ledCol = Math.floor(Math.random() * 2) + 25; // 主回路LED(上段): 列25〜26 (占有25〜28)
+      return {
+        name: "トランジスタ回路 (構図C: 主回路右上 ＆ 制御回路左下 左右大逆転クロス)",
+        desc: "主回路が右上、制御回路が左下に完全に二極化し、中央のトランジスタへ向かって左右から配線が集中交差する最高難度パズル配置です。",
+        components: [
+          { id: "SW_PRESET_TR", type: "switch", pinA: `I${swCol}`, pinB: `I${swCol + 2}`, isOn: true, name: "ベース制御スイッチ", desc: "左下配置の制御スイッチ" },
+          { id: "R_PRESET_TR_B", type: "resistor", val_ohm: 10000, pinA: `I${rbCol}`, pinB: `I${rbCol + 3}`, isVertical: false, colors: ["#78350f", "#000000", "#ea580c", "#d97706"], name: "10kΩ ベース抵抗", desc: "左下配置の保護抵抗" },
+          { id: "TR_PRESET_1", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `C${trCol}`, pinC: `C${trCol + 1}`, pinB: `C${trCol + 2}`, pinA: `C${trCol}`, name: "NPNトランジスタ (2SC1815)", desc: "中央に配置されたスイッチング素子" },
+          { id: "R_PRESET_TR_C", type: "resistor", val_ohm: 1000, pinA: `B${rcCol}`, pinB: `B${rcCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "右上配置の負荷抵抗" },
+          { id: "LED_PRESET_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `B${ledCol}`, pinB: `B${ledCol + 2}`, isOn: true, name: "赤色LED (5mm)", desc: "右上配置の表示LED" }
+        ],
+        answerWires: [
+          { id: "W_TR_VCC1", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
+          { id: "W_TR_RC_TO_LED", fromHole: `C${rcCol + 4}`, toHole: `A${ledCol}`, color: "#eab308" },
+          { id: "W_TR_LED_TO_C", fromHole: `C${ledCol + 2}`, toHole: `A${trCol + 1}`, color: "#f97316" },
+          { id: "W_TR_GND", fromHole: `E${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
+          { id: "W_TR_VCC2", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `F${swCol}`, color: "#ef4444" },
+          { id: "W_TR_SW_TO_RB", fromHole: `J${swCol + 2}`, toHole: `J${rbCol}`, color: "#06b6d4" },
+          { id: "W_TR_RB_TO_B", fromHole: `G${rbCol + 3}`, toHole: `E${trCol + 2}`, color: "#a855f7" }
+        ]
+      };
+    }
   },
 
 
-
-// Stage 6: 2灯独立並列点灯回路 (4ゾーン分割動的ランダムジェネレータ)
+// Stage 6: 2灯独立並列点灯回路 (穴衝突根絶 3大マルチツッコミ構図ジェネレータ)
   PARALLEL_LEDS: () => {
-    const r1Col = Math.floor(Math.random() * 4) + 2;   // 系統1抵抗: 列2〜5
-    const led1Col = Math.floor(Math.random() * 3) + 10; // 系統1LED: 列10〜12
-    const r2Col = Math.floor(Math.random() * 4) + 16;  // 系統2抵抗: 列16〜19
-    const led2Col = Math.floor(Math.random() * 3) + 24; // 系統2LED: 列24〜26
+    // 3つのトポロジー構図からランダム抽選 (0:対角スプリット, 1:上下挟み撃ちサンドイッチ, 2:右上抵抗・左下LED大逆走)
+    const pattern = Math.floor(Math.random() * 3);
 
-    return {
-      name: "2灯独立並列点灯回路 (Red & Green / ランダム配置)",
-      desc: "赤色系統と緑色系統が左右の独立ゾーンへ散開配置されます。並列に電源レールへ接続することで、互いの点灯状態に影響を与えない独立並列回路を構成します。",
-      components: [
-        // 系統1: 赤色LEDライン
-        { id: "R_PARA_1", type: "resistor", val_ohm: 1000, pinA: `C${r1Col}`, pinB: `C${r1Col + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "R1 (1.0kΩ 赤側)", desc: "赤色LEDの電流制限抵抗" },
-        { id: "LED_PARA_1", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `C${led1Col}`, pinB: `C${led1Col + 2}`, isOn: true, name: "赤色LED (系統1)", desc: "順方向電圧2.0Vの赤色LED" },
-        // 系統2: 緑色LEDライン
-        { id: "R_PARA_2", type: "resistor", val_ohm: 1000, pinA: `C${r2Col}`, pinB: `C${r2Col + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "R2 (1.0kΩ 緑側)", desc: "緑色LEDの電流制限抵抗" },
-        { id: "LED_PARA_2", type: "led", colorType: "green", color: "#22c55e", vf: 2.2, pinA: `C${led2Col}`, pinB: `C${led2Col + 2}`, isOn: true, name: "緑色LED (系統2)", desc: "順方向電圧2.2Vの緑色LED" }
-      ],
-      answerWires: [
-        // 系統1 (赤)
-        { id: "W_PARA_VCC1", fromHole: `BUS_TOP_PLUS_${r1Col}`, toHole: `A${r1Col}`, color: "#ef4444" },
-        { id: "W_PARA_R1_TO_L1", fromHole: `A${r1Col + 4}`, toHole: `A${led1Col}`, color: "#eab308" },
-        { id: "W_PARA_GND1", fromHole: `E${led1Col + 2}`, toHole: `BUS_BOTTOM_MINUS_${led1Col + 2}`, color: "#3b82f6" },
-        // 系統2 (緑)
-        { id: "W_PARA_VCC2", fromHole: `BUS_TOP_PLUS_${r2Col}`, toHole: `A${r2Col}`, color: "#ef4444" },
-        { id: "W_PARA_R2_TO_L2", fromHole: `A${r2Col + 4}`, toHole: `A${led2Col}`, color: "#22c55e" },
-        { id: "W_PARA_GND2", fromHole: `E${led2Col + 2}`, toHole: `BUS_BOTTOM_MINUS_${led2Col + 2}`, color: "#3b82f6" }
-      ]
-    };
+    if (pattern === 0) {
+      // 構図A: 対角線スプリット (溝跨ぎ赤抵抗 ＆ 左上赤LED ＆ 下段緑抵抗 ＆ 右下最果て緑LED)
+      const r1Col = Math.floor(Math.random() * 3) + 2;   // 溝跨ぎ: 列2〜4
+      const led1Col = Math.floor(Math.random() * 3) + 7;  // 上段A行: 列7〜9 (占有7〜11)
+      const r2Col = Math.floor(Math.random() * 3) + 13;  // 下段H行: 列13〜15 (占有13〜19)
+      const led2Col = Math.floor(Math.random() * 3) + 22; // 下段J行最果て: 列22〜24 (占有22〜26)
+      return {
+        name: "2灯並列点灯回路 (構図A: 溝跨ぎ赤抵抗 ＆ 左上赤LED ＆ 右下最果て緑LED)",
+        desc: "赤色系統が中央溝を跨ぎつつ左上へ跳ね返り、緑色系統が右下J行の最果てへ大遠征する対角線スプリット配置です。",
+        components: [
+          { id: "R_PARA_1", type: "resistor", val_ohm: 1000, pinA: `E${r1Col}`, pinB: `F${r1Col}`, isVertical: true, spanCols: 1, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "R1 (1.0kΩ 赤側)", desc: "中央溝を跨ぐ赤側抵抗" },
+          { id: "LED_PARA_1", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `A${led1Col}`, pinB: `A${led1Col + 2}`, isOn: true, name: "赤色LED (系統1)", desc: "左上A行の赤色LED" },
+          { id: "R_PARA_2", type: "resistor", val_ohm: 1000, pinA: `H${r2Col}`, pinB: `H${r2Col + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "R2 (1.0kΩ 緑側)", desc: "下段の緑側抵抗" },
+          { id: "LED_PARA_2", type: "led", colorType: "green", color: "#22c55e", vf: 2.2, pinA: `J${led2Col}`, pinB: `J${led2Col + 2}`, isOn: true, name: "緑色LED (系統2)", desc: "右下J行最果ての緑色LED" }
+        ],
+        answerWires: [
+          { id: "W_PARA_VCC1", fromHole: `BUS_TOP_PLUS_${r1Col}`, toHole: `A${r1Col}`, color: "#ef4444" },
+          { id: "W_PARA_R1_TO_L1", fromHole: `G${r1Col}`, toHole: `C${led1Col}`, color: "#eab308" },
+          { id: "W_PARA_GND1", fromHole: `B${led1Col + 2}`, toHole: `BUS_BOTTOM_MINUS_${led1Col + 2}`, color: "#3b82f6" },
+          { id: "W_PARA_VCC2", fromHole: `BUS_TOP_PLUS_${r2Col}`, toHole: `F${r2Col}`, color: "#ef4444" },
+          { id: "W_PARA_R2_TO_L2", fromHole: `J${r2Col + 4}`, toHole: `I${led2Col}`, color: "#22c55e" },
+          { id: "W_PARA_GND2", fromHole: `H${led2Col + 2}`, toHole: `BUS_BOTTOM_MINUS_${led2Col + 2}`, color: "#3b82f6" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // 構図B: 中央溝挟み撃ち (上段赤系統 ＆ 下段緑系統 上下サンドイッチ)
+      const r1Col = Math.floor(Math.random() * 3) + 3;    // 上段赤抵抗: 列3〜5 (占有3〜9)
+      const led1Col = Math.floor(Math.random() * 3) + 14; // 上段赤LED: 列14〜16 (占有14〜18)
+      const r2Col = Math.floor(Math.random() * 3) + 5;    // 下段緑抵抗: 列5〜7 (占有5〜11)
+      const led2Col = Math.floor(Math.random() * 3) + 17; // 下段緑LED: 列17〜19 (占有17〜21)
+      return {
+        name: "2灯並列点灯回路 (構図B: 上段赤系統 ＆ 下段緑系統 上下サンドイッチ)",
+        desc: "上段に赤色系統、下段に緑色系統を完全に分離し、中央溝を挟んで並行して給電・接地する立体レイアウトです。",
+        components: [
+          { id: "R_PARA_1", type: "resistor", val_ohm: 1000, pinA: `B${r1Col}`, pinB: `B${r1Col + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "R1 (1.0kΩ 赤側)", desc: "上段配置の赤側抵抗" },
+          { id: "LED_PARA_1", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `B${led1Col}`, pinB: `B${led1Col + 2}`, isOn: true, name: "赤色LED (系統1)", desc: "上段配置の赤色LED" },
+          { id: "R_PARA_2", type: "resistor", val_ohm: 1000, pinA: `I${r2Col}`, pinB: `I${r2Col + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "R2 (1.0kΩ 緑側)", desc: "下段配置の緑側抵抗" },
+          { id: "LED_PARA_2", type: "led", colorType: "green", color: "#22c55e", vf: 2.2, pinA: `I${led2Col}`, pinB: `I${led2Col + 2}`, isOn: true, name: "緑色LED (系統2)", desc: "下段配置の緑色LED" }
+        ],
+        answerWires: [
+          { id: "W_PARA_VCC1", fromHole: `BUS_TOP_PLUS_${r1Col}`, toHole: `A${r1Col}`, color: "#ef4444" },
+          { id: "W_PARA_R1_TO_L1", fromHole: `C${r1Col + 4}`, toHole: `A${led1Col}`, color: "#eab308" },
+          { id: "W_PARA_GND1", fromHole: `C${led1Col + 2}`, toHole: `BUS_BOTTOM_MINUS_${led1Col + 2}`, color: "#3b82f6" },
+          { id: "W_PARA_VCC2", fromHole: `BUS_TOP_PLUS_${r2Col}`, toHole: `F${r2Col}`, color: "#ef4444" },
+          { id: "W_PARA_R2_TO_L2", fromHole: `J${r2Col + 4}`, toHole: `J${led2Col}`, color: "#22c55e" },
+          { id: "W_PARA_GND2", fromHole: `G${led2Col + 2}`, toHole: `BUS_BOTTOM_MINUS_${led2Col + 2}`, color: "#3b82f6" }
+        ]
+      };
+    } else {
+      // 構図C: 右上抵抗ツイン ＆ 左下LEDツイン (超長距離大逆走並列)
+      const r1Col = Math.floor(Math.random() * 2) + 18;  // 上段赤抵抗: 列18〜19 (占有18〜23)
+      const r2Col = Math.floor(Math.random() * 2) + 24;  // 上段緑抵抗: 列24〜25 (占有24〜29)
+      const led1Col = Math.floor(Math.random() * 2) + 3; // 下段赤LED: 列3〜4 (占有3〜6)
+      const led2Col = Math.floor(Math.random() * 2) + 9; // 下段緑LED: 列9〜10 (占有9〜12)
+      return {
+        name: "2灯並列点灯回路 (構図C: 右上抵抗ツイン ＆ 左下LEDツイン 大逆走並列)",
+        desc: "2本の保護抵抗が右上に密集し、電力を受け取った配線が盤面を対角線上に大逆走して左下の2灯を光らせる最高難度パズルレイアウトです。",
+        components: [
+          { id: "R_PARA_1", type: "resistor", val_ohm: 1000, pinA: `B${r1Col}`, pinB: `B${r1Col + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "R1 (1.0kΩ 赤側)", desc: "右上配置の赤側抵抗" },
+          { id: "R_PARA_2", type: "resistor", val_ohm: 1000, pinA: `B${r2Col}`, pinB: `B${r2Col + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "R2 (1.0kΩ 緑側)", desc: "右上配置の緑側抵抗" },
+          { id: "LED_PARA_1", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `I${led1Col}`, pinB: `I${led1Col + 2}`, isOn: true, name: "赤色LED (系統1)", desc: "左下配置の赤色LED" },
+          { id: "LED_PARA_2", type: "led", colorType: "green", color: "#22c55e", vf: 2.2, pinA: `I${led2Col}`, pinB: `I${led2Col + 2}`, isOn: true, name: "緑色LED (系統2)", desc: "左下配置の緑色LED" }
+        ],
+        answerWires: [
+          { id: "W_PARA_VCC1", fromHole: `BUS_TOP_PLUS_${r1Col}`, toHole: `A${r1Col}`, color: "#ef4444" },
+          { id: "W_PARA_R1_TO_L1", fromHole: `C${r1Col + 4}`, toHole: `F${led1Col}`, color: "#eab308" },
+          { id: "W_PARA_GND1", fromHole: `J${led1Col + 2}`, toHole: `BUS_BOTTOM_MINUS_${led1Col + 2}`, color: "#3b82f6" },
+          { id: "W_PARA_VCC2", fromHole: `BUS_TOP_PLUS_${r2Col}`, toHole: `A${r2Col}`, color: "#ef4444" },
+          { id: "W_PARA_R2_TO_L2", fromHole: `C${r2Col + 4}`, toHole: `F${led2Col}`, color: "#22c55e" },
+          { id: "W_PARA_GND2", fromHole: `J${led2Col + 2}`, toHole: `BUS_BOTTOM_MINUS_${led2Col + 2}`, color: "#3b82f6" }
+        ]
+      };
+    }
+  },
+
+
+
+// Stage 7-1: 分圧の壁 (3大マルチツッコミ構図ジェネレータ)
+  BRIDGE_1: () => {
+    // 3つのトポロジー構図からランダム抽選 (0:上下立体分圧, 1:溝跨ぎ縦挿し分圧, 2:右上左下大逆走分圧)
+    const pattern = Math.floor(Math.random() * 3);
+
+    if (pattern === 0) {
+      // 構図A: 上段R1 ＆ 中央溝越え中継 ＆ 下段R2 (上下立体分圧)
+      const r1Col = Math.floor(Math.random() * 3) + 3;   // 上段: 列3〜5 (占有3〜9)
+      const r2Col = Math.floor(Math.random() * 3) + 14;  // 下段: 列14〜16 (占有14〜20)
+      return {
+        name: "Stage 7-1: 分圧の壁 (構図A: 上下段立体分圧)",
+        desc: "上流抵抗R1(上段)から中央溝を越えて下流抵抗R2(下段)へ中継し、4.5Vの基準電位ノードを立体的に生成します。",
+        components: [
+          { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: `C${r1Col}`, pinB: `C${r1Col + 4}`, name: "R1 (1.0kΩ 上流)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: `H${r2Col}`, pinB: `H${r2Col + 4}`, name: "R2 (1.0kΩ 下流)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] }
+        ],
+        answerWires: [
+          { id: "W_B1_VCC", fromHole: `BUS_TOP_PLUS_${r1Col}`, toHole: `A${r1Col}`, color: "#ef4444" },
+          { id: "W_B1_MID", fromHole: `E${r1Col + 4}`, toHole: `F${r2Col}`, color: "#eab308" },
+          { id: "W_B1_GND", fromHole: `J${r2Col + 4}`, toHole: `BUS_BOTTOM_MINUS_${r2Col + 4}`, color: "#3b82f6" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // 構図B: 溝跨ぎ縦挿しR1 ＆ 下段最果てR2 (アクロバティック縦横分圧)
+      const r1Col = Math.floor(Math.random() * 3) + 4;   // 溝跨ぎ: 列4〜6
+      const r2Col = Math.floor(Math.random() * 3) + 18;  // 下段: 列18〜20 (占有18〜24)
+      return {
+        name: "Stage 7-1: 分圧の壁 (構図B: 溝跨ぎ縦挿し ＆ 最果てR2)",
+        desc: "上流抵抗R1が中央溝をダイナミックに跨ぎ、下段の長距離配線を経てR2へ接続されるレイアウトです。",
+        components: [
+          { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: `E${r1Col}`, pinB: `F${r1Col}`, isVertical: true, spanCols: 1, name: "R1 (1.0kΩ 上流)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: `I${r2Col}`, pinB: `I${r2Col + 4}`, name: "R2 (1.0kΩ 下流)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] }
+        ],
+        answerWires: [
+          { id: "W_B1_VCC", fromHole: `BUS_TOP_PLUS_${r1Col}`, toHole: `A${r1Col}`, color: "#ef4444" },
+          { id: "W_B1_MID", fromHole: `G${r1Col}`, toHole: `G${r2Col}`, color: "#eab308" },
+          { id: "W_B1_GND", fromHole: `J${r2Col + 4}`, toHole: `BUS_BOTTOM_MINUS_${r2Col + 4}`, color: "#3b82f6" }
+        ]
+      };
+    } else {
+      // 構図C: 右上R1 ＆ 左下R2 (超長距離大逆走分圧)
+      const r1Col = Math.floor(Math.random() * 3) + 20;  // 上段: 列20〜22 (占有20〜26)
+      const r2Col = Math.floor(Math.random() * 3) + 3;   // 下段: 列3〜5 (占有3〜9)
+      return {
+        name: "Stage 7-1: 分圧の壁 (構図C: 右上R1 ＆ 左下R2 大逆走分圧)",
+        desc: "右上の上流抵抗R1から、左下の僻地に置かれた下流抵抗R2へと盤面を斜めに大逆走して中点電位を形成する長距離パズルです。",
+        components: [
+          { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: `B${r1Col}`, pinB: `B${r1Col + 4}`, name: "R1 (1.0kΩ 上流)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: `I${r2Col}`, pinB: `I${r2Col + 4}`, name: "R2 (1.0kΩ 下流)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] }
+        ],
+        answerWires: [
+          { id: "W_B1_VCC", fromHole: `BUS_TOP_PLUS_${r1Col}`, toHole: `A${r1Col}`, color: "#ef4444" },
+          { id: "W_B1_MID", fromHole: `C${r1Col + 4}`, toHole: `F${r2Col}`, color: "#eab308" },
+          { id: "W_B1_GND", fromHole: `J${r2Col + 4}`, toHole: `BUS_BOTTOM_MINUS_${r2Col + 4}`, color: "#3b82f6" }
+        ]
+      };
+    }
+  },
+
+
+
+ // Stage 7-2: 並列ツイン分圧 (3大マルチツッコミ構図ジェネレータ)
+  BRIDGE_2: () => {
+    // 3つのトポロジー構図からランダム抽選 (0:上下挟み撃ちツイン, 1:溝跨ぎ縦挿し＆最果てVR, 2:左右大逆転ツイン)
+    const pattern = Math.floor(Math.random() * 3);
+
+    if (pattern === 0) {
+      // 構図A: 上段左アーム(固定4.5V) ＆ 下段右アーム(可変電位) 上下挟み撃ち
+      const lCol = Math.floor(Math.random() * 3) + 3;    // 左アーム(上段): 列3〜5 (占有3〜11)
+      const rCol = Math.floor(Math.random() * 3) + 16;   // 右アーム(下段): 列16〜18 (占有16〜25)
+      return {
+        name: "Stage 7-2: 並列ツイン分圧 (構図A: 上段固定 ＆ 下段可変 上下挟み撃ち)",
+        desc: "上段に固定4.5V基準アーム、下段に可変電位アームを完全分離。中央溝を挟んで2つの異なる電位ノードが生成されます。",
+        components: [
+          // 左アーム (上段固定分圧)
+          { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: `C${lCol}`, pinB: `C${lCol + 4}`, name: "R1 (1.0kΩ 左上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: `D${lCol + 4}`, pinB: `D${lCol + 8}`, name: "R2 (1.0kΩ 左下)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+         // 右アーム (下段可変分圧: 10kΩツインで中央50%位置を平衡点に設定)
+          { id: "comp_r3", type: "resistor", val_ohm: 10000, pinA: `H${rCol}`, pinB: `H${rCol + 4}`, name: "R3 (10kΩ 右上)", colors: ["#78350f", "#000000", "#ea580c", "#d97706"] },
+          { id: "comp_vr1", type: "potentiometer", val_max_ohm: 10000, val_ohm: 5000, cur_ratio: 0.5, pinA: `I${rCol + 4}`, pinB: `I${rCol + 8}`, pinC: `J${rCol + 6}`, pinWiper: `J${rCol + 6}`, name: "VR1 (可変抵抗 右下)" }
+        ],
+
+        answerWires: [
+          // 左アーム給電・接地
+          { id: "W_B2_L_VCC", fromHole: `BUS_TOP_PLUS_${lCol}`, toHole: `A${lCol}`, color: "#ef4444" },
+          { id: "W_B2_L_GND", fromHole: `E${lCol + 8}`, toHole: `BUS_BOTTOM_MINUS_${lCol + 8}`, color: "#3b82f6" },
+          // 右アーム給電・接地 (下段へ直接給電)
+          { id: "W_B2_R_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `F${rCol}`, color: "#ef4444" },
+          { id: "W_B2_R_GND", fromHole: `J${rCol + 6}`, toHole: `BUS_BOTTOM_MINUS_${rCol + 6}`, color: "#38bdf8" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // 構図B: 溝跨ぎ縦挿しR1 ＆ 最果て可変抵抗アーム
+      const lCol = Math.floor(Math.random() * 3) + 3;    // 溝跨ぎ左アーム: 列3〜5 (占有3〜9)
+      const rCol = Math.floor(Math.random() * 3) + 16;   // 右アーム(上段): 列16〜18 (占有16〜26)
+      return {
+        name: "Stage 7-2: 並列ツイン分圧 (構図B: 溝跨ぎR1 ＆ 最果て可変分圧)",
+        desc: "左アームの上流抵抗が中央溝を跨ぐ一方、右アームは上段の右寄りに配置されたダイナミックな配置です。",
+        components: [
+          // 左アーム
+          { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: `E${lCol}`, pinB: `F${lCol}`, isVertical: true, spanCols: 1, name: "R1 (1.0kΩ 左上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: `G${lCol}`, pinB: `G${lCol + 4}`, name: "R2 (1.0kΩ 左下)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          // 右アーム
+          { id: "comp_r3", type: "resistor", val_ohm: 1000, pinA: `B${rCol}`, pinB: `B${rCol + 4}`, name: "R3 (1.0kΩ 右上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_vr1", type: "potentiometer", val_max_ohm: 10000, val_ohm: 1000, cur_ratio: 0.1, pinA: `C${rCol + 4}`, pinB: `C${rCol + 8}`, pinC: `D${rCol + 6}`, pinWiper: `D${rCol + 6}`, name: "VR1 (可変抵抗 右下)" }
+        ],
+        answerWires: [
+          { id: "W_B2_L_VCC", fromHole: `BUS_TOP_PLUS_${lCol}`, toHole: `A${lCol}`, color: "#ef4444" },
+          { id: "W_B2_L_GND", fromHole: `J${lCol + 4}`, toHole: `BUS_BOTTOM_MINUS_${lCol + 4}`, color: "#3b82f6" },
+          { id: "W_B2_R_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `A${rCol}`, color: "#ef4444" },
+          { id: "W_B2_R_GND", fromHole: `D${rCol + 6}`, toHole: `BUS_BOTTOM_MINUS_${rCol + 6}`, color: "#38bdf8" }
+        ]
+      };
+    } else {
+      // 構図C: 右上固定分圧 ＆ 左下可変分圧 (左右大逆転ツイン)
+      const lCol = Math.floor(Math.random() * 3) + 18;   // 固定アーム(右上): 列18〜20 (占有18〜26)
+      const rCol = Math.floor(Math.random() * 3) + 3;    // 可変アーム(左下): 列3〜5 (占有3〜13)
+      return {
+        name: "Stage 7-2: 並列ツイン分圧 (構図C: 右上固定 ＆ 左下可変 左右大逆転)",
+        desc: "基準となる固定分圧が右上に、可変電位アームが左下の僻地に配置され、左右の常識を覆す長距離ツインレイアウトです。",
+        components: [
+          // 固定アーム (右上)
+          { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: `B${lCol}`, pinB: `B${lCol + 4}`, name: "R1 (1.0kΩ 左上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: `C${lCol + 4}`, pinB: `C${lCol + 8}`, name: "R2 (1.0kΩ 左下)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          // 可変アーム (左下)
+          { id: "comp_r3", type: "resistor", val_ohm: 1000, pinA: `H${rCol}`, pinB: `H${rCol + 4}`, name: "R3 (1.0kΩ 右上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_vr1", type: "potentiometer", val_max_ohm: 10000, val_ohm: 1000, cur_ratio: 0.1, pinA: `I${rCol + 4}`, pinB: `I${rCol + 8}`, pinC: `J${rCol + 6}`, pinWiper: `J${rCol + 6}`, name: "VR1 (可変抵抗 右下)" }
+        ],
+        answerWires: [
+          { id: "W_B2_L_VCC", fromHole: `BUS_TOP_PLUS_${lCol}`, toHole: `A${lCol}`, color: "#ef4444" },
+          { id: "W_B2_L_GND", fromHole: `D${lCol + 8}`, toHole: `BUS_BOTTOM_MINUS_${lCol + 8}`, color: "#3b82f6" },
+          { id: "W_B2_R_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `F${rCol}`, color: "#ef4444" },
+          { id: "W_B2_R_GND", fromHole: `J${rCol + 6}`, toHole: `BUS_BOTTOM_MINUS_${rCol + 6}`, color: "#38bdf8" }
+        ]
+      };
+    }
   },
 
 
 
 
-// ★ Stage 7-1: 分圧の壁 (直列2本による中点4.5Vの生成)
-  BRIDGE_1: {
-    name: "Stage 7-1: 分圧の壁 (基準電位)",
-    desc: "1.0kΩの抵抗2本を直列に繋ぎ、中央の12列目にぴったり半分の電圧(4.5V)の足場を作ります。",
-    components: [
-      { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: "C8", pinB: "C12", name: "R1 (1.0kΩ 上流)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
-      { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: "D12", pinB: "D16", name: "R2 (1.0kΩ 下流)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] }
-    ],
-    answerWires: [
-      { fromHole: "BUS_TOP_PLUS_8", toHole: "A8", color: "#ef4444" },
-      { fromHole: "E16", toHole: "BUS_BOTTOM_MINUS_16", color: "#3b82f6" }
-    ]
-  },
+// Stage 7-3: 禁断の横糸 (3大マルチツッコミ構図ジェネレータ)
+  BRIDGE_3: () => {
+    // 3つのトポロジー構図からランダム抽選 (0:中央溝斜め横断架橋, 1:溝跨ぎR1＆水平長距離架橋, 2:対角線大逆走架橋)
+    const pattern = Math.floor(Math.random() * 3);
 
-  // ★ Stage 7-2: 並列ツイン (固定分圧 ＋ 可変分圧の独立2系統)
-  BRIDGE_2: {
-    name: "Stage 7-2: 並列ツイン分圧 (可変電位の登場)",
-    desc: "左アーム(固定4.5V)の隣に、可変抵抗を用いた右アームを並列配置。ツマミで右アームの中点電位だけが自在に変化します。",
-    components: [
-      // 左アーム (固定4.5V基準)
-      { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: "C8", pinB: "C12", name: "R1 (1.0kΩ 左上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
-      { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: "D12", pinB: "D16", name: "R2 (1.0kΩ 左下)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
-      // 右アーム (可変電位アーム)
-      { id: "comp_r3", type: "resistor", val_ohm: 1000, pinA: "C18", pinB: "C22", name: "R3 (1.0kΩ 右上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
-      { id: "comp_vr1", type: "potentiometer", val_max_ohm: 10000, val_ohm: 1000, cur_ratio: 0.1, pinA: "D22", pinB: "D24", pinC: "E23", pinWiper: "E23", name: "VR1 (可変抵抗 右下)" }
-    ],
-    answerWires: [
-      // 左アーム給電・接地
-      { fromHole: "BUS_TOP_PLUS_8", toHole: "A8", color: "#ef4444" },
-      { fromHole: "E16", toHole: "BUS_BOTTOM_MINUS_16", color: "#3b82f6" },
-      // 右アーム給電・接地
-     // 右アーム給電・接地
-      { fromHole: "BUS_TOP_PLUS_18", toHole: "A18", color: "#ef4444" },
-      { fromHole: "E23", toHole: "E24", color: "#38bdf8" }, // ワイパー中継
-      { fromHole: "E24", toHole: "BUS_BOTTOM_MINUS_24", color: "#3b82f6" } // 右アーム最短接地
-    ]
-  },
-
-// ★ Stage 7-3: 禁断の横糸 (左右中点の直結架橋・等電位ショート)
-  BRIDGE_3: {
-    name: "Stage 7-3: 禁断の横糸 (中点架橋)",
-    desc: "左右の4.5V中点同士を1本の横ジャンパ線で直結。電位が等しいため電流はゼロだが、ツマミを回すと強烈な横流が発生します。",
-    components: [
-      // 左アーム
-      { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: "C8", pinB: "C12", name: "R1 (1.0kΩ 左上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
-      { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: "D12", pinB: "D16", name: "R2 (1.0kΩ 左下)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
-      // 右アーム
-      { id: "comp_r3", type: "resistor", val_ohm: 1000, pinA: "C18", pinB: "C22", name: "R3 (1.0kΩ 右上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
-      { id: "comp_vr1", type: "potentiometer", val_max_ohm: 10000, val_ohm: 1000, cur_ratio: 0.1, pinA: "D22", pinB: "D24", pinC: "E23", pinWiper: "E23", name: "VR1 (可変抵抗 右下)" }
-    ],
-    answerWires: [
-      // 左アーム給電・接地
-      { fromHole: "BUS_TOP_PLUS_8", toHole: "A8", color: "#ef4444" },
-      { fromHole: "E16", toHole: "BUS_BOTTOM_MINUS_16", color: "#3b82f6" },
-     // 右アーム給電・接地
-      { fromHole: "BUS_TOP_PLUS_18", toHole: "A18", color: "#ef4444" },
-      { fromHole: "E23", toHole: "E24", color: "#38bdf8" },
-      { fromHole: "E24", toHole: "BUS_BOTTOM_MINUS_24", color: "#3b82f6" },
-      // ★ 禁断の横糸
-      { fromHole: "A12", toHole: "A22", color: "#eab308" }
-    ]
-  },
-
-
-// Stage 7-4: 平衡の奇跡 (横向きLEDによる平衡点検出 / 完全分離パッチ配線版)
-  BRIDGE_4: {
-    name: "Stage 7-4: 平衡の奇跡 (LED平衡検出)",
-    desc: "中央に赤色LEDをコンパクトに配置。左右の中点からジャンパ線で架橋パッチします。ツマミを回すと激しく点灯し、1000Ω(4.5V平衡)に近づくにつれてフッと完全消灯します。",
-    components: [
-      // 左アーム (4.5V固定基準: 列3〜11)
-      { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: "C3", pinB: "C7", name: "R1 (1.0kΩ 左上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
-      { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: "D7", pinB: "D11", name: "R2 (1.0kΩ 左下)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
-      // 中央平衡検出インジケータ (独立列14〜16)
-      { id: "comp_bridge_led", type: "led", color: "#ef4444", colorType: "red", vf: 2.0, pinA: "B14", pinB: "B16", name: "架橋平衡インジケータ (赤LED)" },
-      // 右アーム (可変アーム: 列19〜25)
-      { id: "comp_r3", type: "resistor", val_ohm: 1000, pinA: "C19", pinB: "C23", name: "R3 (1.0kΩ 右上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
-      { id: "comp_vr1", type: "potentiometer", val_max_ohm: 10000, val_ohm: 1000, cur_ratio: 0.1, pinA: "D23", pinB: "D25", pinC: "E24", pinWiper: "E24", name: "VR1 (可変抵抗 右下)" }
-    ],
-    answerWires: [
-      // 左アーム給電・接地
-      { fromHole: "BUS_TOP_PLUS_3", toHole: "A3", color: "#ef4444" },
-      { fromHole: "E11", toHole: "BUS_BOTTOM_MINUS_11", color: "#3b82f6" },
-      // 右アーム給電・接地
-      { fromHole: "BUS_TOP_PLUS_19", toHole: "A19", color: "#ef4444" },
-      { fromHole: "E24", toHole: "E25", color: "#38bdf8" },
-      { fromHole: "E25", toHole: "BUS_BOTTOM_MINUS_25", color: "#3b82f6" },
-      // ユーザーによる架橋パッチ線 (左中点7 ➔ LEDアノード14、LEDカソード16 ➔ 右中点23)
-      { fromHole: "A7", toHole: "A14", color: "#eab308" },
-      { fromHole: "A16", toHole: "A23", color: "#eab308" }
-    ]
-  },
-
-  // Stage 7-5: 極致の完成 (逆並列LEDによる双方向差動インジケータ / 完全分離パッチ配線版)
-  BRIDGE_5: {
-    name: "Stage 7-5: 極致の完成 (双方向平衡インジケータ)",
-    desc: "中央に赤LEDと逆向きの緑LEDを抱き合わせ配置し、左右の中点からジャンパ線で架橋します。ツマミを左に回すと赤、右に回すと緑が点灯し、1000Ωで両方ピタリと消灯する究極の平衡検出器です。",
-    components: [
-      // 左アーム (4.5V固定基準: 列3〜11)
-      { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: "C3", pinB: "C7", name: "R1 (1.0kΩ 左上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
-      { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: "D7", pinB: "D11", name: "R2 (1.0kΩ 左下)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
-      // 中央双方向インジケータ (独立列14〜16・逆並列抱き合わせ)
-      { id: "comp_led_red", type: "led", color: "#ef4444", colorType: "red", vf: 2.0, pinA: "A14", pinB: "A16", name: "インジケータ (赤: 左高電位)" },
-      { id: "comp_led_green", type: "led", color: "#22c55e", colorType: "green", vf: 2.2, pinA: "B16", pinB: "B14", name: "インジケータ (緑: 右高電位)" },
-      // 右アーム (可変アーム: 列19〜25)
-      { id: "comp_r3", type: "resistor", val_ohm: 1000, pinA: "C19", pinB: "C23", name: "R3 (1.0kΩ 右上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
-      { id: "comp_vr1", type: "potentiometer", val_max_ohm: 10000, val_ohm: 1000, cur_ratio: 0.1, pinA: "D23", pinB: "D25", pinC: "E24", pinWiper: "E24", name: "VR1 (可変抵抗 右下)" }
-    ],
-    answerWires: [
-      // 左アーム給電・接地
-      { fromHole: "BUS_TOP_PLUS_3", toHole: "A3", color: "#ef4444" },
-      { fromHole: "E11", toHole: "BUS_BOTTOM_MINUS_11", color: "#3b82f6" },
-      // 右アーム給電・接地
-      { fromHole: "BUS_TOP_PLUS_19", toHole: "A19", color: "#ef4444" },
-      { fromHole: "E24", toHole: "E25", color: "#38bdf8" },
-      { fromHole: "E25", toHole: "BUS_BOTTOM_MINUS_25", color: "#3b82f6" },
-      // ユーザーによる架橋パッチ線 (左中点7 ➔ 中央14、中央16 ➔ 右中点23)
-      { fromHole: "E7", toHole: "E14", color: "#eab308" },
-      { fromHole: "E16", toHole: "E23", color: "#eab308" }
-    ]
+    if (pattern === 0) {
+      // 構図A: 上段左アーム(固定4.5V) ＆ 下段右アーム(可変電位) 中央溝斜め横断架橋
+      const lCol = Math.floor(Math.random() * 3) + 3;    // 左アーム(上段): 列3〜5 (占有3〜11)
+      const rCol = Math.floor(Math.random() * 3) + 16;   // 右アーム(下段): 列16〜18 (占有16〜25)
+      return {
+        name: "Stage 7-3: 禁断の横糸 (構図A: 中央溝斜め横断架橋)",
+        desc: "上段の固定中点と下段の可変中点を結ぶ架橋線が、中央溝をダイナミックに斜め横断する立体ブリッジ配置です。",
+        components: [
+          // 左アーム (上段固定分圧)
+          { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: `C${lCol}`, pinB: `C${lCol + 4}`, name: "R1 (1.0kΩ 左上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: `D${lCol + 4}`, pinB: `D${lCol + 8}`, name: "R2 (1.0kΩ 左下)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          // 右アーム (下段可変分圧)
+          { id: "comp_r3", type: "resistor", val_ohm: 1000, pinA: `H${rCol}`, pinB: `H${rCol + 4}`, name: "R3 (1.0kΩ 右上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_vr1", type: "potentiometer", val_max_ohm: 10000, val_ohm: 1000, cur_ratio: 0.1, pinA: `I${rCol + 4}`, pinB: `I${rCol + 8}`, pinC: `J${rCol + 6}`, pinWiper: `J${rCol + 6}`, name: "VR1 (可変抵抗 右下)" }
+        ],
+        answerWires: [
+          // 左アーム給電・接地
+          { id: "W_B3_L_VCC", fromHole: `BUS_TOP_PLUS_${lCol}`, toHole: `A${lCol}`, color: "#ef4444" },
+          { id: "W_B3_L_GND", fromHole: `E${lCol + 8}`, toHole: `BUS_BOTTOM_MINUS_${lCol + 8}`, color: "#3b82f6" },
+          // 右アーム給電・接地
+          { id: "W_B3_R_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `F${rCol}`, color: "#ef4444" },
+          { id: "W_B3_R_GND", fromHole: `J${rCol + 6}`, toHole: `BUS_BOTTOM_MINUS_${rCol + 6}`, color: "#38bdf8" },
+          // 禁断の横糸 (上段左中点 ➔ 下段右中点 斜め横断)
+          { id: "W_B3_BRIDGE", fromHole: `A${lCol + 4}`, toHole: `F${rCol + 4}`, color: "#eab308" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // 構図B: 溝跨ぎ縦挿しR1 ＆ 最果て可変分圧 ＆ 下段長距離水平架橋
+      const lCol = Math.floor(Math.random() * 3) + 3;    // 溝跨ぎ左アーム: 列3〜5 (占有3〜9)
+      const rCol = Math.floor(Math.random() * 3) + 16;   // 右アーム(上段): 列16〜18 (占有16〜26)
+      return {
+        name: "Stage 7-3: 禁断の横糸 (構図B: 溝跨ぎR1 ＆ 斜め長距離架橋)",
+        desc: "左アームの上流抵抗が中央溝を跨ぎ下段に中点を形成。上段右寄りに置かれた可変中点へ向かって架橋線が駆け上がるレイアウトです。",
+        components: [
+          // 左アーム
+          { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: `E${lCol}`, pinB: `F${lCol}`, isVertical: true, spanCols: 1, name: "R1 (1.0kΩ 左上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: `G${lCol}`, pinB: `G${lCol + 4}`, name: "R2 (1.0kΩ 左下)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          // 右アーム
+          { id: "comp_r3", type: "resistor", val_ohm: 1000, pinA: `B${rCol}`, pinB: `B${rCol + 4}`, name: "R3 (1.0kΩ 右上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_vr1", type: "potentiometer", val_max_ohm: 10000, val_ohm: 1000, cur_ratio: 0.1, pinA: `C${rCol + 4}`, pinB: `C${rCol + 8}`, pinC: `D${rCol + 6}`, pinWiper: `D${rCol + 6}`, name: "VR1 (可変抵抗 右下)" }
+        ],
+        answerWires: [
+          { id: "W_B3_L_VCC", fromHole: `BUS_TOP_PLUS_${lCol}`, toHole: `A${lCol}`, color: "#ef4444" },
+          { id: "W_B3_L_GND", fromHole: `J${lCol + 4}`, toHole: `BUS_BOTTOM_MINUS_${lCol + 4}`, color: "#3b82f6" },
+          { id: "W_B3_R_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `A${rCol}`, color: "#ef4444" },
+          { id: "W_B3_R_GND", fromHole: `D${rCol + 6}`, toHole: `BUS_BOTTOM_MINUS_${rCol + 6}`, color: "#38bdf8" },
+          // 禁断の横糸 (下段左中点 ➔ 上段右中点 駆け上がり架橋)
+          { id: "W_B3_BRIDGE", fromHole: `I${lCol}`, toHole: `A${rCol + 4}`, color: "#eab308" }
+        ]
+      };
+    } else {
+      // 構図C: 右上固定分圧 ＆ 左下可変分圧 (対角線超長距離大逆走架橋)
+      const lCol = Math.floor(Math.random() * 3) + 18;   // 固定アーム(右上): 列18〜20 (占有18〜26)
+      const rCol = Math.floor(Math.random() * 3) + 3;    // 可変アーム(左下): 列3〜5 (占有3〜13)
+      return {
+        name: "Stage 7-3: 禁断の横糸 (構図C: 右上固定 ＆ 左下可変 対角線大逆走架橋)",
+        desc: "右上の固定分圧中点から、左下の可変分圧中点へ向かって架橋線が盤面を対角線上に大逆走する最高難度パズルレイアウトです。",
+        components: [
+          // 固定アーム (右上)
+          { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: `B${lCol}`, pinB: `B${lCol + 4}`, name: "R1 (1.0kΩ 左上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: `C${lCol + 4}`, pinB: `C${lCol + 8}`, name: "R2 (1.0kΩ 左下)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          // 可変アーム (左下)
+          { id: "comp_r3", type: "resistor", val_ohm: 1000, pinA: `H${rCol}`, pinB: `H${rCol + 4}`, name: "R3 (1.0kΩ 右上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_vr1", type: "potentiometer", val_max_ohm: 10000, val_ohm: 1000, cur_ratio: 0.1, pinA: `I${rCol + 4}`, pinB: `I${rCol + 8}`, pinC: `J${rCol + 6}`, pinWiper: `J${rCol + 6}`, name: "VR1 (可変抵抗 右下)" }
+        ],
+        answerWires: [
+          { id: "W_B3_L_VCC", fromHole: `BUS_TOP_PLUS_${lCol}`, toHole: `A${lCol}`, color: "#ef4444" },
+          { id: "W_B3_L_GND", fromHole: `D${lCol + 8}`, toHole: `BUS_BOTTOM_MINUS_${lCol + 8}`, color: "#3b82f6" },
+          { id: "W_B3_R_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `F${rCol}`, color: "#ef4444" },
+          { id: "W_B3_R_GND", fromHole: `J${rCol + 6}`, toHole: `BUS_BOTTOM_MINUS_${rCol + 6}`, color: "#38bdf8" },
+          // 禁断の横糸 (右上中点 ➔ 左下中点 対角線大逆走)
+          { id: "W_B3_BRIDGE", fromHole: `A${lCol + 4}`, toHole: `F${rCol + 4}`, color: "#eab308" }
+        ]
+      };
+    }
   },
 
 
+// Stage 7-4: 平衡の奇跡 (極性整合＆中央50%平衡 3大マルチツッコミ構図ジェネレータ)
+  BRIDGE_4: () => {
+    // 3つのトポロジー構図からランダム抽選 (0:上下挟み撃ち中央架橋, 1:溝跨ぎR1＆下段架橋, 2:左右大逆転クロス架橋)
+    const pattern = Math.floor(Math.random() * 3);
+
+    if (pattern === 0) {
+      // 構図A: 上段左アーム(固定4.5V) ＆ 下段右アーム(可変電位) ＆ 中央溝跨ぎLED
+      const lCol = Math.floor(Math.random() * 3) + 3;    // 左アーム(上段): 列3〜5 (占有3〜11)
+      const ledCol = Math.floor(Math.random() * 3) + 12; // 架橋LED(上段): 列12〜14 (占有12〜16)
+      const rCol = Math.floor(Math.random() * 3) + 18;   // 右アーム(下段): 列18〜20 (占有18〜26)
+      return {
+        name: "Stage 7-4: 平衡の奇跡 (構図A: 上下段挟み撃ち ＆ 中央LED架橋)",
+        desc: "上段の固定アームと下段の可変アームの間にLEDを配置。ツマミの中央(50%平衡)でLEDがフッと完全消灯します。",
+        components: [
+          // 左アーム (上段固定分圧: 1.0kΩ + 1.0kΩ)
+          { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: `C${lCol}`, pinB: `C${lCol + 4}`, name: "R1 (1.0kΩ 左上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: `D${lCol + 4}`, pinB: `D${lCol + 8}`, name: "R2 (1.0kΩ 左下)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          // 架橋平衡インジケータ (上段中間)
+          { id: "comp_bridge_led", type: "led", color: "#ef4444", colorType: "red", vf: 2.0, pinA: `B${ledCol}`, pinB: `B${ledCol + 2}`, name: "架橋平衡インジケータ (赤LED)" },
+          // 右アーム (下段可変分圧: 10kΩ + 10kΩVR)
+          { id: "comp_r3", type: "resistor", val_ohm: 10000, pinA: `H${rCol}`, pinB: `H${rCol + 4}`, name: "R3 (10kΩ 右上)", colors: ["#78350f", "#000000", "#ea580c", "#d97706"] },
+          { id: "comp_vr1", type: "potentiometer", val_max_ohm: 10000, val_ohm: 5000, cur_ratio: 0.5, pinA: `I${rCol + 4}`, pinB: `I${rCol + 8}`, pinC: `J${rCol + 6}`, pinWiper: `J${rCol + 6}`, name: "VR1 (可変抵抗 右下)" }
+        ],
+        answerWires: [
+          // 左アーム給電・接地
+          { id: "W_B4_L_VCC", fromHole: `BUS_TOP_PLUS_${lCol}`, toHole: `A${lCol}`, color: "#ef4444" },
+          { id: "W_B4_L_GND", fromHole: `E${lCol + 8}`, toHole: `BUS_BOTTOM_MINUS_${lCol + 8}`, color: "#3b82f6" },
+          // 右アーム給電・接地
+          { id: "W_B4_R_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `F${rCol}`, color: "#ef4444" },
+          { id: "W_B4_R_GND", fromHole: `J${rCol + 6}`, toHole: `BUS_BOTTOM_MINUS_${rCol + 6}`, color: "#38bdf8" },
+          // 架橋パッチ線 (左中点 ➔ LEDアノード、LEDカソード ➔ 右中点)
+          { id: "W_B4_BRIDGE_A", fromHole: `A${lCol + 4}`, toHole: `A${ledCol}`, color: "#eab308" },
+          { id: "W_B4_BRIDGE_B", fromHole: `A${ledCol + 2}`, toHole: `F${rCol + 4}`, color: "#eab308" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // 構図B: 溝跨ぎ縦挿しR1 ＆ 最果て可変分圧 ＆ 下段LED架橋
+      const lCol = Math.floor(Math.random() * 3) + 3;    // 溝跨ぎ左アーム: 列3〜5 (占有3〜9)
+      const ledCol = Math.floor(Math.random() * 3) + 11; // 架橋LED(下段): 列11〜13 (占有11〜15)
+      const rCol = Math.floor(Math.random() * 3) + 18;   // 右アーム(上段): 列18〜20 (占有18〜26)
+      return {
+        name: "Stage 7-4: 平衡の奇跡 (構図B: 溝跨ぎR1 ＆ 下段LED架橋)",
+        desc: "左アームが中央溝を跨ぎ、下段に配置されたLEDへ中点電位を供給。上段の可変中点と結ばれたLEDが平衡点でフッと消灯します。",
+        components: [
+          // 左アーム
+          { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: `E${lCol}`, pinB: `F${lCol}`, isVertical: true, spanCols: 1, name: "R1 (1.0kΩ 左上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: `G${lCol}`, pinB: `G${lCol + 4}`, name: "R2 (1.0kΩ 左下)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          // 架橋平衡インジケータ (下段中間)
+          { id: "comp_bridge_led", type: "led", color: "#ef4444", colorType: "red", vf: 2.0, pinA: `I${ledCol}`, pinB: `I${ledCol + 2}`, name: "架橋平衡インジケータ (赤LED)" },
+          // 右アーム (上段可変分圧)
+          { id: "comp_r3", type: "resistor", val_ohm: 10000, pinA: `B${rCol}`, pinB: `B${rCol + 4}`, name: "R3 (10kΩ 右上)", colors: ["#78350f", "#000000", "#ea580c", "#d97706"] },
+          { id: "comp_vr1", type: "potentiometer", val_max_ohm: 10000, val_ohm: 5000, cur_ratio: 0.5, pinA: `C${rCol + 4}`, pinB: `C${rCol + 8}`, pinC: `D${rCol + 6}`, pinWiper: `D${rCol + 6}`, name: "VR1 (可変抵抗 右下)" }
+        ],
+        answerWires: [
+          { id: "W_B4_L_VCC", fromHole: `BUS_TOP_PLUS_${lCol}`, toHole: `A${lCol}`, color: "#ef4444" },
+          { id: "W_B4_L_GND", fromHole: `J${lCol + 4}`, toHole: `BUS_BOTTOM_MINUS_${lCol + 4}`, color: "#3b82f6" },
+          { id: "W_B4_R_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `A${rCol}`, color: "#ef4444" },
+          { id: "W_B4_R_GND", fromHole: `D${rCol + 6}`, toHole: `BUS_BOTTOM_MINUS_${rCol + 6}`, color: "#38bdf8" },
+          // 架橋パッチ線 (下段左中点 ➔ LEDアノード、LEDカソード ➔ 上段右中点)
+          { id: "W_B4_BRIDGE_A", fromHole: `H${lCol}`, toHole: `J${ledCol}`, color: "#eab308" },
+          { id: "W_B4_BRIDGE_B", fromHole: `J${ledCol + 2}`, toHole: `A${rCol + 4}`, color: "#eab308" }
+        ]
+      };
+    } else {
+      // 構図C: 右上固定分圧 ＆ 左下可変分圧 ＆ 対角線大逆走架橋
+      const lCol = Math.floor(Math.random() * 3) + 20;  // 固定アーム(右上): 列20〜22 (占有20〜28)
+      const ledCol = Math.floor(Math.random() * 3) + 12; // 架橋LED(中央): 列12〜14 (占有12〜16)
+      const rCol = Math.floor(Math.random() * 3) + 3;    // 可変アーム(左下): 列3〜5 (占有3〜13)
+      return {
+        name: "Stage 7-4: 平衡の奇跡 (構図C: 右上固定 ＆ 左下可変 対角大逆走架橋)",
+        desc: "右上の固定分圧中点から左下の可変中点へ向かってLEDが斜めに横断配置され、盤面全体を使って平衡検出を行う最高難度パズルです。",
+        components: [
+          // 固定アーム (右上)
+          { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: `B${lCol}`, pinB: `B${lCol + 4}`, name: "R1 (1.0kΩ 左上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: `C${lCol + 4}`, pinB: `C${lCol + 8}`, name: "R2 (1.0kΩ 左下)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          // 架橋平衡インジケータ (中央)
+          { id: "comp_bridge_led", type: "led", color: "#ef4444", colorType: "red", vf: 2.0, pinA: `B${ledCol}`, pinB: `B${ledCol + 2}`, name: "架橋平衡インジケータ (赤LED)" },
+          // 可変アーム (左下)
+          { id: "comp_r3", type: "resistor", val_ohm: 10000, pinA: `H${rCol}`, pinB: `H${rCol + 4}`, name: "R3 (10kΩ 右上)", colors: ["#78350f", "#000000", "#ea580c", "#d97706"] },
+          { id: "comp_vr1", type: "potentiometer", val_max_ohm: 10000, val_ohm: 5000, cur_ratio: 0.5, pinA: `I${rCol + 4}`, pinB: `I${rCol + 8}`, pinC: `J${rCol + 6}`, pinWiper: `J${rCol + 6}`, name: "VR1 (可変抵抗 右下)" }
+        ],
+        answerWires: [
+          { id: "W_B4_L_VCC", fromHole: `BUS_TOP_PLUS_${lCol}`, toHole: `A${lCol}`, color: "#ef4444" },
+          { id: "W_B4_L_GND", fromHole: `D${lCol + 8}`, toHole: `BUS_BOTTOM_MINUS_${lCol + 8}`, color: "#3b82f6" },
+          { id: "W_B4_R_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `F${rCol}`, color: "#ef4444" },
+          { id: "W_B4_R_GND", fromHole: `J${rCol + 6}`, toHole: `BUS_BOTTOM_MINUS_${rCol + 6}`, color: "#38bdf8" },
+          // 架橋パッチ線 (右上中点 ➔ LEDアノード、LEDカソード ➔ 左下中点)
+          { id: "W_B4_BRIDGE_A", fromHole: `A${lCol + 4}`, toHole: `A${ledCol}`, color: "#eab308" },
+          { id: "W_B4_BRIDGE_B", fromHole: `A${ledCol + 2}`, toHole: `F${rCol + 4}`, color: "#eab308" }
+        ]
+      };
+    }
+  },
 
 
-// Stage 8: タクトスイッチ・プッシュ点灯回路 (3ゾーン分割動的ランダムジェネレータ)
+
+// Stage 7-5: 極致の完成 (逆並列LED双方向検出＆中央50%平衡 3大マルチツッコミ構図ジェネレータ)
+  BRIDGE_5: () => {
+    // 3つのトポロジー構図からランダム抽選 (0:上下挟み撃ち中央逆並列, 1:溝跨ぎR1＆下段逆並列, 2:左右大逆転対角架橋)
+    const pattern = Math.floor(Math.random() * 3);
+
+    if (pattern === 0) {
+      // 構図A: 上段左アーム(固定4.5V) ＆ 下段右アーム(可変電位) ＆ 中央逆並列抱き合わせ
+      const lCol = Math.floor(Math.random() * 3) + 3;    // 左アーム(上段): 列3〜5 (占有3〜11)
+      const ledCol = Math.floor(Math.random() * 3) + 12; // 逆並列LED(上段): 列12〜14 (占有12〜16)
+      const rCol = Math.floor(Math.random() * 3) + 18;   // 右アーム(下段): 列18〜20 (占有18〜26)
+      return {
+        name: "Stage 7-5: 極致の完成 (構図A: 上下段挟み撃ち ＆ 中央逆並列LED)",
+        desc: "赤LEDと逆向きの緑LEDを上段中央に抱き合わせ配置。ツマミを左に回すと赤、右に回すと緑が点灯し、中央(50%平衡)で両方ピタリと消灯します。",
+        components: [
+          // 左アーム (上段固定分圧: 1.0kΩ + 1.0kΩ)
+          { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: `C${lCol}`, pinB: `C${lCol + 4}`, name: "R1 (1.0kΩ 左上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: `D${lCol + 4}`, pinB: `D${lCol + 8}`, name: "R2 (1.0kΩ 左下)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          // 中央双方向インジケータ (逆並列抱き合わせ)
+          { id: "comp_led_red", type: "led", color: "#ef4444", colorType: "red", vf: 2.0, pinA: `A${ledCol}`, pinB: `A${ledCol + 2}`, name: "インジケータ (赤: 左高電位)" },
+          { id: "comp_led_green", type: "led", color: "#22c55e", colorType: "green", vf: 2.2, pinA: `B${ledCol + 2}`, pinB: `B${ledCol}`, name: "インジケータ (緑: 右高電位)" },
+          // 右アーム (下段可変分圧: 10kΩ + 10kΩVR)
+          { id: "comp_r3", type: "resistor", val_ohm: 10000, pinA: `H${rCol}`, pinB: `H${rCol + 4}`, name: "R3 (10kΩ 右上)", colors: ["#78350f", "#000000", "#ea580c", "#d97706"] },
+          { id: "comp_vr1", type: "potentiometer", val_max_ohm: 10000, val_ohm: 5000, cur_ratio: 0.5, pinA: `I${rCol + 4}`, pinB: `I${rCol + 8}`, pinC: `J${rCol + 6}`, pinWiper: `J${rCol + 6}`, name: "VR1 (可変抵抗 右下)" }
+        ],
+        answerWires: [
+          // 左アーム給電・接地
+          { id: "W_B5_L_VCC", fromHole: `BUS_TOP_PLUS_${lCol}`, toHole: `A${lCol}`, color: "#ef4444" },
+          { id: "W_B5_L_GND", fromHole: `E${lCol + 8}`, toHole: `BUS_BOTTOM_MINUS_${lCol + 8}`, color: "#3b82f6" },
+          // 右アーム給電・接地
+          { id: "W_B5_R_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `F${rCol}`, color: "#ef4444" },
+          { id: "W_B5_R_GND", fromHole: `J${rCol + 6}`, toHole: `BUS_BOTTOM_MINUS_${rCol + 6}`, color: "#38bdf8" },
+          // 架橋パッチ線 (左中点 ➔ 逆並列LED左ノード、逆並列LED右ノード ➔ 右中点)
+          { id: "W_B5_BRIDGE_A", fromHole: `A${lCol + 4}`, toHole: `E${ledCol}`, color: "#eab308" },
+          { id: "W_B5_BRIDGE_B", fromHole: `E${ledCol + 2}`, toHole: `F${rCol + 4}`, color: "#eab308" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // 構図B: 溝跨ぎ縦挿しR1 ＆ 最果て可変分圧 ＆ 下段逆並列抱き合わせ
+      const lCol = Math.floor(Math.random() * 3) + 3;    // 溝跨ぎ左アーム: 列3〜5 (占有3〜9)
+      const ledCol = Math.floor(Math.random() * 3) + 11; // 逆並列LED(下段): 列11〜13 (占有11〜15)
+      const rCol = Math.floor(Math.random() * 3) + 18;   // 右アーム(上段): 列18〜20 (占有18〜26)
+      return {
+        name: "Stage 7-5: 極致の完成 (構図B: 溝跨ぎR1 ＆ 下段逆並列LED)",
+        desc: "左アームが中央溝を跨ぎ下段に中点を形成。下段に配置された逆並列インジケータが左右の電位の高低を赤と緑で鮮やかに識別します。",
+        components: [
+          // 左アーム
+          { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: `E${lCol}`, pinB: `F${lCol}`, isVertical: true, spanCols: 1, name: "R1 (1.0kΩ 左上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: `G${lCol}`, pinB: `G${lCol + 4}`, name: "R2 (1.0kΩ 左下)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          // 下段逆並列インジケータ
+          { id: "comp_led_red", type: "led", color: "#ef4444", colorType: "red", vf: 2.0, pinA: `H${ledCol}`, pinB: `H${ledCol + 2}`, name: "インジケータ (赤: 左高電位)" },
+          { id: "comp_led_green", type: "led", color: "#22c55e", colorType: "green", vf: 2.2, pinA: `I${ledCol + 2}`, pinB: `I${ledCol}`, name: "インジケータ (緑: 右高電位)" },
+          // 右アーム (上段可変分圧)
+          { id: "comp_r3", type: "resistor", val_ohm: 10000, pinA: `B${rCol}`, pinB: `B${rCol + 4}`, name: "R3 (10kΩ 右上)", colors: ["#78350f", "#000000", "#ea580c", "#d97706"] },
+          { id: "comp_vr1", type: "potentiometer", val_max_ohm: 10000, val_ohm: 5000, cur_ratio: 0.5, pinA: `C${rCol + 4}`, pinB: `C${rCol + 8}`, pinC: `D${rCol + 6}`, pinWiper: `D${rCol + 6}`, name: "VR1 (可変抵抗 右下)" }
+        ],
+        answerWires: [
+          { id: "W_B5_L_VCC", fromHole: `BUS_TOP_PLUS_${lCol}`, toHole: `A${lCol}`, color: "#ef4444" },
+          { id: "W_B5_L_GND", fromHole: `J${lCol + 4}`, toHole: `BUS_BOTTOM_MINUS_${lCol + 4}`, color: "#3b82f6" },
+          { id: "W_B5_R_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `A${rCol}`, color: "#ef4444" },
+          { id: "W_B5_R_GND", fromHole: `D${rCol + 6}`, toHole: `BUS_BOTTOM_MINUS_${rCol + 6}`, color: "#38bdf8" },
+          // 架橋パッチ線 (下段左中点 ➔ 逆並列左ノード、逆並列右ノード ➔ 上段右中点)
+          { id: "W_B5_BRIDGE_A", fromHole: `H${lCol}`, toHole: `J${ledCol}`, color: "#eab308" },
+          { id: "W_B5_BRIDGE_B", fromHole: `J${ledCol + 2}`, toHole: `A${rCol + 4}`, color: "#eab308" }
+        ]
+      };
+    } else {
+      // 構図C: 右上固定分圧 ＆ 左下可変分圧 ＆ 対角線大逆走架橋
+      const lCol = Math.floor(Math.random() * 3) + 20;  // 固定アーム(右上): 列20〜22 (占有20〜28)
+      const ledCol = Math.floor(Math.random() * 3) + 12; // 逆並列LED(中央): 列12〜14 (占有12〜16)
+      const rCol = Math.floor(Math.random() * 3) + 3;    // 可変アーム(左下): 列3〜5 (占有3〜13)
+      return {
+        name: "Stage 7-5: 極致の完成 (構図C: 右上固定 ＆ 左下可変 対角大逆走架橋)",
+        desc: "右上の固定分圧中点から左下の可変中点へ向かって逆並列LEDが対角線上に架橋配置され、盤面全体を使って双方向平衡検出を行う最高峰パズルです。",
+        components: [
+          // 固定アーム (右上)
+          { id: "comp_r1", type: "resistor", val_ohm: 1000, pinA: `B${lCol}`, pinB: `B${lCol + 4}`, name: "R1 (1.0kΩ 左上)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          { id: "comp_r2", type: "resistor", val_ohm: 1000, pinA: `C${lCol + 4}`, pinB: `C${lCol + 8}`, name: "R2 (1.0kΩ 左下)", colors: ["#78350f", "#000000", "#dc2626", "#d97706"] },
+          // 中央逆並列インジケータ
+          { id: "comp_led_red", type: "led", color: "#ef4444", colorType: "red", vf: 2.0, pinA: `A${ledCol}`, pinB: `A${ledCol + 2}`, name: "インジケータ (赤: 左高電位)" },
+          { id: "comp_led_green", type: "led", color: "#22c55e", colorType: "green", vf: 2.2, pinA: `B${ledCol + 2}`, pinB: `B${ledCol}`, name: "インジケータ (緑: 右高電位)" },
+          // 可変アーム (左下)
+          { id: "comp_r3", type: "resistor", val_ohm: 10000, pinA: `H${rCol}`, pinB: `H${rCol + 4}`, name: "R3 (10kΩ 右上)", colors: ["#78350f", "#000000", "#ea580c", "#d97706"] },
+          { id: "comp_vr1", type: "potentiometer", val_max_ohm: 10000, val_ohm: 5000, cur_ratio: 0.5, pinA: `I${rCol + 4}`, pinB: `I${rCol + 8}`, pinC: `J${rCol + 6}`, pinWiper: `J${rCol + 6}`, name: "VR1 (可変抵抗 右下)" }
+        ],
+        answerWires: [
+          { id: "W_B5_L_VCC", fromHole: `BUS_TOP_PLUS_${lCol}`, toHole: `A${lCol}`, color: "#ef4444" },
+          { id: "W_B5_L_GND", fromHole: `D${lCol + 8}`, toHole: `BUS_BOTTOM_MINUS_${lCol + 8}`, color: "#3b82f6" },
+          { id: "W_B5_R_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `F${rCol}`, color: "#ef4444" },
+          { id: "W_B5_R_GND", fromHole: `J${rCol + 6}`, toHole: `BUS_BOTTOM_MINUS_${rCol + 6}`, color: "#38bdf8" },
+          // 架橋パッチ線 (右上中点 ➔ 逆並列左ノード、逆並列右ノード ➔ 左下中点)
+          { id: "W_B5_BRIDGE_A", fromHole: `A${lCol + 4}`, toHole: `D${ledCol}`, color: "#eab308" },
+          { id: "W_B5_BRIDGE_B", fromHole: `D${ledCol + 2}`, toHole: `F${rCol + 4}`, color: "#eab308" }
+        ]
+      };
+    }
+  },
+
+
+
+// Stage 8: タクトスイッチ・プッシュ点灯回路 (3大マルチツッコミ構図ジェネレータ)
   TACT_SWITCH_CIRCUIT: () => {
-    const rCol = Math.floor(Math.random() * 4) + 2;    // ゾーン1: 列2〜5
-    const ledCol = Math.floor(Math.random() * 5) + 11; // ゾーン2: 列11〜15
-    const swCol = Math.floor(Math.random() * 4) + 21;  // ゾーン3: 列21〜24
+    const pattern = Math.floor(Math.random() * 3);
 
-    return {
-      name: "タクトスイッチ・プッシュ点灯回路 (モーメンタリ / ランダム配置)",
-      desc: "保護抵抗、青色LED、タクトスイッチが独立ゾーンへ散開配置されます。ジャンパ線で直列結線し、ボタンを押している間だけ通電する基本入力回路を構築します。",
-      components: [
-        { id: "R_TACT_1", type: "resistor", val_ohm: 1000, pinA: `C${rCol}`, pinB: `C${rCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 保護抵抗", desc: "1.0kΩ 電流制限抵抗" },
-        { id: "LED_TACT_1", type: "led", colorType: "blue", color: "#3b82f6", vf: 3.0, pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: false, name: "青色LED (5mm)", desc: "順方向降下3.0Vの高輝度青色LED" },
-        { id: "SW_TACT_1", type: "tact_switch", subType: "tact", pinA: `C${swCol}`, pinB: `C${swCol + 3}`, isPressed: false, name: "タクトスイッチ (モーメンタリ)", desc: "押下時のみ閉路を形成する押しボタンスイッチ" }
-      ],
-      answerWires: [
-        // 1. 給電: +9Vレール ➔ 1kΩ保護抵抗
-        { id: "W_TACT_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `A${rCol}`, color: "#ef4444" },
-        // 2. 抵抗出力 ➔ LEDアノード
-        { id: "W_TACT_R_TO_LED", fromHole: `A${rCol + 4}`, toHole: `A${ledCol}`, color: "#eab308" },
-        // 3. LEDカソード ➔ タクトスイッチ入力
-        { id: "W_TACT_LED_TO_SW", fromHole: `A${ledCol + 2}`, toHole: `A${swCol}`, color: "#06b6d4" },
-        // 4. 接地: タクトスイッチ出力 ➔ 下部マイナスレール(GND)
-        { id: "W_TACT_GND", fromHole: `E${swCol + 3}`, toHole: `BUS_BOTTOM_MINUS_${swCol + 3}`, color: "#3b82f6" }
-      ]
-    };
+    if (pattern === 0) {
+      // 構図A: 上段抵抗 ＆ 中央溝越え下段タクトSW ＆ 上段最果て青色LED (上下立体ジグザグ)
+      const rCol = Math.floor(Math.random() * 3) + 3;    // 上段: 列3〜5 (占有3〜9)
+      const swCol = Math.floor(Math.random() * 3) + 11;  // 下段: 列11〜13 (占有11〜16)
+      const ledCol = Math.floor(Math.random() * 3) + 20; // 上段: 列20〜22 (占有20〜24)
+      return {
+        name: "タクトスイッチ・プッシュ点灯回路 (構図A: 上下段立体ジグザグ)",
+        desc: "上段の保護抵抗から中央溝を飛び越えて下段のタクトスイッチへ接続し、再び上段最果ての青色LEDへ駆け上がる立体配線です。",
+        components: [
+          { id: "R_TACT_1", type: "resistor", val_ohm: 1000, pinA: `C${rCol}`, pinB: `C${rCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 保護抵抗", desc: "1.0kΩ 電流制限抵抗" },
+          { id: "SW_TACT_1", type: "tact_switch", subType: "tact", pinA: `H${swCol}`, pinB: `H${swCol + 3}`, isPressed: false, name: "タクトスイッチ (モーメンタリ)", desc: "押下時のみ閉路を形成する押しボタンスイッチ" },
+          { id: "LED_TACT_1", type: "led", colorType: "blue", color: "#3b82f6", vf: 3.0, pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: false, name: "青色LED (5mm)", desc: "順方向降下3.0Vの高輝度青色LED" }
+        ],
+        answerWires: [
+          { id: "W_TACT_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `A${rCol}`, color: "#ef4444" },
+          { id: "W_TACT_R_TO_SW", fromHole: `E${rCol + 4}`, toHole: `F${swCol}`, color: "#eab308" },
+          { id: "W_TACT_SW_TO_LED", fromHole: `F${swCol + 3}`, toHole: `A${ledCol}`, color: "#06b6d4" },
+          { id: "W_TACT_GND", fromHole: `E${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // 構図B: 溝跨ぎ縦挿し抵抗 ＆ 下段最果てSW ＆ 上段中央青色LED
+      const rCol = Math.floor(Math.random() * 3) + 4;    // 溝跨ぎ: 列4〜6
+      const ledCol = Math.floor(Math.random() * 3) + 12; // 上段: 列12〜14
+      const swCol = Math.floor(Math.random() * 3) + 20;  // 下段: 列20〜22
+      return {
+        name: "タクトスイッチ・プッシュ点灯回路 (構図B: 溝跨ぎR ＆ 最果てSW)",
+        desc: "保護抵抗が中央溝をダイナミックに跨ぎ、下段最果てのスイッチから上段中央のLEDへと電力を送るアクロバティック配置です。",
+        components: [
+          { id: "R_TACT_1", type: "resistor", val_ohm: 1000, pinA: `E${rCol}`, pinB: `F${rCol}`, isVertical: true, spanCols: 1, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 保護抵抗", desc: "1.0kΩ 電流制限抵抗" },
+          { id: "LED_TACT_1", type: "led", colorType: "blue", color: "#3b82f6", vf: 3.0, pinA: `B${ledCol}`, pinB: `B${ledCol + 2}`, isOn: false, name: "青色LED (5mm)", desc: "順方向降下3.0Vの高輝度青色LED" },
+          { id: "SW_TACT_1", type: "tact_switch", subType: "tact", pinA: `H${swCol}`, pinB: `H${swCol + 3}`, isPressed: false, name: "タクトスイッチ (モーメンタリ)", desc: "押下時のみ閉路を形成する押しボタンスイッチ" }
+        ],
+        answerWires: [
+          { id: "W_TACT_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `A${rCol}`, color: "#ef4444" },
+          { id: "W_TACT_R_TO_LED", fromHole: `G${rCol}`, toHole: `E${ledCol}`, color: "#eab308" },
+          { id: "W_TACT_LED_TO_SW", fromHole: `A${ledCol + 2}`, toHole: `F${swCol}`, color: "#06b6d4" },
+          { id: "W_TACT_GND", fromHole: `J${swCol + 3}`, toHole: `BUS_BOTTOM_MINUS_${swCol + 3}`, color: "#3b82f6" }
+        ]
+      };
+    } else {
+      // 構図C: 右上抵抗 ＆ 左下SW ＆ 右下LED (対角線大逆走)
+      const rCol = Math.floor(Math.random() * 3) + 20;   // 上段: 列20〜22
+      const swCol = Math.floor(Math.random() * 3) + 3;   // 下段: 列3〜5
+      const ledCol = Math.floor(Math.random() * 3) + 13; // 下段: 列13〜15
+      return {
+        name: "タクトスイッチ・プッシュ点灯回路 (構図C: 右上R ＆ 左下SW 大逆走)",
+        desc: "電源から右上の保護抵抗へ給電後、左下の僻地に置かれたタクトスイッチへ盤面を斜め大横断して戻る長距離パズルです。",
+        components: [
+          { id: "R_TACT_1", type: "resistor", val_ohm: 1000, pinA: `B${rCol}`, pinB: `B${rCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 保護抵抗", desc: "1.0kΩ 電流制限抵抗" },
+          { id: "SW_TACT_1", type: "tact_switch", subType: "tact", pinA: `H${swCol}`, pinB: `H${swCol + 3}`, isPressed: false, name: "タクトスイッチ (モーメンタリ)", desc: "押下時のみ閉路を形成する押しボタンスイッチ" },
+          { id: "LED_TACT_1", type: "led", colorType: "blue", color: "#3b82f6", vf: 3.0, pinA: `H${ledCol}`, pinB: `H${ledCol + 2}`, isOn: false, name: "青色LED (5mm)", desc: "順方向降下3.0Vの高輝度青色LED" }
+        ],
+        answerWires: [
+          { id: "W_TACT_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `A${rCol}`, color: "#ef4444" },
+          { id: "W_TACT_R_TO_SW", fromHole: `C${rCol + 4}`, toHole: `F${swCol}`, color: "#eab308" },
+          { id: "W_TACT_SW_TO_LED", fromHole: `F${swCol + 3}`, toHole: `F${ledCol}`, color: "#06b6d4" },
+          { id: "W_TACT_GND", fromHole: `J${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
+        ]
+      };
+    }
   },
 
-
-
-// Stage 9: 整流ダイオード・極性と逆流防止回路 (3ゾーン分割動的ランダムジェネレータ)
+  // Stage 9: 整流ダイオード・極性と逆流防止回路 (3大マルチツッコミ構図ジェネレータ)
   DIODE_RECTIFIER: () => {
-    const rCol = Math.floor(Math.random() * 4) + 2;    // ゾーン1: 列2〜5
-    const dCol = Math.floor(Math.random() * 4) + 11;   // ゾーン2: 列11〜14
-    const ledCol = Math.floor(Math.random() * 4) + 21; // ゾーン3: 列21〜24
+    const pattern = Math.floor(Math.random() * 3);
 
-    return {
-      name: "整流ダイオード・極性と逆流防止回路 (1N4007 / ランダム配置)",
-      desc: "保護抵抗、整流ダイオード、赤色LEDが独立ゾーンへ散開配置されます。電流を一方向にしか流さないダイオードの順方向電圧降下(約0.7V)と逆方向完全遮断の基本特性を体感します。",
-      components: [
-        { id: "R_DIODE_1", type: "resistor", val_ohm: 1000, pinA: `C${rCol}`, pinB: `C${rCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 保護抵抗", desc: "1.0kΩ 電流制限抵抗" },
-        { id: "D_RECT_1", type: "diode", pinA: `C${dCol}`, pinB: `C${dCol + 4}`, vf: 0.7, max_V: 1000, max_I_A: 1.0, name: "整流ダイオード (1N4007)", desc: "順方向電圧約0.7V。一方向のみ電流を通す整流素子" },
-        { id: "LED_DIODE_1", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: true, name: "赤色LED (5mm)", desc: "順方向降下2.0Vの標準赤色LED" }
-      ],
-      answerWires: [
-        // 1. 給電: +9Vレール ➔ 1kΩ保護抵抗
-        { id: "W_DIODE_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `A${rCol}`, color: "#ef4444" },
-        // 2. 抵抗出力 ➔ ダイオードアノード
-        { id: "W_DIODE_R_TO_D", fromHole: `A${rCol + 4}`, toHole: `A${dCol}`, color: "#eab308" },
-        // 3. ダイオードカソード ➔ LEDアノード
-        { id: "W_DIODE_D_TO_LED", fromHole: `A${dCol + 4}`, toHole: `A${ledCol}`, color: "#06b6d4" },
-        // 4. 接地: LEDカソード ➔ 下部マイナスレール(GND)
-        { id: "W_DIODE_GND", fromHole: `E${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
-      ]
-    };
+    if (pattern === 0) {
+      // 構図A: 上段抵抗 ＆ 中央溝越え下段ダイオード ＆ 上段赤色LED (上下挟み撃ち直列)
+      const rCol = Math.floor(Math.random() * 3) + 3;    // 上段: 列3〜5 (占有3〜9)
+      const dCol = Math.floor(Math.random() * 3) + 11;   // 下段: 列11〜13 (占有11〜17)
+      const ledCol = Math.floor(Math.random() * 3) + 20; // 上段: 列20〜22 (占有20〜24)
+      return {
+        name: "整流ダイオード回路 (構図A: 上下段挟み撃ち直列)",
+        desc: "上段の保護抵抗から中央溝を飛び越えて下段の整流ダイオードへ接続し、再び上段の赤色LEDへ駆け上がる立体整流回路です。",
+        components: [
+          { id: "R_DIODE_1", type: "resistor", val_ohm: 1000, pinA: `C${rCol}`, pinB: `C${rCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 保護抵抗", desc: "1.0kΩ 電流制限抵抗" },
+          { id: "D_RECT_1", type: "diode", pinA: `H${dCol}`, pinB: `H${dCol + 4}`, vf: 0.7, max_V: 1000, max_I_A: 1.0, name: "整流ダイオード (1N4007)", desc: "順方向電圧約0.7V。一方向のみ電流を通す整流素子" },
+          { id: "LED_DIODE_1", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: true, name: "赤色LED (5mm)", desc: "順方向降下2.0Vの標準赤色LED" }
+        ],
+        answerWires: [
+          { id: "W_DIODE_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `A${rCol}`, color: "#ef4444" },
+          { id: "W_DIODE_R_TO_D", fromHole: `E${rCol + 4}`, toHole: `F${dCol}`, color: "#eab308" },
+          { id: "W_DIODE_D_TO_LED", fromHole: `F${dCol + 4}`, toHole: `A${ledCol}`, color: "#06b6d4" },
+          { id: "W_DIODE_GND", fromHole: `E${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // 構図B: 溝跨ぎ縦挿しダイオード ＆ 下段這いずり赤色LED
+      const rCol = Math.floor(Math.random() * 3) + 3;    // 上段: 列3〜5
+      const dCol = Math.floor(Math.random() * 3) + 11;   // 溝跨ぎ: 列11〜13
+      const ledCol = Math.floor(Math.random() * 3) + 19; // 下段: 列19〜21
+      return {
+        name: "整流ダイオード回路 (構図B: 溝跨ぎダイオード ＆ 下段LED)",
+        desc: "整流ダイオードが中央溝を縦挿しで跨ぎ、上段から下段へとワンウェイの電流を一気に流し込むアクロバティック配置です。",
+        components: [
+          { id: "R_DIODE_1", type: "resistor", val_ohm: 1000, pinA: `B${rCol}`, pinB: `B${rCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 保護抵抗", desc: "1.0kΩ 電流制限抵抗" },
+          { id: "D_RECT_1", type: "diode", pinA: `E${dCol}`, pinB: `F${dCol}`, isVertical: true, spanCols: 1, vf: 0.7, max_V: 1000, max_I_A: 1.0, name: "整流ダイオード (1N4007)", desc: "順方向電圧約0.7V。一方向のみ電流を通す整流素子" },
+          { id: "LED_DIODE_1", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `I${ledCol}`, pinB: `I${ledCol + 2}`, isOn: true, name: "赤色LED (5mm)", desc: "順方向降下2.0Vの標準赤色LED" }
+        ],
+        answerWires: [
+          { id: "W_DIODE_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `A${rCol}`, color: "#ef4444" },
+          { id: "W_DIODE_R_TO_D", fromHole: `C${rCol + 4}`, toHole: `A${dCol}`, color: "#eab308" },
+          { id: "W_DIODE_D_TO_LED", fromHole: `G${dCol}`, toHole: `G${ledCol}`, color: "#06b6d4" },
+          { id: "W_DIODE_GND", fromHole: `J${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
+        ]
+      };
+    } else {
+      // 構図C: 右上ダイオード ＆ 左下抵抗 ＆ 右下LED (対角線大逆走)
+      const dCol = Math.floor(Math.random() * 3) + 20;   // 上段: 列20〜22
+      const rCol = Math.floor(Math.random() * 3) + 3;    // 下段: 列3〜5
+      const ledCol = Math.floor(Math.random() * 3) + 13; // 下段: 列13〜15
+      return {
+        name: "整流ダイオード回路 (構図C: 右上D ＆ 左下R 対角大逆走)",
+        desc: "右上のダイオードから左下の僻地に置かれた保護抵抗へ盤面を斜めに大横断し、下段のLEDを点灯させる長距離パズルです。",
+        components: [
+          { id: "D_RECT_1", type: "diode", pinA: `B${dCol}`, pinB: `B${dCol + 4}`, vf: 0.7, max_V: 1000, max_I_A: 1.0, name: "整流ダイオード (1N4007)", desc: "順方向電圧約0.7V。一方向のみ電流を通す整流素子" },
+          { id: "R_DIODE_1", type: "resistor", val_ohm: 1000, pinA: `H${rCol}`, pinB: `H${rCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 保護抵抗", desc: "1.0kΩ 電流制限抵抗" },
+          { id: "LED_DIODE_1", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `H${ledCol}`, pinB: `H${ledCol + 2}`, isOn: true, name: "赤色LED (5mm)", desc: "順方向降下2.0Vの標準赤色LED" }
+        ],
+        answerWires: [
+          { id: "W_DIODE_VCC", fromHole: `BUS_TOP_PLUS_${dCol}`, toHole: `A${dCol}`, color: "#ef4444" },
+          { id: "W_DIODE_D_TO_R", fromHole: `C${dCol + 4}`, toHole: `F${rCol}`, color: "#eab308" },
+          { id: "W_DIODE_R_TO_LED", fromHole: `F${rCol + 4}`, toHole: `F${ledCol}`, color: "#06b6d4" },
+          { id: "W_DIODE_GND", fromHole: `J${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
+        ]
+      };
+    }
   },
 
-
-
- // Stage 10: NPNトランジスタ・電子スイッチング回路 (5ゾーン分割動的ランダムジェネレータ)
+  // Stage 10: NPNトランジスタ・電子スイッチング回路 (3大マルチツッコミ構図ジェネレータ)
   STAGE_10_TRANSISTOR: () => {
-    const rcCol = Math.floor(Math.random() * 2) + 2;   // ゾーン1: 列2〜3
-    const ledCol = Math.floor(Math.random() * 2) + 8;  // ゾーン2: 列8〜9
-    const trCol = Math.floor(Math.random() * 2) + 13;  // ゾーン3: 列13〜14 (E: trCol, C: +1, B: +2)
-    const swCol = Math.floor(Math.random() * 2) + 19;  // ゾーン4: 列19〜20
-    const rbCol = Math.floor(Math.random() * 2) + 25;  // ゾーン5: 列25〜26
+    const pattern = Math.floor(Math.random() * 3);
 
-    return {
-      name: "NPNトランジスタ・電子スイッチング回路 (2SC1815 / ランダム配置)",
-      desc: "コレクタ主回路とベース制御タクトスイッチが独立ゾーンへ散開配置されます。タクトスイッチを押すと約83µAの微小ベース電流が流れ、約80倍ものコレクタ電流(約6.9mA)が開閉駆動されます。",
-      components: [
-        // コレクタ主回路
-        { id: "R_TR_C", type: "resistor", val_ohm: 1000, pinA: `C${rcCol}`, pinB: `C${rcCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "1.0kΩ コレクタ電流制限抵抗" },
-        { id: "LED_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: false, name: "赤色LED (5mm)", desc: "コレクタ主電流で点灯するLED" },
-        { id: "TR_1815", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `C${trCol}`, pinC: `C${trCol + 1}`, pinB: `C${trCol + 2}`, pinA: `C${trCol}`, pinCOM: `C${trCol + 1}`, name: "NPNトランジスタ (2SC1815)", desc: "ベース電流でコレクタ電流を開閉するスイッチング素子" },
-        // ベース制御回路
-        { id: "SW_TR_BASE", type: "tact_switch", subType: "tact", pinA: `C${swCol}`, pinB: `C${swCol + 3}`, isPressed: false, name: "ベース制御スイッチ", desc: "ベース電流を投入・遮断するタクトスイッチ" },
-        { id: "R_TR_B", type: "resistor", val_ohm: 100000, pinA: `C${rbCol}`, pinB: `C${rbCol + 3}`, isVertical: false, colors: ["#78350f", "#000000", "#facc15", "#d97706"], name: "100kΩ ベース抵抗", desc: "100kΩ ベース電流制限抵抗" }
-      ],
-      answerWires: [
-        // 1. コレクタ主電源: +9Vレール ➔ 1kΩ負荷抵抗
-        { id: "W_TR_VCC1", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
-        // 2. 負荷抵抗 ➔ LEDアノード
-        { id: "W_TR_RC_TO_LED", fromHole: `A${rcCol + 4}`, toHole: `A${ledCol}`, color: "#eab308" },
-        // 3. LEDカソード ➔ トランジスタ コレクタ端子(C)
-        { id: "W_TR_LED_TO_C", fromHole: `A${ledCol + 2}`, toHole: `A${trCol + 1}`, color: "#f97316" },
-        // 4. トランジスタ エミッタ端子(E) ➔ GND接地
-        { id: "W_TR_GND", fromHole: `E${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
-        // 5. ベース制御電源: +9Vレール ➔ タクトスイッチ入力
-        { id: "W_TR_VCC2", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `A${swCol}`, color: "#ef4444" },
-        // 6. タクトスイッチ ➔ 100kΩベース抵抗入力
-        { id: "W_TR_SW_TO_RB", fromHole: `A${swCol + 3}`, toHole: `A${rbCol}`, color: "#06b6d4" },
-        // 7. ベース抵抗出力 ➔ トランジスタ ベース端子(B)
-        { id: "W_TR_RB_TO_B", fromHole: `E${rbCol + 3}`, toHole: `E${trCol + 2}`, color: "#a855f7" }
-      ]
-    };
+    if (pattern === 0) {
+      // 構図A: 上段制御回路(SW+Rb) ＆ 下段主回路(Rc+LED+TR) 上下完全分離
+      const rcCol = Math.floor(Math.random() * 2) + 3;   // 下段: 列3〜4 (占有3〜9)
+      const ledCol = Math.floor(Math.random() * 2) + 11; // 下段: 列11〜12 (占有11〜15)
+      const trCol = Math.floor(Math.random() * 2) + 18;  // 下段: 列18〜19 (占有18〜22)
+      const swCol = Math.floor(Math.random() * 2) + 3;   // 上段: 列3〜4 (占有3〜8)
+      const rbCol = Math.floor(Math.random() * 2) + 12;  // 上段: 列12〜13 (占有12〜17)
+      return {
+        name: "NPNトランジスタ回路 (構図A: 上段制御 ＆ 下段主回路 上下完全分離)",
+        desc: "上段にベース制御スイッチと抵抗、下段にコレクタ主回路を完全分離。中央溝を越えて微小ベース電流が主回路のスイッチングを司ります。",
+        components: [
+          // コレクタ主回路 (下段)
+          { id: "R_TR_C", type: "resistor", val_ohm: 1000, pinA: `H${rcCol}`, pinB: `H${rcCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "1.0kΩ コレクタ電流制限抵抗" },
+          { id: "LED_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `H${ledCol}`, pinB: `H${ledCol + 2}`, isOn: false, name: "赤色LED (5mm)", desc: "コレクタ主電流で点灯するLED" },
+          { id: "TR_1815", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `H${trCol}`, pinC: `H${trCol + 1}`, pinB: `H${trCol + 2}`, pinA: `H${trCol}`, pinCOM: `H${trCol + 1}`, name: "NPNトランジスタ (2SC1815)", desc: "ベース電流でコレクタ電流を開閉するスイッチング素子" },
+          // ベース制御回路 (上段)
+          { id: "SW_TR_BASE", type: "tact_switch", subType: "tact", pinA: `C${swCol}`, pinB: `C${swCol + 3}`, isPressed: false, name: "ベース制御スイッチ", desc: "ベース電流を投入・遮断するタクトスイッチ" },
+          { id: "R_TR_B", type: "resistor", val_ohm: 100000, pinA: `C${rbCol}`, pinB: `C${rbCol + 3}`, isVertical: false, colors: ["#78350f", "#000000", "#facc15", "#d97706"], name: "100kΩ ベース抵抗", desc: "100kΩ ベース電流制限抵抗" }
+        ],
+        answerWires: [
+          // 主回路給電・配線・接地
+          { id: "W_TR_VCC1", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `F${rcCol}`, color: "#ef4444" },
+          { id: "W_TR_RC_TO_LED", fromHole: `F${rcCol + 4}`, toHole: `F${ledCol}`, color: "#eab308" },
+          { id: "W_TR_LED_TO_C", fromHole: `F${ledCol + 2}`, toHole: `F${trCol + 1}`, color: "#f97316" },
+          { id: "W_TR_GND", fromHole: `J${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
+          // 制御回路給電・中継・溝跨ぎベース注入
+          { id: "W_TR_VCC2", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `A${swCol}`, color: "#ef4444" },
+          { id: "W_TR_SW_TO_RB", fromHole: `A${swCol + 3}`, toHole: `A${rbCol}`, color: "#06b6d4" },
+          { id: "W_TR_RB_TO_B", fromHole: `E${rbCol + 3}`, toHole: `F${trCol + 2}`, color: "#a855f7" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // 構図B: 溝跨ぎ縦挿しRc ＆ 最下段TR ＆ 右上SW
+      const rcCol = Math.floor(Math.random() * 2) + 3;   // 溝跨ぎ: 列3〜4
+      const ledCol = Math.floor(Math.random() * 2) + 9;  // 下段: 列9〜10
+      const trCol = Math.floor(Math.random() * 2) + 15;  // 下段: 列15〜16
+      const swCol = Math.floor(Math.random() * 2) + 18;  // 上段: 列18〜19
+      const rbCol = Math.floor(Math.random() * 2) + 24;  // 上段: 列24〜25
+      return {
+        name: "NPNトランジスタ回路 (構図B: 溝跨ぎRc ＆ 最下段TR ＆ 右上SW)",
+        desc: "主回路の負荷抵抗が中央溝を縦挿しで跨ぎ、制御回路が右上に配置されたアクロバティックなスイッチング回路です。",
+        components: [
+          { id: "R_TR_C", type: "resistor", val_ohm: 1000, pinA: `E${rcCol}`, pinB: `F${rcCol}`, isVertical: true, spanCols: 1, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "1.0kΩ コレクタ電流制限抵抗" },
+          { id: "LED_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `I${ledCol}`, pinB: `I${ledCol + 2}`, isOn: false, name: "赤色LED (5mm)", desc: "コレクタ主電流で点灯するLED" },
+          { id: "TR_1815", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `I${trCol}`, pinC: `I${trCol + 1}`, pinB: `I${trCol + 2}`, pinA: `I${trCol}`, pinCOM: `I${trCol + 1}`, name: "NPNトランジスタ (2SC1815)", desc: "ベース電流でコレクタ電流を開閉するスイッチング素子" },
+          { id: "SW_TR_BASE", type: "tact_switch", subType: "tact", pinA: `B${swCol}`, pinB: `B${swCol + 3}`, isPressed: false, name: "ベース制御スイッチ", desc: "ベース電流を投入・遮断するタクトスイッチ" },
+          { id: "R_TR_B", type: "resistor", val_ohm: 100000, pinA: `B${rbCol}`, pinB: `B${rbCol + 3}`, isVertical: false, colors: ["#78350f", "#000000", "#facc15", "#d97706"], name: "100kΩ ベース抵抗", desc: "100kΩ ベース電流制限抵抗" }
+        ],
+        answerWires: [
+          { id: "W_TR_VCC1", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
+          { id: "W_TR_RC_TO_LED", fromHole: `G${rcCol}`, toHole: `G${ledCol}`, color: "#eab308" },
+          { id: "W_TR_LED_TO_C", fromHole: `G${ledCol + 2}`, toHole: `G${trCol + 1}`, color: "#f97316" },
+          { id: "W_TR_GND", fromHole: `J${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
+          { id: "W_TR_VCC2", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `A${swCol}`, color: "#ef4444" },
+          { id: "W_TR_SW_TO_RB", fromHole: `A${swCol + 3}`, toHole: `A${rbCol}`, color: "#06b6d4" },
+          { id: "W_TR_RB_TO_B", fromHole: `C${rbCol + 3}`, toHole: `G${trCol + 2}`, color: "#a855f7" }
+        ]
+      };
+    } else {
+      // 構図C: 主回路右上 ＆ 制御回路左下 左右完全逆転大クロス
+      const rcCol = Math.floor(Math.random() * 2) + 16;  // 上段: 列16〜17
+      const ledCol = Math.floor(Math.random() * 2) + 21; // 上段: 列21〜22
+      const trCol = Math.floor(Math.random() * 2) + 25;  // 上段: 列25〜26
+      const swCol = Math.floor(Math.random() * 2) + 3;   // 下段: 列3〜4
+      const rbCol = Math.floor(Math.random() * 2) + 9;   // 下段: 列9〜10
+      return {
+        name: "NPNトランジスタ回路 (構図C: 主回路右上 ＆ 制御回路左下 左右大逆転)",
+        desc: "主回路が右上に追いやられ、制御スイッチが左下の僻地に配置された左右大逆転パズルです。盤面を対角線上に横断してベースを駆動します。",
+        components: [
+          { id: "R_TR_C", type: "resistor", val_ohm: 1000, pinA: `B${rcCol}`, pinB: `B${rcCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "1.0kΩ コレクタ電流制限抵抗" },
+          { id: "LED_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `B${ledCol}`, pinB: `B${ledCol + 2}`, isOn: false, name: "赤色LED (5mm)", desc: "コレクタ主電流で点灯するLED" },
+          { id: "TR_1815", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `C${trCol}`, pinC: `C${trCol + 1}`, pinB: `C${trCol + 2}`, pinA: `C${trCol}`, pinCOM: `C${trCol + 1}`, name: "NPNトランジスタ (2SC1815)", desc: "ベース電流でコレクタ電流を開閉するスイッチング素子" },
+          { id: "SW_TR_BASE", type: "tact_switch", subType: "tact", pinA: `H${swCol}`, pinB: `H${swCol + 3}`, isPressed: false, name: "ベース制御スイッチ", desc: "ベース電流を投入・遮断するタクトスイッチ" },
+          { id: "R_TR_B", type: "resistor", val_ohm: 100000, pinA: `H${rbCol}`, pinB: `H${rbCol + 3}`, isVertical: false, colors: ["#78350f", "#000000", "#facc15", "#d97706"], name: "100kΩ ベース抵抗", desc: "100kΩ ベース電流制限抵抗" }
+        ],
+        answerWires: [
+          { id: "W_TR_VCC1", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
+          { id: "W_TR_RC_TO_LED", fromHole: `A${rcCol + 4}`, toHole: `A${ledCol}`, color: "#eab308" },
+          { id: "W_TR_LED_TO_C", fromHole: `A${ledCol + 2}`, toHole: `A${trCol + 1}`, color: "#f97316" },
+          { id: "W_TR_GND", fromHole: `E${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
+          { id: "W_TR_VCC2", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `F${swCol}`, color: "#ef4444" },
+          { id: "W_TR_SW_TO_RB", fromHole: `F${swCol + 3}`, toHole: `F${rbCol}`, color: "#06b6d4" },
+          { id: "W_TR_RB_TO_B", fromHole: `J${rbCol + 3}`, toHole: `E${trCol + 2}`, color: "#a855f7" }
+        ]
+      };
+    }
   },
 
-  // Stage 11: CdS光導電セルとトランジスタによる自動夜間街灯回路 (動的ランダムジェネレータ)
+
+
+ // Stage 11: 暗くなると自動点灯する夜間街灯回路 (難易度維持型 3大マルチ構図ジェネレータ)
   STAGE_11_CDS_NIGHTLIGHT: () => {
-    const rcCol = Math.floor(Math.random() * 2) + 2;     // ゾーン1: 列2〜3
-    const ledCol = Math.floor(Math.random() * 2) + 8;    // ゾーン2: 列8〜9
-    const trCol = Math.floor(Math.random() * 2) + 13;    // ゾーン3: 列13〜14 (E: trCol, C: +1, B: +2)
-    const baseCol = trCol + 2;                          // ベース分圧中点ノード
-    const cdsEndCol = Math.floor(Math.random() * 3) + 18; // ゾーン4: 列18〜20
-    const pullCol = Math.floor(Math.random() * 3) + 23;   // ゾーン5: 列23〜25
+    const pattern = Math.floor(Math.random() * 3);
 
-    return {
-      name: "暗くなると自動点灯する夜間街灯回路 (CdS ＋ 2SC1815 / ランダム配置)",
-      desc: "コレクタ主回路とCdSベース分圧回路が独立ゾーンへ散開配置されます。昼間(明るい時)はCdSの低抵抗によってベース電位が引き落とされ消灯。夜間(暗闇)になるとCdSが高抵抗化してベース電位が0.7Vを超え、トランジスタが自動ONして街灯LEDが点灯します。",
-      components: [
-        // 1. コレクタ主回路
-        { id: "R_TR_C", type: "resistor", val_ohm: 1000, pinA: `C${rcCol}`, pinB: `C${rcCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "コレクタ電流制限抵抗" },
-        { id: "LED_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: false, name: "赤色LED (5mm)", desc: "夜間に自動点灯する街灯LED" },
-        { id: "TR_1815", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `C${trCol}`, pinC: `C${trCol + 1}`, pinB: `C${baseCol}`, pinA: `C${trCol}`, pinCOM: `C${trCol + 1}`, name: "NPNトランジスタ (2SC1815)", desc: "ベース分圧電位でコレクタ電流を開閉するスイッチング素子" },
-
-        // 2. ベース分圧制御回路
-        { id: "R_BASE_PULLUP", type: "resistor", val_ohm: 47000, pinA: `C${pullCol}`, pinB: `C${baseCol}`, isVertical: false, colors: ["#eab308", "#7e22ce", "#f97316", "#d97706"], name: "47kΩ ベースプルアップ抵抗", desc: "電源からベースへバイアスを供給する分圧上流抵抗" },
-        { id: "CDS_NIGHT", type: "cds", pinA: `D${baseCol}`, pinB: `D${cdsEndCol}`, isVertical: false, lux: 150, name: "CdS光導電セル (5mm)", desc: "ベースとGNDの間で明暗を感知する受光素子" }
-      ],
-      answerWires: [
-        // コレクタ主電源
-        { id: "W_TR_VCC1", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
-        // 負荷抵抗 ➔ LEDアノード
-        { id: "W_TR_RC_TO_LED", fromHole: `A${rcCol + 4}`, toHole: `A${ledCol}`, color: "#eab308" },
-        // LEDカソード ➔ トランジスタ コレクタ端子(C)
-        { id: "W_TR_LED_TO_C", fromHole: `A${ledCol + 2}`, toHole: `A${trCol + 1}`, color: "#f97316" },
-        // トランジスタ エミッタ端子(E) ➔ GND接地
-        { id: "W_TR_GND", fromHole: `E${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
-        // ベース分圧給電 (47kΩ抵抗入力へ)
-        { id: "W_TR_VCC2", fromHole: `BUS_TOP_PLUS_${pullCol}`, toHole: `A${pullCol}`, color: "#ef4444" },
-        // CdS下流 ➔ GND接地
-        { id: "W_CDS_GND", fromHole: `E${cdsEndCol}`, toHole: `BUS_BOTTOM_MINUS_${cdsEndCol}`, color: "#3b82f6" }
-      ]
-    };
+    if (pattern === 0) {
+      // 構図A: 上段主回路 ＆ 下段CdSセンサー分圧回路 (上下明快セパレート)
+      const rcCol = Math.floor(Math.random() * 2) + 3;   // 上段: 列3〜4
+      const ledCol = Math.floor(Math.random() * 2) + 9;  // 上段: 列9〜10
+      const trCol = Math.floor(Math.random() * 2) + 14;  // 上段: 列14〜15 (E: trCol, C: +1, B: +2)
+      const baseCol = trCol + 2;                         // ベース中点: 列16〜17
+      const pullCol = baseCol + 4;                       // プルアップ入力: 列20〜21 (標準4ピッチ)
+      return {
+        name: "暗くなると自動点灯する夜間街灯回路 (構図A: 上段主回路 ＆ 下段CdS分圧)",
+        desc: "上段に街灯LED主回路、下段にCdS光センサーを配置。昼間はCdSがベース電位を引き落として消灯し、暗くなると自動点灯します。",
+        components: [
+          { id: "R_TR_C", type: "resistor", val_ohm: 1000, pinA: `C${rcCol}`, pinB: `C${rcCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "コレクタ電流制限抵抗" },
+          { id: "LED_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: false, name: "赤色LED (5mm)", desc: "夜間に自動点灯する街灯LED" },
+          { id: "TR_1815", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `C${trCol}`, pinC: `C${trCol + 1}`, pinB: `C${baseCol}`, pinA: `C${trCol}`, pinCOM: `C${trCol + 1}`, name: "NPNトランジスタ (2SC1815)", desc: "ベース分圧電位でコレクタ電流を開閉するスイッチング素子" },
+          { id: "R_BASE_PULLUP", type: "resistor", val_ohm: 47000, pinA: `C${pullCol}`, pinB: `C${baseCol}`, isVertical: false, colors: ["#eab308", "#7e22ce", "#f97316", "#d97706"], name: "47kΩ ベースプルアップ抵抗", desc: "電源からベースへバイアスを供給する分圧上流抵抗" },
+          { id: "CDS_NIGHT", type: "cds", pinA: `H${baseCol}`, pinB: `H${baseCol + 4}`, isVertical: false, lux: 150, name: "CdS光導電セル (5mm)", desc: "ベースとGNDの間で明暗を感知する受光素子" }
+        ],
+        answerWires: [
+          { id: "W_TR_VCC1", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
+          { id: "W_TR_RC_TO_LED", fromHole: `A${rcCol + 4}`, toHole: `A${ledCol}`, color: "#eab308" },
+          { id: "W_TR_LED_TO_C", fromHole: `A${ledCol + 2}`, toHole: `A${trCol + 1}`, color: "#f97316" },
+          { id: "W_TR_GND", fromHole: `E${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
+          { id: "W_TR_VCC2", fromHole: `BUS_TOP_PLUS_${pullCol}`, toHole: `A${pullCol}`, color: "#ef4444" },
+          { id: "W_CDS_BASE", fromHole: `E${baseCol}`, toHole: `F${baseCol}`, color: "#a855f7" },
+          { id: "W_CDS_GND", fromHole: `J${baseCol + 4}`, toHole: `BUS_BOTTOM_MINUS_${baseCol + 4}`, color: "#3b82f6" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // 構図B: 溝跨ぎ縦挿しRc ＆ 下段主回路 ＆ 上段CdS分圧
+      const rcCol = Math.floor(Math.random() * 2) + 3;   // 溝跨ぎ: 列3〜4
+      const ledCol = Math.floor(Math.random() * 2) + 9;  // 下段: 列9〜10
+      const trCol = Math.floor(Math.random() * 2) + 14;  // 下段: 列14〜15 (E: trCol, C: +1, B: +2)
+      const baseCol = trCol + 2;                         // ベース中点: 列16〜17
+      const pullCol = baseCol + 4;                       // 上段プルアップ: 列20〜21
+      return {
+        name: "暗くなると自動点灯する夜間街灯回路 (構図B: 溝跨ぎRc ＆ 上下立体駆動)",
+        desc: "負荷抵抗が中央溝を縦挿しで跨ぎ、上段のCdS分圧回路から下段のトランジスタベースへ制御電位を供給します。",
+        components: [
+          { id: "R_TR_C", type: "resistor", val_ohm: 1000, pinA: `E${rcCol}`, pinB: `F${rcCol}`, isVertical: true, spanCols: 1, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "コレクタ電流制限抵抗" },
+          { id: "LED_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `I${ledCol}`, pinB: `I${ledCol + 2}`, isOn: false, name: "赤色LED (5mm)", desc: "夜間に自動点灯する街灯LED" },
+          { id: "TR_1815", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `I${trCol}`, pinC: `I${trCol + 1}`, pinB: `I${baseCol}`, pinA: `I${trCol}`, pinCOM: `I${trCol + 1}`, name: "NPNトランジスタ (2SC1815)", desc: "ベース分圧電位でコレクタ電流を開閉するスイッチング素子" },
+          { id: "R_BASE_PULLUP", type: "resistor", val_ohm: 47000, pinA: `B${pullCol}`, pinB: `B${baseCol}`, isVertical: false, colors: ["#eab308", "#7e22ce", "#f97316", "#d97706"], name: "47kΩ ベースプルアップ抵抗", desc: "電源からベースへバイアスを供給する分圧上流抵抗" },
+          { id: "CDS_NIGHT", type: "cds", pinA: `C${baseCol}`, pinB: `C${baseCol + 4}`, isVertical: false, lux: 150, name: "CdS光導電セル (5mm)", desc: "ベースとGNDの間で明暗を感知する受光素子" }
+        ],
+        answerWires: [
+          { id: "W_TR_VCC1", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
+          { id: "W_TR_RC_TO_LED", fromHole: `G${rcCol}`, toHole: `G${ledCol}`, color: "#eab308" },
+          { id: "W_TR_LED_TO_C", fromHole: `G${ledCol + 2}`, toHole: `G${trCol + 1}`, color: "#f97316" },
+          { id: "W_TR_GND", fromHole: `J${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
+          { id: "W_TR_VCC2", fromHole: `BUS_TOP_PLUS_${pullCol}`, toHole: `A${pullCol}`, color: "#ef4444" },
+          { id: "W_CDS_BASE", fromHole: `E${baseCol}`, toHole: `F${baseCol}`, color: "#a855f7" },
+          { id: "W_CDS_GND", fromHole: `E${baseCol + 4}`, toHole: `BUS_BOTTOM_MINUS_${baseCol + 4}`, color: "#3b82f6" }
+        ]
+      };
+    } else {
+      // 構図C: 左右素直な散開配置 (解きやすさ重視の自然なレイアウト)
+      const rcCol = Math.floor(Math.random() * 2) + 2;   // 上段左: 列2〜3
+      const ledCol = Math.floor(Math.random() * 2) + 8;  // 上段左: 列8〜9
+      const trCol = Math.floor(Math.random() * 2) + 13;  // 上段中央: 列13〜14
+      const baseCol = trCol + 2;                         // 列15〜16
+      const pullCol = baseCol + 4;                       // 列19〜20 (4ピッチ)
+      const cdsEndCol = baseCol + 8;                     // 列23〜24 (CdS 4ピッチ)
+      return {
+        name: "暗くなると自動点灯する夜間街灯回路 (構図C: 左右ダイナミック散開)",
+        desc: "主回路からベース分圧回路へ向かって自然に流れる配置。暗闇になるとベース電位が0.7Vを超えて街灯が点灯します。",
+        components: [
+          { id: "R_TR_C", type: "resistor", val_ohm: 1000, pinA: `C${rcCol}`, pinB: `C${rcCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "コレクタ電流制限抵抗" },
+          { id: "LED_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: false, name: "赤色LED (5mm)", desc: "夜間に自動点灯する街灯LED" },
+          { id: "TR_1815", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `C${trCol}`, pinC: `C${trCol + 1}`, pinB: `C${baseCol}`, pinA: `C${trCol}`, pinCOM: `C${trCol + 1}`, name: "NPNトランジスタ (2SC1815)", desc: "ベース分圧電位でコレクタ電流を開閉するスイッチング素子" },
+          { id: "R_BASE_PULLUP", type: "resistor", val_ohm: 47000, pinA: `C${pullCol}`, pinB: `C${baseCol}`, isVertical: false, colors: ["#eab308", "#7e22ce", "#f97316", "#d97706"], name: "47kΩ ベースプルアップ抵抗", desc: "電源からベースへバイアスを供給する分圧上流抵抗" },
+          { id: "CDS_NIGHT", type: "cds", pinA: `D${baseCol}`, pinB: `D${cdsEndCol}`, isVertical: false, lux: 150, name: "CdS光導電セル (5mm)", desc: "ベースとGNDの間で明暗を感知する受光素子" }
+        ],
+        answerWires: [
+          { id: "W_TR_VCC1", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
+          { id: "W_TR_RC_TO_LED", fromHole: `A${rcCol + 4}`, toHole: `A${ledCol}`, color: "#eab308" },
+          { id: "W_TR_LED_TO_C", fromHole: `A${ledCol + 2}`, toHole: `A${trCol + 1}`, color: "#f97316" },
+          { id: "W_TR_GND", fromHole: `E${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
+          { id: "W_TR_VCC2", fromHole: `BUS_TOP_PLUS_${pullCol}`, toHole: `A${pullCol}`, color: "#ef4444" },
+          { id: "W_CDS_GND", fromHole: `E${cdsEndCol}`, toHole: `BUS_BOTTOM_MINUS_${cdsEndCol}`, color: "#3b82f6" }
+        ]
+      };
+    }
   },
 
 
@@ -815,27 +1564,7 @@ const PART_REGISTRY = {
  RESISTOR_10000:   { category: "PASSIVE", type: "resistor", val_ohm: 10000,  name: "10kΩ 固定抵抗器",   colors: ["#78350f", "#000000", "#ea580c", "#d97706"], spanCols: 5, desc: "10kΩ プルアップ/ダウン用抵抗。" },
   RESISTOR_100000: { category: "PASSIVE", type: "resistor", val_ohm: 100000, name: "100kΩ 固定抵抗器",  colors: ["#78350f", "#000000", "#eab308", "#d97706"], spanCols: 5, desc: "100kΩ 高入力インピーダンス分圧用。" },
 
-  // ★ 項目②: CdS光導電セル (光可変抵抗器 LDR / 5mm硫化カドミウム)
-  CDS_PHOTOCELL: {
-    category: "PASSIVE",
-    type: "cds",
-    name: "CdS光導電セル (5mm)",
-    desc: "光の強さに応じて抵抗値が変化する光センサー。暗くするとメガΩ級へ上昇します。",
-    spanCols: 2, // 2列スパン配置
-    lux: 50, // 初期照度: 50 Lux (薄暗い室内)
-    val_ohm: 10000, // 50 Lux時: 約 10kΩ
-    r_dark: 1000000, // 暗黒時: 1MΩ
-    r_10lux: 20000,  // 10 Lux時: 20kΩ
-    gamma: 0.7,
-    getPhysicsText: (comp, phys) => {
-      const curLux = comp.lux !== undefined ? comp.lux : 50;
-      const curOhm = comp.val_ohm || 10000;
-      const ohmText = curOhm >= 1000000
-        ? `${(curOhm / 1000000).toFixed(2)}MΩ`
-        : (curOhm >= 1000 ? `${(curOhm / 1000).toFixed(1)}kΩ` : `${curOhm}Ω`);
-      return ` <b>[照度検知]:</b> ${comp.name} 照度 ${curLux}Lux (実効抵抗 ${ohmText})`;
-    }
-  },
+
 
 
 
@@ -916,9 +1645,9 @@ SWITCH_TACT:     { category: "SWITCH",   type: "tact_switch", subType: "tact",  
     }
   },
 
-  // --- 音響・波形素子 (圧電サウンダ / ピエゾブザー) ---
+// --- 音響・波形素子 (圧電サウンダ / ピエゾブザー) ---
   BUZZER_PIEZO: {
-    category: "OUTPUT",
+    category: "OPTO",
     type: "buzzer",
     name: "圧電ブザー (2.4kHz)",
     spanCols: 2, // 2列スパン直挿し
@@ -1414,35 +2143,49 @@ function updatePhysicsLogEngine(physics, energizedNodes) {
     return;
   }
 
-// ★ 門番(if判定)を撤廃: ツリー再描画と完全同期で最新ログを生成
+// ツリー再描画と完全同期で最新の因果ログを生成
   prevCircuitStatus = "CLOSED";
   logEl.style.borderLeftColor = "#38bdf8";
 
+  // 過熱・焼損の非常事態を最優先判定 (デッドコード解消)
+  const burnedComp = components.find(c => c.isBurned);
+  const hotLED = components.find(c => c.type === "led" && c.temp_C && c.temp_C > 60.0);
+
+  if (burnedComp) {
+    logEl.style.borderLeftColor = "#ef4444";
+    logEl.innerHTML = `<span style="color:#ef4444; font-weight:bold;">[MELTED / 物理破壊]:</span> ${burnedComp.name || '素子'} は電流制限の防壁を失い、過大エネルギーにより熱破壊しました。`;
+    return;
+  } else if (hotLED) {
+    logEl.style.borderLeftColor = "#f59e0b";
+    logEl.innerHTML = `<span style="color:#f59e0b; font-weight:bold;">[OVERHEAT / 熱的限界]:</span> ${hotLED.name} の素子温度が <b>${hotLED.temp_C.toFixed(1)}℃</b> に達しています。放熱限界に注意してください。`;
+    return;
+  }
+
   const totalI = (physics && physics.i_total_mA) ? physics.i_total_mA : 0.0;
   const iStr = totalI.toFixed(2);
-  let msgs = [`⚡ <b>[系統稼働中]:</b> +${vLabel} 電源レール供給中 (主幹電流: <b>${iStr} mA</b>)`];
+  let msgs = [`<b>[系統稼働中]:</b> +${vLabel} 電源レール供給中 (全系電流: <b>${iStr} mA</b>)`];
 
   // 1. スイッチ導通状態
   const swComp = components.find(c => c.type === "switch" || c.type === "switch_spdt");
   if (swComp) {
-    msgs.push(`🔘 <b>[閉路接点]:</b> ${swComp.name || 'トグルスイッチ'} 導通中 (損失: 0.00V / 0Ω維持)`);
+    msgs.push(`<b>[閉路接点]:</b> ${swComp.name || 'トグルスイッチ'} 導通中 (損失ゼロの導電経路を形成)`);
   }
 
-  // 2. 抵抗性負荷のリアルタイム分圧・電力
+  // 2. 抵抗性負荷のエネルギー分配
   const resistors = components.filter(c => c.type === "resistor" || c.type === "potentiometer");
   resistors.forEach(r => {
     const rDrop = (r.voltageDrop !== undefined) ? r.voltageDrop.toFixed(2) : "0.00";
     const rRatio = curV > 0 ? (((r.voltageDrop || 0) / curV) * 100).toFixed(1) : "0.0";
     const rPower = (r.power_mW !== undefined) ? r.power_mW.toFixed(1) : ((r.voltageDrop || 0) * totalI).toFixed(1);
     const rName = r.name || (r.val_ohm ? `${(r.val_ohm >= 1000 ? (r.val_ohm/1000) + 'k' : r.val_ohm)}Ω 抵抗` : "抵抗器");
-    msgs.push(`🛡️ <b>[電流制御]:</b> ${rName} ➔ 降下: <b>${rDrop}V</b> (${rRatio}%) / 発熱: ${rPower}mW`);
+    msgs.push(`<b>[エネルギー防壁]:</b> ${rName} ➔ 電圧の <b>${rRatio}% (${rDrop}V)</b> を受け止め熱として消費 (${rPower}mW)`);
   });
 
-  // 3. コンデンサの過渡充電
+  // 3. コンデンサの電荷蓄積
   const capComp = components.find(c => c.type === "capacitor");
   if (capComp) {
     const cDrop = (capComp.voltageDrop !== undefined ? capComp.voltageDrop : (capComp.charge_V || 0)).toFixed(2);
-    msgs.push(`⏱️ <b>[電荷蓄積]:</b> ${capComp.name || '電解コンデンサ'} ➔ 端子間電圧: <b>${cDrop}V</b> (過渡追従中)`);
+    msgs.push(`<b>[電荷貯蔵]:</b> ${capComp.name || '電解コンデンサ'} ➔ 端子間に <b>${cDrop}V</b> を蓄積中`);
   }
 
   // 4. LEDの発光ステータス
@@ -1451,29 +2194,15 @@ function updatePhysicsLogEngine(physics, energizedNodes) {
     if (totalI > 0.05 && (led.isOn || led.current_mA > 0.05)) {
       const ledV = (led.voltageDrop !== undefined ? led.voltageDrop : (led.vf || 2.0)).toFixed(2);
       const ledP = (led.power_mW !== undefined) ? led.power_mW.toFixed(1) : (parseFloat(ledV) * totalI).toFixed(1);
-      msgs.push(`✨ <b>[発光出力]:</b> ${led.name || 'LED'} ➔ 降下: <b>${ledV}V</b> / 光変換電力: ${ledP}mW (正常点灯)`);
+      msgs.push(`<b>[光変換]:</b> ${led.name || 'LED'} ➔ 順方向電位 <b>${ledV}V</b> を確立し発光中 (${ledP}mW)`);
     } else {
       const ledVf = led.vf || 2.0;
-      msgs.push(`⚠️ <b>[消灯維持]:</b> ${led.name || 'LED'} ➔ 電圧不足 (${vLabel} < Vf:${ledVf}V) または遮断`);
+      msgs.push(`<b>[障壁未達]:</b> ${led.name || 'LED'} ➔ 素子を開くエネルギーが不足 (${vLabel} < 障壁電位:${ledVf}V)`);
     }
   });
 
   logEl.innerHTML = msgs.join("<br>");
   lastLogUpdateTime = now;
-
-  if (now - lastLogUpdateTime > 250) {
-    lastLogUpdateTime = now;
-    const burnedComp = components.find(c => c.isBurned);
-    const hotLED = components.find(c => c.type === "led" && c.temp_C && c.temp_C > 60.0);
-
-    if (burnedComp) {
-      logEl.style.borderLeftColor = "#ef4444";
-      logEl.innerHTML = `💥 <span style="color:#ef4444; font-weight:bold;">[MELTED / 物理破滅]:</span> ${burnedComp.name || '素子'} が過大な熱エネルギーにより物理破壊しました。`;
-    } else if (hotLED) {
-      logEl.style.borderLeftColor = "#f59e0b";
-      logEl.innerHTML = `⚠️ <span style="color:#f59e0b; font-weight:bold;">[OVERHEAT WARNING]:</span> ${hotLED.name} 内温度が <b>${hotLED.temp_C.toFixed(1)}℃</b> に上昇中！`;
-    }
-  }
 }
 
 function updateDisplayToggles() {
@@ -1491,19 +2220,18 @@ function calculateCircuitPhysics() {
   const BATTERY_INTERNAL_R = 2.0;
   const wires = Array.isArray(activeJumperWires) ? activeJumperWires : (window.wires || []);
 
-  // 1. 可変抵抗器の実効抵抗値取得ヘルパー
+// 1. 可変抵抗器の実効抵抗値取得ヘルパー (ツマミ比率優先・平衡復帰完全保証版)
   const getPotEffOhm = (c) => {
     const maxOhm = c.val_max_ohm || 10000;
-    const ratio = c.cur_ratio !== undefined ? c.cur_ratio : 0.5;
-    const wiperHole = c.pinC || c.pinWiper || "E5";
-    const nW = getNodeByHoleId(wiperHole);
-    const nB = getNodeByHoleId(c.pinB);
-    const isWiperConnected = wires.some(w => w.fromHole === wiperHole || w.toHole === wiperHole || (nW && (getNodeByHoleId(w.fromHole) === nW || getNodeByHoleId(w.toHole) === nW)));
-    const isBConnected = wires.some(w => w.fromHole === c.pinB || w.toHole === c.pinB || (nB && (getNodeByHoleId(w.fromHole) === nB || getNodeByHoleId(w.toHole) === nB)));
-    if (isWiperConnected) return c.val_ohm !== undefined ? c.val_ohm : Math.round(maxOhm * ratio);
-    if (isBConnected) return maxOhm;
-    return c.val_ohm !== undefined ? c.val_ohm : Math.round(maxOhm * ratio);
+    // cur_ratioが存在する場合はツマミの現在位置を絶対優先で実効値を算出
+    const ratio = c.cur_ratio !== undefined ? c.cur_ratio : (c.val_ohm !== undefined ? (c.val_ohm / maxOhm) : 0.5);
+    const effR = Math.max(1.0, Math.round(maxOhm * ratio));
+    // コンポーネント側のval_ohmもリアルタイム同期して不整合を根絶
+    c.val_ohm = effR;
+    return effR;
   };
+
+
 
   // 2. コンデンサの過渡応答・充放電解析
   const cap = components.find(c => c.type === "capacitor");
@@ -1553,15 +2281,24 @@ function calculateCircuitPhysics() {
     if (w.toHole && w.toHole.startsWith("BUS_TOP_PLUS")) powerFeedNodes.add(getNodeByHoleId(w.fromHole));
   });
 
-  // ブリッジ架橋素子判定: 「独立した2系統以上の給電ラインが存在し、かつ素子の両端が異なるアームの中点にある」場合のみ
+// ブリッジ架橋素子判定: GNDに接地されていない真のブリッジ架橋素子のみを限定抽出
   const isBridgeComponent = (c) => {
-    if (powerFeedNodes.size < 2) return false; // 単一給電なら絶対に架橋ではない(自由配置直列を保護)
+    if (powerFeedNodes.size < 2) return false;
     const nA = getNodeByHoleId(c.pinA || c.pinAnode);
     const nB = getNodeByHoleId(c.pinB || c.pinCathode);
-    // 給電レール・接地レールに直結しておらず、浮いている素子を架橋と判定
-    return nA && nB && !powerFeedNodes.has(nA) && !powerFeedNodes.has(nB);
-  };
+    if (!nA || !nB || powerFeedNodes.has(nA) || powerFeedNodes.has(nB)) return false;
 
+    // マイナスレールへ直接またはジャンパ線を介して接地されている素子は並列負荷であり架橋ではない
+    const isGndConnected = wires.some(w => {
+      const isMinus = (w.fromHole && w.fromHole.includes("MINUS")) || (w.toHole && w.toHole.includes("MINUS"));
+      if (!isMinus) return false;
+      const wf = getNodeByHoleId(w.fromHole);
+      const wt = getNodeByHoleId(w.toHole);
+      return (wf === nA || wt === nA || wf === nB || wt === nB);
+    });
+
+    return !isGndConnected;
+  };
   // 通常の主幹LEDのみを抽出（真のブリッジ架橋LEDのみ直列から除外）
   let activeLeds = components.filter(c => {
     if (c.type !== "led" || c.isBurned || isBridgeComponent(c)) return false;
@@ -1598,7 +2335,7 @@ function calculateCircuitPhysics() {
   connectedResistors.forEach(r => { r.current_mA = 0; r.voltageDrop = 0; r.power_mW = 0; });
   wires.forEach(w => { w.current_mA = 0; });
 
-  // 5. ブランチ（並列／直列）解析コア
+// 5. ブランチ（並列／直列）解析コア
   if (activeLeds.length >= 1) {
     let invRSum = 0;
 
@@ -1607,10 +2344,18 @@ function calculateCircuitPhysics() {
       const nLedA = getNodeByHoleId(led.pinA);
       const nLedB = getNodeByHoleId(led.pinB);
 
+      // 直接接続または中継ジャンパ線を1本介してLEDに繋がる抵抗を動的検出
       const matchedR = connectedResistors.find(r => {
         const nrA = getNodeByHoleId(r.pinA);
         const nrB = getNodeByHoleId(r.pinB);
-        return nrA === nLedA || nrB === nLedA || nrA === nLedB || nrB === nLedB;
+        if (nrA === nLedA || nrB === nLedA || nrA === nLedB || nrB === nLedB) return true;
+        return wires.some(w => {
+          const wf = getNodeByHoleId(w.fromHole);
+          const wt = getNodeByHoleId(w.toHole);
+          const connectsToLed = (wf === nLedA || wt === nLedA || wf === nLedB || wt === nLedB);
+          const connectsToR = (wf === nrA || wt === nrA || wf === nrB || wt === nrB);
+          return connectsToLed && connectsToR;
+        });
       });
 
  // ★ トランジスタ回路検出: ベース抵抗(高抵抗)の混入を徹底排除
@@ -1640,7 +2385,7 @@ function calculateCircuitPhysics() {
       const branchI = vDrive > vf ? ((vDrive - vf) / (branchR + BATTERY_INTERNAL_R)) * 1000 : 0.0;
       led.current_mA = branchI;
 
-      // ダイオード個別諸元への反映
+    // ダイオード個別諸元への反映
       seriesDiodes.forEach(d => {
         d.current_mA = branchI;
         d.voltageDrop = branchI > 0.05 ? (d.vf || 0.7) : 0.0;
@@ -1650,16 +2395,21 @@ function calculateCircuitPhysics() {
       if (isSeriesCap) {
         cap.voltageDrop = capDropV;
         cap.current_mA = branchI;
-        cap.power_mW = (capDropV * branchI) / 1000; // 有効電力(mW)
-      }
-
-      if (isSeriesCap) {
-        cap.voltageDrop = capDropV;
-        cap.current_mA = branchI;
         cap.power_mW = capDropV * branchI;
       }
 
-     // 枝路内抵抗への反映 (トランジスタのベース抵抗への誤爆上書きを完全防止)
+   // 枝路内LED・抵抗への厳格な諸元反映
+      led.current_mA = branchI;
+      led.isOn = (branchI > 0.05);
+      led.voltageDrop = led.isOn ? vf : 0.0;
+      led.power_mW = led.voltageDrop * branchI;
+
+     // 枝路内LED・抵抗への厳格な諸元反映
+      led.current_mA = branchI;
+      led.isOn = (branchI > 0.05);
+      led.voltageDrop = led.isOn ? vf : 0.0;
+      led.power_mW = led.voltageDrop * branchI;
+
       const isTrCircuit = components.some(c => c.type === "transistor");
       connectedResistors.forEach(r => {
         const isBaseResistor = isTrCircuit && ((r.val_ohm || 0) >= 50000 || (r.id && r.id.includes("TR_B")));
@@ -1671,7 +2421,7 @@ function calculateCircuitPhysics() {
         }
       });
 
-  // 枝路内ワイヤへの反映 (給電線・中継線・カソード接地線の全経路へ電流を同期)
+      // 枝路内ワイヤへの厳格な諸元反映 (給電線・中継線・接地線を完全網羅)
       wires.forEach(w => {
         const nF = getNodeByHoleId(w.fromHole);
         const nT = getNodeByHoleId(w.toHole);
@@ -1680,14 +2430,13 @@ function calculateCircuitPhysics() {
         } else {
           const nrA = matchedR ? getNodeByHoleId(matchedR.pinA) : null;
           const nrB = matchedR ? getNodeByHoleId(matchedR.pinB) : null;
-          const nrW = (matchedR && (matchedR.pinC || matchedR.pinWiper)) ? getNodeByHoleId(matchedR.pinC || matchedR.pinWiper) : null;
-
-          // アノード側、カソード側、抵抗側、マイナスレール帰還線のいずれかに該当するワイヤへ電流を流し込む
-          const isBranchWire = (nF === nLedA || nT === nLedA || nF === nLedB || nT === nLedB ||
-                                nF === nrA || nT === nrA || nF === nrB || nT === nrB ||
-                                (nrW && (nF === nrW || nT === nrW)));
-
-          if (isBranchWire) {
+          const isBranchWire = (
+            (nF === nLedA || nT === nLedA) ||
+            (nF === nLedB || nT === nLedB) ||
+            (nrA && (nF === nrA || nT === nrA)) ||
+            (nrB && (nF === nrB || nT === nrB))
+          );
+          if (isBranchWire && branchI > 0) {
             w.current_mA = branchI;
           }
         }
@@ -1843,20 +2592,33 @@ function calculateCircuitPhysics() {
               const bNode = w.fromHole.startsWith("BUS_BOTTOM_MINUS") ? nTo : nFrom;
               const isArmA = armAComps.some(c => getNodeByHoleId(c.pinA) === bNode || getNodeByHoleId(c.pinB) === bNode);
               w.current_mA = isArmA ? iArmA_mA : iArmB_mA;
-            } else {
-              // 給電線またはブリッジ中央の架橋線
+         } else {
+              // 給電線またはブリッジ中央の架橋線 (テブナン等価内部抵抗による現実的横流算出)
               const isFeedWire = (nFrom === feedNodeList[0] || nTo === feedNodeList[0] || nFrom === feedNodeList[1] || nTo === feedNodeList[1]);
-              w.current_mA = isFeedWire ? (i_total_mA * 0.5) : (vDiff > 0.05 ? (vDiff / 10.0) * 1000 : 0.0);
+              // 中点電位差が 0.10V 未満の場合は平衡状態(ゼロ遮断)
+              // 架橋線の電流はテブナン等価抵抗(約1000Ω)を考慮したオーム計算で上限を制限
+              const isBalanced = vDiff < 0.10;
+              const rThevenin = 1000.0;
+              w.current_mA = isFeedWire ? (i_total_mA * 0.5) : (isBalanced ? 0.0 : (vDiff / rThevenin) * 1000);
             }
           }
         });
 
-        // 架橋LEDの動的評価
+       // 架橋LEDの動的評価 (ジャンパ線中継を考慮した所属アーム厳格判定版)
         const bridgeLeds = components.filter(c => isBridgeComponent(c) && c.type === "led" && !c.isBurned);
         bridgeLeds.forEach(led => {
           const nA = getNodeByHoleId(led.pinA);
-          // アームA側かアームB側かを接続ノードから判定
-          const isAnodeOnA = armAComps.some(c => getNodeByHoleId(c.pinA) === nA || getNodeByHoleId(c.pinB) === nA);
+          // 直接接続またはジャンパ線を介してアームAの中点に繋がっているかを動的追跡
+          const isAnodeOnA = armAComps.some(c => {
+            const nrA = getNodeByHoleId(c.pinA);
+            const nrB = getNodeByHoleId(c.pinB);
+            if (nrA === nA || nrB === nA) return true;
+            return wires.some(w => {
+              const wf = getNodeByHoleId(w.fromHole);
+              const wt = getNodeByHoleId(w.toHole);
+              return (wf === nA && (wt === nrA || wt === nrB)) || (wt === nA && (wf === nrA || wf === nrB));
+            });
+          });
           const vAnode = isAnodeOnA ? vMidA : vMidB;
           const vCathode = isAnodeOnA ? vMidB : vMidA;
           const vForward = vAnode - vCathode;
@@ -2337,10 +3099,15 @@ function drawJumperWire(ctx, wire, isAnimated = false) {
     ctx.lineDashOffset = -dashOffset;
   }
 
-  const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
-  const midX = (p1.x + p2.x) / 2;
+const dx = p2.x - p1.x;
+  const dist = Math.hypot(dx, p2.y - p1.y);
+  // 垂直配線(同一列結線)の場合、制御点を横方向へ膨らませて自然な山なりアーチを形成
+  const isVertical = Math.abs(dx) < 4;
+  const bendX = isVertical ? Math.min(Math.max(dist * 0.22, 14), 32) : 0;
+  const midX = (p1.x + p2.x) / 2 + bendX;
+
   const archHeight = Math.min(Math.max(dist * 0.35, 12), 50);
-  const controlY = Math.min(p1.y, p2.y) - archHeight;
+  const controlY = isVertical ? (p1.y + p2.y) / 2 : (Math.min(p1.y, p2.y) - archHeight);
 
   ctx.beginPath();
   ctx.moveTo(p1.x, p1.y);
@@ -5443,10 +6210,16 @@ const INSPECTOR_RENDERERS = {
 
     const isSel = (v) => (ohmVal === v ? "selected" : "");
 
-    if (specBox) {
+  if (specBox) {
+      const flavorText = !isConnected
+        ? "枷の紐 [静寂]: 命の巡りを静かに待つ古き絆。術者よ、数値を侮るなかれ。己が選んだオームの刻印一つで、光の命運は決する。"
+        : (loadRate > 80.0
+          ? "枷の紐 [過熱警告]: 奔流が耐容の限界に迫る。熱の蓄積が臨界を超えんとしている。直ちに配線を見直し、大いなる抵抗を選ぶか回路を遮断せよ。"
+          : "枷の紐 [調律]: 命の巡りを程よく絞り、弱き種子(LED)を破滅から護る古き絆。適切な枷によってのみ、回路に正しき秩序がもたらされる。");
+
       specBox.innerHTML = `
         <div style="display: flex; align-items: center; justify-content: space-between; background: #1e293b; padding: 6px 8px; border-radius: 4px; border: 1px solid #334155; margin-bottom: 8px;">
-          <label for="select-dynamic-resistor-val" style="font-size: 10px; color: #38bdf8; font-weight: bold; white-space: nowrap;">⚡ 抵抗値切替:</label>
+          <label for="select-dynamic-resistor-val" style="font-size: 10px; color: #38bdf8; font-weight: bold; white-space: nowrap;">[設定] 抵抗値切替:</label>
           <select id="select-dynamic-resistor-val" style="background: #0f172a; color: #38bdf8; border: 1px solid #0284c7; border-radius: 4px; padding: 2px 6px; font-size: 10px; font-weight: bold; cursor: pointer;">
             <option value="100" ${isSel(100)}>100 Ω (茶黒茶金)</option>
             <option value="330" ${isSel(330)}>330 Ω (橙橙茶金)</option>
@@ -5455,20 +6228,20 @@ const INSPECTOR_RENDERERS = {
             <option value="100000" ${isSel(100000)}>100k Ω (茶黒黄金)</option>
           </select>
         </div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">📊 電気的定格 ＆ 基本諸元</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[定格] 電気的定格 & 基本諸元</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px 6px; margin-bottom: 8px; color: #cbd5e1;">
           <div>・品名: 炭素皮膜抵抗器</div>
           <div>・定格電力: 0.25 W (1/4W)</div>
           <div>・公称抵抗値: <span style="color: #f59e0b; font-weight: bold;">${displayOhm}</span></div>
           <div>・許容差: ±5% (J級)</div>
         </div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">⚡ リアルタイム動作解析</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[解析] リアルタイム動作解析</div>
         <div style="margin-bottom: 8px; color: #cbd5e1; background: #181825; padding: 6px; border-radius: 4px;">
-          <div>・通過電流 ($I$): <span style="color: #4ade80; font-weight: bold;">${currentmA.toFixed(2)} mA</span></div>
-          <div>・消費電力 ($P$): <span style="color: #4ade80; font-weight: bold;">${powermW.toFixed(1)} mW</span></div>
+          <div>・通過電流 (I): <span style="color: #4ade80; font-weight: bold;">${currentmA.toFixed(2)} mA</span></div>
+          <div>・消費電力 (P): <span style="color: #4ade80; font-weight: bold;">${powermW.toFixed(1)} mW</span></div>
           <div>・定格負荷率: <span style="color: ${loadRate > 80 ? '#ef4444' : '#4ade80'}; font-weight: bold;">${loadRate} %</span></div>
           <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155; font-size: 9px; color: #94a3b8; line-height: 1.4;">
-            ・枷の紐: 命の巡り（電流）を程よく絞り、弱き種子（LED）を破滅から護る古き絆。これなき回路に光を灯せば、種子は瞬く間に黒焦げとなり果てる。
+            ・${flavorText}
           </div>
         </div>`;
 
@@ -5520,17 +6293,33 @@ const INSPECTOR_RENDERERS = {
         ? `・接点構成: 1回路2投 (SPDT / 3路)<br>・切替方式: ノンショーティング (B.B.M.)<br>・定格電圧/電流: DC 12V / 0.5A<br>・接触抵抗: 50 mΩ 以下`
         : `・接点構成: 1回路1投 (SPST)<br>・定格電圧/電流: DC 12V / 0.5A<br>・接触抵抗: 50 mΩ 以下`;
 
+     let flavorText = "";
+      if (isSpdt) {
+        flavorText = isL1
+          ? "転轍の門 [第一流路]: 奔流を接点1(L1)へと導く。一方を照らし、他方を眠らせる天秤の理。術者よ、切り替える流路の先を見極めよ。"
+          : "転轍の門 [第二流路]: 奔流を接点2(L2)へと転換する。道は分かたれども源流は一つ。意図せぬ接続に惑わされるなかれ。";
+      } else {
+        flavorText = isOn
+          ? "架橋の契り [通電/CLOSED]: 隔たれし二極を結び、命の巡りを解き放つ。回路に息吹きが宿る今、各所の挙動を注視せよ。"
+          : "架橋の契り [遮断/OPEN]: 虚空をもって道を断ち、奔流を封じる。術者よ、素子を改むる時は必ずこの契りを解き、静寂を保て。";
+      }
+
       specBox.innerHTML = `
         <div style="background: #1e293b; padding: 8px; border-radius: 4px; border: 1px solid #334155; margin-bottom: 8px;">
-          <label style="font-size: 10px; color: #38bdf8; font-weight: bold; display:block; margin-bottom:4px;">🔘 スイッチ状態操作:</label>
+          <label style="font-size: 10px; color: #38bdf8; font-weight: bold; display:block; margin-bottom:4px;">[操作] スイッチ状態切替:</label>
           <button id="btn-inspector-toggle-switch" style="width:100%; padding:6px 10px; background:${btnBg}; color:#ffffff; border:none; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px; transition:0.2s;">
             ${btnText}
           </button>
         </div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">📊 スイッチ基本諸元</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[諸元] スイッチ基本諸元</div>
         <div style="color: #cbd5e1; margin-bottom: 8px; line-height: 1.5;">${specsHtml}</div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">⚡ リアルタイム動作状態</div>
-        <div style="background: #181825; padding: 6px; border-radius: 4px;">${statusHtml}</div>`;
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[状態] リアルタイム動作状態</div>
+        <div style="background: #181825; padding: 6px; border-radius: 4px;">
+          ${statusHtml}
+          <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155; font-size: 9px; color: #94a3b8; line-height: 1.4;">
+            ・${flavorText}
+          </div>
+        </div>`;
 
       const btnToggle = document.getElementById("btn-inspector-toggle-switch");
       if (btnToggle) {
@@ -5579,23 +6368,30 @@ const INSPECTOR_RENDERERS = {
       const btnText = isPressed ? "ボタンを離す (RELEASE / 遮断)" : "ボタンを押し込む (PUSH / 通電)";
       const statusColor = isPressed ? "#38bdf8" : "#94a3b8";
 
+    const flavorText = isPressed
+        ? "刹那の契り [押下/導通]: 指先の意志が二極を縛り、束の間の奔流を注ぎ込む。術者よ、この瞬間に生じる回路の過渡応答を見逃すなかれ。指を解けば、即座に静寂へと還る。"
+        : "刹那の契り [静止/開路]: 触れざれば動ぜず、常には虚空を開きて待つ。術者よ、漫然と触れるなかれ。準備なき衝動の通電は、回路の弱き種子を不意の嵐に晒す。";
+
       specBox.innerHTML = `
         <div style="background: #1e293b; padding: 8px; border-radius: 4px; border: 1px solid #334155; margin-bottom: 8px;">
-          <label style="font-size: 10px; color: #38bdf8; font-weight: bold; display:block; margin-bottom:4px;">🔘 モーメンタリ接点操作:</label>
+          <label style="font-size: 10px; color: #38bdf8; font-weight: bold; display:block; margin-bottom:4px;">[操作] モーメンタリ接点操作:</label>
           <button id="btn-inspector-tact-push" style="width:100%; padding:8px 10px; background:${btnBg}; color:#ffffff; border:1px solid #38bdf8; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px; transition:0.2s;">
             ${btnText}
           </button>
         </div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">📊 スイッチ基本諸元</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[諸元] スイッチ基本諸元</div>
         <div style="color: #cbd5e1; margin-bottom: 8px; line-height: 1.5; font-size: 11px;">
           ・接点構成: 1回路1投 (SPST モーメンタリa接点)<br>
           ・動作形態: ノーマリーオープン (常時開路)<br>
           ・定格電圧/電流: DC 12V / 50mA<br>
           ・接触抵抗: 100 mΩ 以下
         </div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">⚡ リアルタイム動作状態</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[状態] リアルタイム動作状態</div>
         <div style="background: #181825; padding: 6px; border-radius: 4px; font-size: 11px;">
-          ・現在の導通: <span style="color: ${statusColor}; font-weight: bold;">${isPressed ? '導通中 (ON / 0Ω)' : '開放中 (OFF / ∞Ω)'}</span>
+          <div>・現在の導通: <span style="color: ${statusColor}; font-weight: bold;">${isPressed ? '導通中 (ON / 0Ω)' : '開放中 (OFF / ∞Ω)'}</span></div>
+          <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155; font-size: 9px; color: #94a3b8; line-height: 1.4;">
+            ・${flavorText}
+          </div>
         </div>`;
 
       const btnTact = document.getElementById("btn-inspector-tact-push");
@@ -5637,8 +6433,12 @@ const INSPECTOR_RENDERERS = {
       const isConducting = current_mA > 0.05;
       const vDrop = isConducting ? (comp.voltageDrop || comp.vf || 0.7).toFixed(2) : "0.00";
 
-      specBox.innerHTML = `
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">📊 ダイオード基本諸元</div>
+   const flavorText = isConducting
+     ? "整流の関門 [順流/導通]: 閾値を超えた奔流を前方へと流す。逆流の兆しあらば即座に閉ざす守りの要。術者よ、下流の素子が護られていることを確かめよ。"
+     : "整流の関門 [逆拒/遮断]: 銀の帯が示す壁が、逆巻く奔流を強固に阻む。術者よ、極性の向き(銀帯)を誤れば回路は沈黙し、意図せぬ障壁となる。印を見極めよ。";
+
+   specBox.innerHTML = `
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[諸元] ダイオード基本諸元</div>
         <div style="color: #cbd5e1; margin-bottom: 8px; line-height: 1.6; font-size: 11px;">
           ・型番: 1N4007 (汎用シリコン整流ダイオード)<br>
           ・順方向電圧降下 (Vf): <span style="color: #38bdf8; font-weight: bold;">約 0.7 V</span><br>
@@ -5646,12 +6446,18 @@ const INSPECTOR_RENDERERS = {
           ・ピーク逆耐電圧 (VRRM): 1,000 V (1kV)<br>
           ・極性マーク: カソード側に銀色帯バンド
         </div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">⚡ リアルタイム動作状態</div>
-       <div style="background: #181825; padding: 6px; border-radius: 4px; font-size: 11px;">
-          ・動作バイアス: <span style="color: ${isConducting ? '#4ade80' : '#94a3b8'}; font-weight: bold;">${isConducting ? '順方向導通 (FORWARD)' : '遮断 / 逆阻止 (REVERSE)'}</span><br>
-          ・素子間電圧降下: <span style="color: #38bdf8; font-weight: bold;">${vDrop} V</span><br>
-          ・通過電流: <span style="color: #38bdf8; font-weight: bold;">${current_mA.toFixed(2)} mA</span>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[状態] リアルタイム動作状態</div>
+        <div style="background: #181825; padding: 6px; border-radius: 4px; font-size: 11px;">
+          <div>・動作バイアス: <span style="color: ${isConducting ? '#4ade80' : '#94a3b8'}; font-weight: bold;">${isConducting ? '順方向導通 (FORWARD)' : '遮断 / 逆阻止 (REVERSE)'}</span></div>
+          <div>・素子間電圧降下: <span style="color: #38bdf8; font-weight: bold;">${vDrop} V</span></div>
+          <div>・通過電流: <span style="color: #38bdf8; font-weight: bold;">${current_mA.toFixed(2)} mA</span></div>
+          <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155; font-size: 9px; color: #94a3b8; line-height: 1.4;">
+            ・${flavorText}
+          </div>
         </div>`;
+
+
+
     }
   },
 
@@ -5671,8 +6477,12 @@ const INSPECTOR_RENDERERS = {
       const ibStr = isSaturated ? "約 83 µA (0.083 mA)" : "0.00 µA";
       const icStr = isSaturated ? `${(comp.current_mA || 6.89).toFixed(2)} mA` : "0.00 mA";
 
+     const flavorText = isSaturated
+        ? "転轍の門番 [飽和/導通]: 微小なる呼び水(ベース電流)を捧げしことで、門が開き大いなる主潮流(コレクタ電流)が解き放たれた。術者よ、増幅の理を過信するなかれ。負荷なき直結は門番そのものを灰燼へと帰す。"
+        : "転轍の門番 [遮断/静止]: 呼び水なき門は堅く閉ざされ、背後の大いなる奔流を完全に阻んでいる。術者よ、三つの足(E・C・B)の順を誤るなかれ。向きを違えれば、門番は決して応えぬ。";
+
       specBox.innerHTML = `
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">📊 トランジスタ基本諸元</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[諸元] トランジスタ基本諸元</div>
         <div style="color: #cbd5e1; margin-bottom: 8px; line-height: 1.6; font-size: 11px;">
           ・型番: 2SC1815-Y (NPNシリコンエピタキシャル型)<br>
           ・ピン配列 (平坦面正面): <b>左: E (エミッタ) / 中: C (コレクタ) / 右: B (ベース)</b><br>
@@ -5680,13 +6490,19 @@ const INSPECTOR_RENDERERS = {
           ・コレクタ飽和電圧 (Vce(sat)): 約 0.1 V<br>
           ・ベース・エミッタ間電圧 (Vbe): 約 0.7 V
         </div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">⚡ リアルタイム動作状態</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[状態] リアルタイム動作状態</div>
         <div style="background: #181825; padding: 6px; border-radius: 4px; font-size: 11px;">
-          ・動作領域: <span style="color: ${stateColor}; font-weight: bold;">${stateText}</span><br>
-          ・ベース電流 (Ib): <span style="color: #facc15; font-weight: bold;">${ibStr}</span><br>
-          ・コレクタ電流 (Ic): <span style="color: #38bdf8; font-weight: bold;">${icStr}</span><br>
-          ・C-E間電圧 (Vce): <span style="color: #cbd5e1;">${isSaturated ? '約 0.10 V' : '9.00 V (開放)'}</span>
+          <div>・動作領域: <span style="color: ${stateColor}; font-weight: bold;">${stateText}</span></div>
+          <div>・ベース電流 (Ib): <span style="color: #facc15; font-weight: bold;">${ibStr}</span></div>
+          <div>・コレクタ電流 (Ic): <span style="color: #38bdf8; font-weight: bold;">${icStr}</span></div>
+          <div>・C-E間電圧 (Vce): <span style="color: #cbd5e1;">${isSaturated ? '約 0.10 V' : '9.00 V (開放)'}</span></div>
+          <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155; font-size: 9px; color: #94a3b8; line-height: 1.4;">
+            ・${flavorText}
+          </div>
         </div>`;
+ 
+
+
     }
   },
 
@@ -5709,35 +6525,47 @@ const INSPECTOR_RENDERERS = {
     const cType = comp.colorType || "red";
     const isSel = (hex, type) => (currentColor === hex || cType === type) ? "selected" : "";
 
-    if (specBox) {
+   if (specBox) {
+      let flavorText = "";
+      if (comp.isBurned) {
+        flavorText = "種子の灯 [灰燼/熱破壊]: 枷なき激流により核は瞬く間に焼き尽くされ、永遠の沈黙に沈んだ。術者よ、抵抗なき直結が招く無残を深く心に刻め。過ちを悔い、新しき種子に正しき枷を施せ。";
+      } else if (isLit) {
+        flavorText = "種子の灯 [開花/点灯]: 適切な枷(抵抗)に守られ、導かれし奔流を純粋なる光へと昇華させている。術者よ、この輝きを保ちたくば電流の数値を常に注視せよ。過信は即座に灰燼へと繋がる。";
+      } else {
+        flavorText = "種子の灯 [休眠/消灯]: 静かに息を潜める玻璃の種子。開花の閾値(順方向電圧)と、極性(アノード/カソード)の正しき導きを待っている。向きを違えれば、光は決して宿らぬ。";
+      }
+
       specBox.innerHTML = `
         <div style="display: flex; align-items: center; justify-content: space-between; background: #1e293b; padding: 6px 8px; border-radius: 4px; border: 1px solid #334155; margin-bottom: 8px;">
-          <label for="select-led-color" style="font-size: 10px; color: #38bdf8; font-weight: bold;">🎨 発光カラー切替:</label>
+          <label for="select-led-color" style="font-size: 10px; color: #38bdf8; font-weight: bold;">[設定] 発光カラー切替:</label>
           <select id="select-led-color" style="background: #0f172a; color: #38bdf8; border: 1px solid #0284c7; border-radius: 4px; padding: 2px 6px; font-size: 10px; font-weight: bold; cursor: pointer;">
-            <option value="#ef4444" ${isSel("#ef4444", "red")}>🔴 赤色 (Red - Vf:2.0V)</option>
-            <option value="#22c55e" ${isSel("#22c55e", "green")}>🟢 緑色 (Green - Vf:2.2V)</option>
-            <option value="#3b82f6" ${isSel("#3b82f6", "blue")}>🔵 青色 (Blue - Vf:3.1V)</option>
-            <option value="#ffff00" ${isSel("#ffff00", "yellow")}>🟡 黄色 (Yellow - Vf:2.1V)</option>
-            <option value="#ffffff" ${isSel("#ffffff", "white")}>⚪ 白色 (White - Vf:3.2V)</option>
-            <option value="#ec4899" ${isSel("#ec4899", "rainbow")}>🌈 虹色 (Rainbow - Vf:3.2V)</option>
+            <option value="#ef4444" ${isSel("#ef4444", "red")}>[赤] 赤色 (Red - Vf:2.0V)</option>
+            <option value="#22c55e" ${isSel("#22c55e", "green")}>[緑] 緑色 (Green - Vf:2.2V)</option>
+            <option value="#3b82f6" ${isSel("#3b82f6", "blue")}>[青] 青色 (Blue - Vf:3.1V)</option>
+            <option value="#ffff00" ${isSel("#ffff00", "yellow")}>[黄] 黄色 (Yellow - Vf:2.1V)</option>
+            <option value="#ffffff" ${isSel("#ffffff", "white")}>[白] 白色 (White - Vf:3.2V)</option>
+            <option value="#ec4899" ${isSel("#ec4899", "rainbow")}>[虹] 虹色 (Rainbow - Vf:3.2V)</option>
           </select>
         </div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">📊 LED 基本諸元</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[諸元] LED 基本諸元</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px 6px; margin-bottom: 8px; color: #cbd5e1;">
           <div>・品名: ${comp.name || '5mm LED'}</div>
-          <div>・順方向電圧 ($V_f$): <span style="color: #f59e0b; font-weight: bold;">${vf.toFixed(1)} V</span></div>
+          <div>・順方向電圧 (Vf): <span style="color: #f59e0b; font-weight: bold;">${vf.toFixed(1)} V</span></div>
           <div>・絶対最大定格: 30 mA</div>
-          <div>・素子状態: <span style="color: ${comp.isBurned ? '#ef4444' : '#4ade80'}; font-weight: bold;">${comp.isBurned ? '🔥 熱破壊 (溶断断線)' : '✨ 正常'}</span></div>
+          <div>・素子状態: <span style="color: ${comp.isBurned ? '#ef4444' : '#4ade80'}; font-weight: bold;">${comp.isBurned ? '熱破壊 (溶断断線)' : '正常'}</span></div>
         </div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">⚡ リアルタイム動作解析</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[解析] リアルタイム動作解析</div>
         <div style="margin-bottom: 8px; color: #cbd5e1; background: #181825; padding: 6px; border-radius: 4px;">
-          <div>・発光状態: <span style="color: ${isLit ? '#4ade80' : '#ef4444'}; font-weight: bold;">${isLit ? '点灯中 (ACTIVE)' : (comp.isBurned ? '🔥 破壊破損 (OPEN)' : '消灯中 (OFF)')}</span></div>
-          <div>・動作電流 ($I_f$): <span style="color: ${comp.isBurned ? '#ef4444' : '#4ade80'}; font-weight: bold;">${currentmA.toFixed(2)} mA</span></div>
-          <div>・消費電力 ($P_d$): <span style="color: ${comp.isBurned ? '#ef4444' : '#4ade80'}; font-weight: bold;">${powermW.toFixed(1)} mW</span></div>
+          <div>・発光状態: <span style="color: ${isLit ? '#4ade80' : '#ef4444'}; font-weight: bold;">${isLit ? '点灯中 (ACTIVE)' : (comp.isBurned ? '破壊破損 (OPEN)' : '消灯中 (OFF)')}</span></div>
+          <div>・動作電流 (If): <span style="color: ${comp.isBurned ? '#ef4444' : '#4ade80'}; font-weight: bold;">${currentmA.toFixed(2)} mA</span></div>
+          <div>・消費電力 (Pd): <span style="color: ${comp.isBurned ? '#ef4444' : '#4ade80'}; font-weight: bold;">${powermW.toFixed(1)} mW</span></div>
           <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155; font-size: 9px; color: #94a3b8; line-height: 1.4;">
-            ・赤く膿んだ玻璃細工: 赤く澱んだ玻璃（ガラス）で作られた、歪な種子。僅かな巡り（電流）に反応し、妖しい朱の光を放つ。自ら熱を発することなくただ光り輝くが、過剰な巡りはその核を焼き黒く煤けさせる。
+            ・${flavorText}
           </div>
         </div>`;
+
+
+
 
       const selColor = document.getElementById("select-led-color");
       if (selColor) {
@@ -5771,17 +6599,27 @@ const INSPECTOR_RENDERERS = {
     const curRatio = comp.cur_ratio !== undefined ? comp.cur_ratio : 0.5;
     const currentOhm = comp.val_ohm !== undefined ? Math.round(comp.val_ohm) : Math.round(maxOhm * curRatio);
 
-    if (specBox) {
+   if (specBox) {
+      const potRatio = Math.round((currentOhm / maxOhm) * 100);
+      let flavorText = "";
+      if (currentOhm <= 50) {
+        flavorText = "自在の堰 [全開/短絡警戒]: 堰を完全に払い、奔流を無防備に解き放つ。術者よ、下流に固定の枷(保護抵抗)なくば、この過大電流は容易く素子を焼き尽くす。ゼロオームの過信を戒めよ。";
+      } else if (currentOhm >= maxOhm * 0.95) {
+        flavorText = "自在の堰 [極限遮蔽]: 堰を極限まで押し上げ、奔流の道を細く絞り込む。光は微かとなり、回路の命脈は静寂の中へと眠りにつく。";
+      } else {
+        flavorText = "自在の堰 [無段階調律]: 術者の指先が堰の幅を自在に伸縮させ、電位の傾度を滑らかに統御する。中点からの分圧を見極め、均衡の取れた設計を導け。";
+      }
+
       specBox.innerHTML = `
         <div style="background: #1e293b; padding: 8px; border-radius: 4px; border: 1px solid #334155; margin-bottom: 8px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <label for="input-pot-slider" style="font-size: 10px; color: #38bdf8; font-weight: bold;">🎛️ 抵抗値ダイレクト調整 (1Ω単位):</label>
-            <span id="text-pot-ohm" style="font-size: 11px; color: #f59e0b; font-weight: bold; font-family: monospace;">${currentOhm} Ω (${Math.round((currentOhm / maxOhm) * 100)}%)</span>
+            <label for="input-pot-slider" style="font-size: 10px; color: #38bdf8; font-weight: bold;">[操作] 抵抗値ダイレクト調整 (1Ω単位):</label>
+            <span id="text-pot-ohm" style="font-size: 11px; color: #f59e0b; font-weight: bold; font-family: monospace;">${currentOhm} Ω (${potRatio}%)</span>
           </div>
           <input type="range" id="input-pot-slider" min="0" max="${maxOhm}" step="1" value="${currentOhm}" style="width: 100%; cursor: pointer; accent-color: #38bdf8;">
         </div>
 
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">📊 可変抵抗 基本諸元</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[諸元] 可変抵抗 基本諸元</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 6px; margin-bottom: 8px; color: #cbd5e1; font-size: 11px; align-items: center;">
           <div>・定格レンジ:</div>
           <div>
@@ -5799,6 +6637,15 @@ const INSPECTOR_RENDERERS = {
           <div>Bカーブ (リニア)</div>
           <div>・回転角範囲:</div>
           <div>270 度</div>
+        </div>
+
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[状態] リアルタイム動作状態</div>
+        <div style="background: #181825; padding: 6px; border-radius: 4px; font-size: 11px;">
+          <div>・分圧比率: <span style="color: #38bdf8; font-weight: bold;">${potRatio} %</span></div>
+          <div>・有効抵抗値: <span style="color: #4ade80; font-weight: bold;">${currentOhm} Ω / ${maxOhm} Ω</span></div>
+          <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155; font-size: 9px; color: #94a3b8; line-height: 1.4;">
+            ・${flavorText}
+          </div>
         </div>`;
 
       const slider = document.getElementById("input-pot-slider");
@@ -5860,11 +6707,20 @@ const INSPECTOR_RENDERERS = {
     const capuF = comp.val_uF || 10;
     const energy_mJ = 0.5 * (capuF * 1e-6) * (curV * curV) * 1000;
 
-    if (specBox) {
+  if (specBox) {
+      let flavorText = "";
+      if (curV >= 4.5) {
+        flavorText = "猶予の器 [満水/蓄電]: 奔流を呑み込み、器の内に膨大なる電荷を張り詰めている。術者よ、回路を組み替える前には必ず強制放電の儀を行い、器を空にせよ。不意の解放は弱き素子を一撃で滅ぼす。";
+      } else if (curV >= 0.5) {
+        flavorText = "猶予の器 [過渡/充放電]: 激しき落差を和らげ、脈動する波形を滑らかな息吹へと彫刻している。器の大きさが時の流れ(時定数)を支配する理を知れ。";
+      } else {
+        flavorText = "猶予の器 [静止/空虚]: 乾いた器は静かに佇み、次なる奔流の到来を待つ。術者よ、二つの極性(陽極/陰極)を違えて注ぐなかれ。逆流の冒涜は、器そのものを破裂と煙の災厄へと導く。";
+      }
+
       specBox.innerHTML = `
         <div style="background: #1e293b; padding: 8px; border-radius: 4px; border: 1px solid #334155; margin-bottom: 8px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <label for="select-cap-val" style="font-size: 10px; color: #38bdf8; font-weight: bold;">[C] 静電容量切替:</label>
+            <label for="select-cap-val" style="font-size: 10px; color: #38bdf8; font-weight: bold;">[設定] 静電容量切替:</label>
             <select id="select-cap-val" style="background: #0f172a; color: #38bdf8; border: 1px solid #0284c7; border-radius: 4px; padding: 2px 6px; font-size: 10px; font-weight: bold; cursor: pointer;">
               <option value="0.1" ${capuF === 0.1 ? 'selected' : ''}>0.1 µF (微小なまり)</option>
               <option value="1" ${capuF === 1 ? 'selected' : ''}>1 µF (台形波)</option>
@@ -5879,22 +6735,24 @@ const INSPECTOR_RENDERERS = {
             [強制放電] 電荷リセット (0.0V)
           </button>
         </div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">コンデンサ基本諸元</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[諸元] コンデンサ基本諸元</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px 6px; margin-bottom: 8px; color: #cbd5e1; font-size: 11px;">
           <div>・静電容量: <span style="color: #f59e0b; font-weight: bold;">${capuF} µF</span></div>
           <div>・耐圧定格: ${comp.max_V || 50} V</div>
           <div>・極性配列: 有極性 (アノード/カソード)</div>
           <div>・誘電構造: アルミニウム電解</div>
         </div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">リアルタイム充放電 ＆ 平滑状態</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[解析] リアルタイム充放電 & 平滑状態</div>
         <div style="margin-bottom: 8px; color: #cbd5e1; background: #181825; padding: 6px; border-radius: 4px; font-size: 11px;">
           <div>・端子間電圧 (Vc): <span style="color: #4ade80; font-weight: bold;">${curV.toFixed(2)} V</span></div>
           <div>・蓄積エネルギー (E): <span style="color: #4ade80; font-weight: bold;">${energy_mJ.toFixed(3)} mJ</span></div>
           <div>・オシロ平滑寄与率: <span style="color: #38bdf8; font-weight: bold;">${Math.min((capuF / 10.0) * 100, 100).toFixed(0)} %</span></div>
           <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155; font-size: 9px; color: #94a3b8; line-height: 1.4;">
-            ・波形彫刻特性: 0.1µF〜22µFの範囲で切り替えることで、オシロスコープ上の2.4kHzパルス波形がシャープな矩形波から滑らかな三角波へと連続的に変調します。
+            ・${flavorText}
           </div>
         </div>`;
+
+
 
       const selCap = document.getElementById("select-cap-val");
       if (selCap) {
@@ -5941,26 +6799,32 @@ const INSPECTOR_RENDERERS = {
     const currentmA = (comp.current_mA !== undefined) ? comp.current_mA : (isForward ? (physics.i_total_mA || 0.0) : 0.0);
     const powermW = comp.power_mW !== undefined ? comp.power_mW : (currentmA * (comp.vf || 0.7));
 
-    if (specBox) {
+  if (specBox) {
+      const flavorText = isForward
+        ? "黒き楔 [順導/開門]: 頑ななる秩序の楔を越え、命の奔流が一方向へと解き放たれた。術者よ、下流へと続く流路が整っているか見届けよ。0.7Vの代償を払い、回路は今、前進の息吹を得る。"
+        : "黒き楔 [逆拒/閉門]: 銀の帯が掲げる拒絶の印が、逆巻く奔流を強固に堰き止めている。術者よ、回路が沈黙せし時はまずこの楔の向き(カソード銀帯)を疑え。逆らえば一切の光は届かぬ。";
+
       specBox.innerHTML = `
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">📊 ダイオード基本諸元</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[諸元] ダイオード基本諸元</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px 6px; margin-bottom: 8px; color: #cbd5e1;">
           <div>・型番: 1N4007</div>
-          <div>・順方向降下 ($V_f$): <span style="color: #f59e0b; font-weight: bold;">0.7 V</span></div>
-          <div>・最大逆耐圧 ($V_{rrm}$): 1000 V</div>
-          <div>・定格順電流 ($I_o$): 1.0 A</div>
+          <div>・順方向降下 (Vf): <span style="color: #f59e0b; font-weight: bold;">0.7 V</span></div>
+          <div>・最大逆耐圧 (Vrrm): 1000 V</div>
+          <div>・定格順電流 (Io): 1.0 A</div>
           <div>・極性表示: カソード銀帯</div>
           <div>・素子構造: シリコン接合</div>
         </div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">⚡ リアルタイム動作解析</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[解析] リアルタイム動作解析</div>
         <div style="margin-bottom: 8px; color: #cbd5e1; background: #181825; padding: 6px; border-radius: 4px;">
           <div>・バイアス状態: <span style="color: ${isForward ? '#4ade80' : '#ef4444'}; font-weight: bold;">${isForward ? '順バイアス (導通中)' : '逆バイアス (遮断/OPEN)'}</span></div>
-          <div>・通過電流 ($I_f$): <span style="color: ${isForward ? '#4ade80' : '#64748b'}; font-weight: bold;">${currentmA.toFixed(2)} mA</span></div>
-          <div>・接合部損失 ($P_d$): <span style="color: ${isForward ? '#4ade80' : '#64748b'}; font-weight: bold;">${powermW.toFixed(1)} mW</span></div>
+          <div>・通過電流 (If): <span style="color: ${isForward ? '#4ade80' : '#64748b'}; font-weight: bold;">${currentmA.toFixed(2)} mA</span></div>
+          <div>・接合部損失 (Pd): <span style="color: ${isForward ? '#4ade80' : '#64748b'}; font-weight: bold;">${powermW.toFixed(1)} mW</span></div>
           <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155; font-size: 9px; color: #94a3b8; line-height: 1.4;">
-            ・一方のみを許す黒き楔: 秩序の理に縛られた、頑ななる黒鉄の楔。巡りはただ一方向（アノードからカソード）にのみ進むことを赦され、逆らう流れはことごとく拒絶される。
+            ・${flavorText}
           </div>
         </div>`;
+
+
     }
   },
 
@@ -5978,34 +6842,41 @@ const INSPECTOR_RENDERERS = {
     const isBaseOn = (state === "SATURATED");
     const ic_mA = (comp.current_mA !== undefined) ? comp.current_mA : (isBaseOn && physics.status === "CLOSED" ? (physics.i_total_mA || 0.0) : 0.0);
     const ib_uA = isBaseOn && ic_mA > 0 ? (ic_mA / (comp.hfe || 150)) * 1000 : 0.0;
-        if (specBox) {
+       if (specBox) {
+      const flavorText = isBaseOn
+        ? "三脚の水門 [開門/導通]: 右足(ベース)へ捧げし微小なる呼び水に応じ、中央の門(コレクタ)が大いなる本流を左の出口(エミッタ)へと解き放った。術者よ、呼び水の道に正しき枷(10kΩ等の抵抗)を挟みしや。直結の過信は水門を内側から焼き砕く。"
+        : "三脚の水門 [閉門/遮断]: 右足(ベース)への生贄なき今、門は冷徹に閉ざされ、本流の侵入を一切許さぬ。術者よ、三つの足の順(左からE・C・B)を違えるなかれ。足を取り違えれば、門は沈黙したまま開かぬ。";
+
       specBox.innerHTML = `
         <div style="background: #1e293b; border: 1px solid #0284c7; border-radius: 4px; padding: 6px 8px; margin-bottom: 8px;">
-          <div style="font-size: 10px; color: #38bdf8; font-weight: bold; margin-bottom: 4px;">🔌 端子接続の鉄則ガイド (どこに繋ぐ？)</div>
+          <div style="font-size: 10px; color: #38bdf8; font-weight: bold; margin-bottom: 4px;">[指南] 端子接続の鉄則ガイド (どこに繋ぐ？)</div>
           <div style="font-size: 9.5px; line-height: 1.5; color: #cbd5e1;">
-            <div>🟡 <b style="color: #f87171;">B (右足・ベース)</b>: <b>制御入力</b> ➔ スイッチ/10kΩ抵抗を繋ぐ (水門レバー)</div>
-            <div>🔴 <b style="color: #facc15;">C (中足・コレクタ)</b>: <b>主電源入力</b> ➔ LED/負荷抵抗を繋ぐ (本流の入口)</div>
-            <div>🔵 <b style="color: #38bdf8;">E (左足・エミッタ)</b>: <b>主出力</b> ➔ マイナスレール(GND)へ繋ぐ (出口)</div>
+            <div><b style="color: #f87171;">[B: 右足・ベース]</b>: <b>制御入力</b> ➔ スイッチ/10kΩ抵抗を繋ぐ (水門レバー)</div>
+            <div><b style="color: #facc15;">[C: 中足・コレクタ]</b>: <b>主電源入力</b> ➔ LED/負荷抵抗を繋ぐ (本流の入口)</div>
+            <div><b style="color: #38bdf8;">[E: 左足・エミッタ]</b>: <b>主出力</b> ➔ マイナスレール(GND)へ繋ぐ (出口)</div>
           </div>
         </div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">📊 トランジスタ基本諸元</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[諸元] トランジスタ基本諸元</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px 6px; margin-bottom: 8px; color: #cbd5e1;">
           <div>・型番: 2SC1815-Y</div>
           <div>・極性: NPN型</div>
-          <div>・増幅率 ($h_{FE}$): <span style="color: #f59e0b; font-weight: bold;">${comp.hfe || 150}</span></div>
-          <div>・$V_{BE}$ 閾値: 0.7 V</div>
-          <div>・最大定格 ($I_c$): 150 mA</div>
+          <div>・増幅率 (hFE): <span style="color: #f59e0b; font-weight: bold;">${comp.hfe || 150}</span></div>
+          <div>・Vbe 閾値: 0.7 V</div>
+          <div>・最大定格 (Ic): 150 mA</div>
           <div>・端子配列: 左から E-C-B</div>
         </div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">⚡ リアルタイム動作状態</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[状態] リアルタイム動作状態</div>
         <div style="margin-bottom: 8px; color: #cbd5e1; background: #181825; padding: 6px; border-radius: 4px;">
           <div>・動作モード: <span style="color: ${isBaseOn ? '#4ade80' : '#ef4444'}; font-weight: bold;">${isBaseOn ? '飽和導通 (SATURATED / ON)' : '遮断状態 (CUTOFF / OFF)'}</span></div>
-          <div>・コレクタ電流 ($I_c$): <span style="color: ${isBaseOn ? '#4ade80' : '#64748b'}; font-weight: bold;">${ic_mA.toFixed(2)} mA</span></div>
-          <div>・ベース制御電流 ($I_b$): <span style="color: ${isBaseOn ? '#38bdf8' : '#64748b'}; font-weight: bold;">${ib_uA.toFixed(1)} µA</span></div>
-        <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155; font-size: 9px; color: #94a3b8; line-height: 1.4;">
-            ・三つの脚を持つ水門: 右の脚（ベース）にわずかなる生贄（電流）を注がぬ限り、中央の門（コレクタ）は固く閉ざされ、左の出口（エミッタ）へ至る奔流を拒み続ける。
+          <div>・コレクタ電流 (Ic): <span style="color: ${isBaseOn ? '#4ade80' : '#64748b'}; font-weight: bold;">${ic_mA.toFixed(2)} mA</span></div>
+          <div>・ベース制御電流 (Ib): <span style="color: ${isBaseOn ? '#38bdf8' : '#64748b'}; font-weight: bold;">${ib_uA.toFixed(1)} µA</span></div>
+          <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155; font-size: 9px; color: #94a3b8; line-height: 1.4;">
+            ・${flavorText}
           </div>
         </div>`;
+
+
+
     }
   },
 
@@ -6026,11 +6897,20 @@ const INSPECTOR_RENDERERS = {
       ? `${(calcOhm / 1000000).toFixed(2)} MΩ`
       : (calcOhm >= 1000 ? `${(calcOhm / 1000).toFixed(1)} kΩ` : `${calcOhm} Ω`);
 
-    if (specBox) {
+   if (specBox) {
+      let flavorText = "";
+      if (lux < 20) {
+        flavorText = "深淵の瞳 [閉眼/高抵抗]: 闇に包まれし瞳は固く閉ざされ、メガオームに及ぶ無限の障壁となって奔流を拒絶する。術者よ、この瞳単体では回路を動かせぬ。固定の枷(抵抗)と結んで分圧の比を創り出して初めて、闇を検知する導きが生まれる。";
+      } else if (lux >= 150) {
+        flavorText = "深淵の瞳 [開眼/低抵抗]: 強き光の恩寵を浴び、頑ななる障壁は一瞬にして崩壊した。奔流は抵抗なく瞳を通り抜ける。光と影の反転を見極め、次段の門番(トランジスタ)へと繋げ。";
+      } else {
+        flavorText = "深淵の瞳 [受光/調律]: 薄明の光を捉え、内部の抵抗を無段階に揺らがせている。術者よ、周囲の明るさに応じて中点の電位がどう傾くかを計測せよ。";
+      }
+
       specBox.innerHTML = `
         <div style="background: #1e293b; padding: 8px; border-radius: 4px; border: 1px solid #334155; margin-bottom: 8px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <label for="input-cds-lux" style="font-size: 10px; color: #38bdf8; font-weight: bold;">周囲照度 (Lux) コントロール:</label>
+            <label for="input-cds-lux" style="font-size: 10px; color: #38bdf8; font-weight: bold;">[操作] 周囲照度 (Lux) コントロール:</label>
             <span id="text-cds-lux" style="font-size: 11px; color: #facc15; font-weight: bold; font-family: monospace;">${lux} Lux</span>
           </div>
           <input type="range" id="input-cds-lux" min="0" max="300" step="1" value="${lux}" style="width: 100%; cursor: pointer; accent-color: #facc15;">
@@ -6041,7 +6921,7 @@ const INSPECTOR_RENDERERS = {
           </div>
         </div>
 
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">光導電セル基本諸元</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[諸元] 光導電セル基本諸元</div>
         <div style="color: #cbd5e1; margin-bottom: 8px; line-height: 1.6; font-size: 11px;">
           ・素子タイプ: GL5528 (5mm硫化カドミウム)<br>
           ・現在の内部抵抗値: <span id="text-cds-ohm" style="color: #4ade80; font-weight: bold; font-size: 12px;">${displayOhm}</span><br>
@@ -6050,11 +6930,14 @@ const INSPECTOR_RENDERERS = {
           ・ピーク受光波長: 540 nm (緑〜黄色光に高感度)
         </div>
 
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">リアルタイム動作状態</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[状態] リアルタイム動作状態</div>
         <div style="background: #181825; padding: 6px; border-radius: 4px; font-size: 11px; color: #cbd5e1;">
-          ・通過電流: <span style="color: #38bdf8; font-weight: bold;">${(comp.current_mA || 0.0).toFixed(2)} mA</span><br>
-          ・端子間電圧降下: <span style="color: #facc15; font-weight: bold;">${(comp.voltageDrop || 0.0).toFixed(2)} V</span><br>
-          ・受光環境: <span style="color: ${lux < 20 ? '#a855f7' : '#facc15'}; font-weight: bold;">${lux < 20 ? '遮光状態 (暗闇検知)' : '明環境 (通常受光)'}</span>
+          <div>・通過電流: <span style="color: #38bdf8; font-weight: bold;">${(comp.current_mA || 0.0).toFixed(2)} mA</span></div>
+          <div>・端子間電圧降下: <span style="color: #facc15; font-weight: bold;">${(comp.voltageDrop || 0.0).toFixed(2)} V</span></div>
+          <div>・受光環境: <span style="color: ${lux < 20 ? '#a855f7' : '#facc15'}; font-weight: bold;">${lux < 20 ? '遮光状態 (暗闇検知)' : '明環境 (通常受光)'}</span></div>
+          <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155; font-size: 9px; color: #94a3b8; line-height: 1.4;">
+            ・${flavorText}
+          </div>
         </div>`;
 
       const slider = document.getElementById("input-cds-lux");
@@ -6103,17 +6986,21 @@ const INSPECTOR_RENDERERS = {
     const id_mA = (comp.id_mA !== undefined) ? comp.id_mA : ((comp.current_mA !== undefined) ? comp.current_mA : (isOn && physics && physics.status === "CLOSED" ? (physics.i_total_mA || 0.0) : 0.0));
     const vds = comp.vds_V !== undefined ? comp.vds_V : (isOn ? (id_mA * 0.001 * (comp.rds_on || 1.2)) : 9.0);
 
-    if (specBox) {
+   if (specBox) {
+      const flavorText = isOn
+        ? "無消費の神門 [開門/導通]: 一滴の生贄(電流)も求めず、純粋なる電位の気迫(2.1V)のみで神門を開き放った。ドレインからソースへの道はわずか1.2Ωの平坦な道へと化す。術者よ、負荷なき直結は神門をも焼き砕く。主電流の道に正しき負荷を忘れぬよう。"
+        : "無消費の神門 [閉門/遮断]: 門は冷徹に閉ざされ、大いなる奔流を完全に遮断している。術者よ、中足(ゲート)を虚空に浮かす(フローティング)なかれ。浮遊せし微小な気(静電気)に触れれば神門は狂乱し、意図せぬ暴走を招く。必ずプルダウンの枷で大地に縛れ。";
+
       specBox.innerHTML = `
         <div style="background: #1e293b; border: 1px solid #0284c7; border-radius: 4px; padding: 6px 8px; margin-bottom: 8px;">
-          <div style="font-size: 10px; color: #38bdf8; font-weight: bold; margin-bottom: 4px;">[端子接続ガイド] (TO-92配列: S-G-D)</div>
+          <div style="font-size: 10px; color: #38bdf8; font-weight: bold; margin-bottom: 4px;">[指南] 端子接続ガイド (TO-92配列: S-G-D)</div>
           <div style="font-size: 9.5px; line-height: 1.5; color: #cbd5e1;">
             <div><b style="color: #38bdf8;">[S] ソース (左足)</b>: <b>基準電位</b> ➔ マイナスレール(GND)へ接続</div>
             <div><b style="color: #a855f7;">[G] ゲート (中足)</b>: <b>制御入力</b> ➔ スイッチ/電圧信号線へ接続 (電流は流れません)</div>
             <div><b style="color: #facc15;">[D] ドレイン (右足)</b>: <b>主負荷入力</b> ➔ LED/ブザー等の負荷マイナス側へ接続</div>
           </div>
         </div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">MOSFET基本諸元</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[諸元] MOSFET基本諸元</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px 6px; margin-bottom: 8px; color: #cbd5e1; font-size: 11px;">
           <div>・型番: 2N7000</div>
           <div>・チャネル: Nチャネル</div>
@@ -6122,17 +7009,20 @@ const INSPECTOR_RENDERERS = {
           <div>・最大定格 (Id): 200 mA</div>
           <div>・耐圧 (Vds_max): 60 V</div>
         </div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">リアルタイム動作状態</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[状態] リアルタイム動作状態</div>
         <div style="margin-bottom: 8px; color: #cbd5e1; background: #181825; padding: 6px; border-radius: 4px; font-size: 11px;">
           <div>・動作モード: <span style="color: ${isOn ? '#4ade80' : '#ef4444'}; font-weight: bold;">${isOn ? '導通状態 (ON / OHMIC)' : '遮断状態 (CUTOFF / OFF)'}</span></div>
           <div>・ゲート電圧 (Vgs): <span style="color: ${vgs >= vgs_th ? '#4ade80' : '#cbd5e1'}; font-weight: bold;">${vgs.toFixed(2)} V</span></div>
           <div>・ドレイン電流 (Id): <span style="color: ${isOn ? '#4ade80' : '#64748b'}; font-weight: bold;">${id_mA.toFixed(2)} mA</span></div>
           <div>・ゲート制御電流 (Ig): <span style="color: #38bdf8; font-weight: bold;">0.00 µA (完全電圧制御)</span></div>
           <div>・ドレイン-ソース間電圧 (Vds): <span style="color: #facc15; font-weight: bold;">${vds.toFixed(2)} V</span></div>
-         <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155; font-size: 9px; color: #94a3b8; line-height: 1.4;">
-            ・電圧駆動の特質: ゲートは酸化膜により絶縁されており直流電流を消費しません。ゲート電位が2.1Vを超えたときのみ、わずか1.2Ωの抵抗でドレイン-ソース間が開通します。
+          <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155; font-size: 9px; color: #94a3b8; line-height: 1.4;">
+            ・${flavorText}
           </div>
         </div>`;
+
+
+
     }
   },
 
@@ -6148,16 +7038,20 @@ const INSPECTOR_RENDERERS = {
     const vDrop = comp.voltageDrop !== undefined ? comp.voltageDrop : (isOscillating ? (current_mA * 0.001 * (comp.val_ohm || 16)) : 0.0);
     const power_mW = comp.power_mW !== undefined ? comp.power_mW : (vDrop * current_mA);
 
-    if (specBox) {
+   if (specBox) {
+      const flavorText = isOscillating
+        ? "響きの魔笛 [共鳴/発声]: 奔流を受けし圧電の結晶が激しく震え、高周波の鋭き咆哮(2.4kHz)を放っている。術者よ、耳を澄まし波形の乱れを看取せよ。並列に器(コンデンサ)を添え、直列に枷(抵抗)を配せば、荒ぶる叫びは優美なる調べへと彫刻される。"
+        : "響きの魔笛 [静寂/待機]: 結晶は身じろぎもせず、沈黙の底で電位の到来を待つ。術者よ、二つの極性([+]アノード/[-]カソード)を違えるなかれ。向きを誤れば結晶は震えず、ただ無言の石と化す。";
+
       specBox.innerHTML = `
         <div style="background: #1e293b; border: 1px solid #0284c7; border-radius: 4px; padding: 6px 8px; margin-bottom: 8px;">
-          <div style="font-size: 10px; color: #38bdf8; font-weight: bold; margin-bottom: 4px;">[端子接続ガイド] (極性判別)</div>
+          <div style="font-size: 10px; color: #38bdf8; font-weight: bold; margin-bottom: 4px;">[指南] 端子接続ガイド (極性判別)</div>
           <div style="font-size: 9.5px; line-height: 1.5; color: #cbd5e1;">
             <div><b style="color: #ef4444;">[+] 正極 (pinA / アノード)</b>: <b>信号/給電側</b> ➔ 電源または負荷上流へ接続</div>
             <div><b style="color: #38bdf8;">[-] 負極 (pinB / カソード)</b>: <b>接地/引込側</b> ➔ GNDまたはMOSFETドレインへ接続</div>
           </div>
         </div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">音響・電気基本諸元</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[諸元] 音響・電気基本諸元</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px 6px; margin-bottom: 8px; color: #cbd5e1; font-size: 11px;">
           <div>・素子種別: 圧電サウンダ</div>
           <div>・発振周波数: <span style="color: #facc15; font-weight: bold;">${comp.freq_hz || 2400} Hz</span></div>
@@ -6166,14 +7060,14 @@ const INSPECTOR_RENDERERS = {
           <div>・駆動形式: 自励発振型</div>
           <div>・ピン間隔: 2列スパン直挿し</div>
         </div>
-        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">リアルタイム発振状態</div>
+        <div style="color: #38bdf8; font-weight: bold; border-bottom: 1px solid #334155; padding-bottom: 2px; margin-bottom: 4px;">[状態] リアルタイム発振状態</div>
         <div style="margin-bottom: 8px; color: #cbd5e1; background: #181825; padding: 6px; border-radius: 4px; font-size: 11px;">
           <div>・動作ステータス: <span style="color: ${isOscillating ? '#4ade80' : '#64748b'}; font-weight: bold;">${isOscillating ? '発振中 (OSCILLATING)' : '停止中 (STOPPED)'}</span></div>
           <div>・駆動電流: <span style="color: ${isOscillating ? '#38bdf8' : '#64748b'}; font-weight: bold;">${current_mA.toFixed(2)} mA</span></div>
           <div>・端子間降下電圧: <span style="color: #facc15; font-weight: bold;">${vDrop.toFixed(2)} V</span></div>
           <div>・音響消費電力: <span style="color: #cbd5e1; font-weight: bold;">${power_mW.toFixed(2)} mW</span></div>
           <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155; font-size: 9px; color: #94a3b8; line-height: 1.4;">
-            ・波形彫刻のヒント: 並列にコンデンサ(0.1µF〜10µF)を接続すると矩形波が三角波へ平滑化され、直列に抵抗を挟むと過渡リンギング(減衰スパイク)がオシロスコープ上に出現します。
+            ・${flavorText}
           </div>
         </div>`;
     }
@@ -6189,14 +7083,31 @@ function updateInspectorUI(comp) {
   const specBox = document.getElementById("inspector-spec-box");
   const selectVal = document.getElementById("select-resistor-val");
   const attrBox = document.getElementById("inspector-attr-box");
-  // ★ 電池選択セレクトボックス (ID安全取得)
+  const actionBox = document.getElementById("inspector-action-box");
+
+
+ // ★ 電池選択セレクトボックス (ID安全取得)
   const batterySelectEl = document.getElementById("select-battery-voltage") || document.getElementById("select-battery") || document.querySelector("select[id*='battery']");
+
+  if (actionBox) {
+    actionBox.style.display = comp ? "grid" : "none";
+  }
+
+  // 3端子パーツ選択時は回転ボタンを非活性化(グレーアウト)
+  const btnInspectorRotate = document.getElementById("btn-inspector-rotate");
+  if (btnInspectorRotate && comp) {
+    const isThreePin = ["transistor", "mosfet", "switch_spdt", "potentiometer"].includes(comp.type);
+    btnInspectorRotate.disabled = isThreePin;
+    btnInspectorRotate.style.opacity = isThreePin ? "0.4" : "1.0";
+    btnInspectorRotate.style.cursor = isThreePin ? "not-allowed" : "pointer";
+  }
 
   if (attrBox) {
     attrBox.style.display = (comp && comp.type === "resistor") ? "flex" : "none";
   }
 
   // 0. パーツ未選択（9V 電源表示）
+
   if (!comp) {
     if (batterySelectEl) batterySelectEl.style.display = "inline-block";
     if (titleEl) titleEl.textContent = "9V POWER SUPPLY";
@@ -6314,13 +7225,14 @@ window.redo = function() {
 function rotateTargetComponent(target) {
   if (!target) return;
 
-  // ★ 3端子トランジスタは縦挿し短絡(ショート)を防ぐため回転を安全にガード
-  if (target.type === "transistor") {
-    console.log("ℹ️ トランジスタは同一列の短絡(ショート)を防ぐため、横向き固定となっています。");
+  // 3端子素子(トランジスタ、MOSFET、3路スイッチ、可変抵抗器)は同一列短絡を防ぐため横向き固定
+  const isThreePin = ["transistor", "mosfet", "switch_spdt", "potentiometer"].includes(target.type);
+  if (isThreePin) {
+    console.log("[保護機能] 3端子素子は同一列の短絡(ショート)を防ぐため、横向き固定となっています。");
     return;
   }
 
- const rows = ["A","B","C","D","E","F","G","H","I","J"];
+  const rows = ["A","B","C","D","E","F","G","H","I","J"];
   const colA = getColFromHoleId(target.pinA);
   const colB = getColFromHoleId(target.pinB);
   const rowStrA = target.pinA.replace(/\d+/g, "");
@@ -6429,19 +7341,21 @@ function distToWireCurve(p, wire) {
 function setupInteraction(canvas) {
   if (!canvas) return;
 
+  // タッチ操作時の画面スクロール・ピンチズーム暴発を完全防止
+  canvas.style.touchAction = "none";
+
   // ==================================================================
-  // 1. マウスダウン (クリック・ドラッグ開始判定)
+  // 1. ポインタ押下 (マウス・タッチ・ペン統合ドラッグ開始判定)
   // ==================================================================
- // ★ クリックとドラッグを完全分離するドラッグ開始位置メモリ
   let dragStartX = 0;
   let dragStartY = 0;
   let hasMovedEnough = false;
 
-  // 1. マウスダウン (クリック・ドラッグ開始判定)
-  canvas.addEventListener("mousedown", (e) => {
+  canvas.addEventListener("pointerdown", (e) => {
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
+
 
     dragStartX = mx;
     dragStartY = my;
@@ -6612,14 +7526,17 @@ function setupInteraction(canvas) {
       return; // 配線削除完了・後続処理をストップ
     }
 
-    // ------------------------------------------------------------------
-    // ★ 2. 【2番目】パーツがない空きスルーホールのタップ判定 (ジャンパー配線)
+   // ------------------------------------------------------------------
+    // ★ 2. 【2番目】空きスルーホールの最寄り吸着判定 (タッチ対応: 半径18px)
     // ------------------------------------------------------------------
     let clickedHole = null;
+    let minHoleDist = 18; // 指先タップを確実に捉える吸着許容半径
+
     for (const hole of allHoles) {
-      if (Math.hypot(hole.x - mx, hole.y - my) <= 8) {
+      const d = Math.hypot(hole.x - mx, hole.y - my);
+      if (d < minHoleDist) {
+        minHoleDist = d;
         clickedHole = hole;
-        break;
       }
     }
 
@@ -6913,6 +7830,9 @@ function deleteSelectedTarget() {
     if (descEl) descEl.textContent = "定格 9.0V 直流電源 (6LR61/006P)。ブレッドボードの上下パワーレールへ電力を給電中。";
   }
 }
+
+
+
 /**
    * ★ 削除モード状態一括同期・制御エンジン (UI・テキスト・カーソル完全連動)
    */
@@ -6944,7 +7864,7 @@ function deleteSelectedTarget() {
     }
   };
 
-  // ★ 削除ボタン(#btn-delete)の発火イベント接続 (安全同期版)
+ // ★ 削除ボタン(#btn-delete)の発火イベント接続 (安全同期版)
   const btnDelete = document.getElementById("btn-delete");
   if (btnDelete) {
     btnDelete.addEventListener("click", () => {
@@ -6957,8 +7877,29 @@ function deleteSelectedTarget() {
     });
   }
 
+ // ★ インスペクター専用: 選択中パーツ即時削除ボタン
+  const btnInspectorDelete = document.getElementById("btn-inspector-delete");
+  if (btnInspectorDelete) {
+    btnInspectorDelete.addEventListener("click", () => {
+      if (selectedComponent || selectedWire) {
+        deleteSelectedTarget();
+      }
+    });
+  }
 
+  // ★ インスペクター専用: 選択中パーツ回転ボタン
+  const btnInspectorRotate = document.getElementById("btn-inspector-rotate");
+  if (btnInspectorRotate) {
+    btnInspectorRotate.addEventListener("click", () => {
+      const target = selectedComponent || (components.length > 0 ? components[components.length - 1] : null);
+      if (target && typeof rotateTargetComponent === "function") {
+        rotateTargetComponent(target);
+        if (typeof renderScene === "function") renderScene();
+      }
+    });
+  }
 
+  // 4-C. インスペクター「種類（抵抗値）変更」ドロップダウン制御
 
   // 4-C. インスペクター「種類（抵抗値）変更」ドロップダウン制御
   const selectVal = document.getElementById("select-resistor-val");
@@ -7674,14 +8615,13 @@ console.log("--------------------------------------------------");
  * ツリー生成の破綻がないかを全数自動検証します。(実行前のボード状態は100%復元)
  */
 function runPresetCircuitAudit() {
-  console.log("%c🔌 [F12 全プリセット回路 総合健全性マトリクス全自動監査開始]", "color: #06b6d4; font-weight: bold; font-size: 15px;");
+  console.log("%c[監査開始] [F12 全プリセット回路 総合健全性マトリクス全自動監査]", "color: #06b6d4; font-weight: bold; font-size: 15px;");
   console.log("==================================================");
 
   if (typeof CIRCUIT_PRESETS === "undefined") {
-    console.error("❌ [監査エラー] CIRCUIT_PRESETS が定義されていません。");
+    console.error("[監査エラー] CIRCUIT_PRESETS が定義されていません。");
     return;
   }
-
   // 1. 現在のボード状態（パーツ＆手動配線）を完全バックアップ
   const backupComponents = JSON.parse(JSON.stringify(components));
   const backupWires = JSON.parse(JSON.stringify(activeJumperWires));
@@ -7691,19 +8631,29 @@ function runPresetCircuitAudit() {
   let passCount = 0;
   let failCount = 0;
 
-  presetKeys.forEach((key) => {
+ presetKeys.forEach((key) => {
     totalTests++;
-    const preset = CIRCUIT_PRESETS[key];
+    const rawPreset = CIRCUIT_PRESETS[key];
+    const preset = typeof rawPreset === "function" ? rawPreset() : rawPreset;
     let hasError = false;
     const errors = [];
 
-    // プリセットデータの仮想展開
+    // プリセットデータの仮想展開 (動的関数・静的オブジェクト両対応)
     components.length = 0;
     activeJumperWires.length = 0;
 
-    preset.components.forEach(c => components.push(JSON.parse(JSON.stringify(c))));
-    if (Array.isArray(preset.wires)) {
-      preset.wires.forEach(w => activeJumperWires.push(JSON.parse(JSON.stringify(w))));
+    const compList = preset ? (preset.components || preset.parts || (preset.circuit && preset.circuit.components)) : null;
+    const wireList = preset ? (preset.wires || preset.answerWires || (preset.circuit && preset.circuit.wires)) : null;
+
+    if (!Array.isArray(compList)) {
+      hasError = true;
+      errors.push(`プリセット [${key}] のパーツ配列 (components/parts) が未定義または不正です`);
+    } else {
+      compList.forEach(c => components.push(JSON.parse(JSON.stringify(c))));
+    }
+
+    if (Array.isArray(wireList)) {
+      wireList.forEach(w => activeJumperWires.push(JSON.parse(JSON.stringify(w))));
     }
 
     // 検証A: 不正な穴ID（存在しないスルーホール）の参照チェック
@@ -7752,13 +8702,13 @@ function runPresetCircuitAudit() {
       errors.push(`解析実行中に例外エラーが発生しました: ${err.message}`);
     }
 
-    // 判定
+  // 判定
     if (!hasError) {
       passCount++;
-      console.log(`  ✅ [PASS] プリセット「${preset.name || key}」: 正常`);
+      console.log(`    [PASS] プリセット「${preset.name || key}」: 正常`);
     } else {
       failCount++;
-      console.error(`  ❌ [FAIL] プリセット「${preset.name || key}」: 異常検出 ➔`, errors);
+      console.error(`    [FAIL] プリセット「${preset.name || key}」: 異常検出 ➔`, errors);
     }
   });
 
@@ -7773,13 +8723,13 @@ function runPresetCircuitAudit() {
   updateCircuitTreePanel(restoredPhysics);
   if (typeof renderScene === "function") renderScene();
 
-// 3. 総合結果レポート出力
+  // 3. 総合結果レポート出力
   console.log("--------------------------------------------------");
   if (failCount === 0) {
-    console.log(`🎉 %c【プリセット回路総合監査: 100% PASSED】 (全 ${totalTests} プリセット全数合格)`, "color: #06b6d4; font-weight: bold;");
-    console.log("✨ すべてのプリセット回路において、穴配置・通電探索・物理計算・ツリー生成が完全正常であることを確認しました！");
+    console.log(`%c[監査完了: 100% PASSED] (全 ${totalTests} プリセット全数合格)`, "color: #06b6d4; font-weight: bold;");
+    console.log("[検証完了] すべてのプリセット回路において、穴配置・通電探索・物理計算・ツリー生成が完全正常であることを確認しました。");
   } else {
-    console.warn(`⚠️ %c【プリセット監査: 異常あり】 成功: ${passCount} / 失敗: ${failCount}`, "color: #ef4444; font-weight: bold;");
+    console.warn(`%c[監査完了: 異常あり] 成功: ${passCount} / 失敗: ${failCount}`, "color: #ef4444; font-weight: bold;");
   }
   console.log("==================================================");
 }
@@ -8132,6 +9082,21 @@ const devLogs = [
       "【次回実装予定】"
     ]
   },
+
+{
+  tag: "BBSIM2-PRESET-AUDIT-COMPLETE",
+  date: "2026-11-09",
+  title: "全17プリセットの動的マルチ構図化完了および物理エンジン総合監査100%合格",
+  details: [
+    "Stage 6におけるブリッジ判定の誤作動を是正し並列LED回路の正常通電を回復",
+    "Stage 7(ホイートストンブリッジ 7-1〜7-5)の潜在バグを解消し3大マルチ構図ジェネレータへ拡張",
+    "可変抵抗器(VR1)の実効値計算をツマミ比率優先へ改修し平衡点(4.5V)復帰ラッチバグを根絶",
+    "架橋LEDの所属アーム厳格追跡ロジックを導入し逆並列LEDの双方向差動検出を完全同期",
+    "Stage 8〜10(直列3兄弟)およびStage 11(CdS夜間街灯)を難易度を保った動的散開配置へ刷新",
+    "F12自動テストスイート(runPresetCircuitAudit)で全17プリセット100% PASSEDを達成",
+    "【次回実装予定】パーツドラッグ移動の Pointer Events 化 (スマホ・タブレット操作対応)"
+  ]
+},
 
 
 {
