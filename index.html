@@ -285,9 +285,31 @@
            <div id="preset-button-group" style="display: inline-flex; gap: 4px;">
              <button class="stage-btn" onclick="handlePresetClick(1)" id="btn-stage-1" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">1</button>
              <button class="stage-btn" onclick="handlePresetClick(2)" id="btn-stage-2" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">2</button>
-             <button class="stage-btn" onclick="handlePresetClick(3)" id="btn-stage-3" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">3</button>
-             <button class="stage-btn" onclick="handlePresetClick(4)" id="btn-stage-4" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">4</button>
+
+
+
+          <button class="stage-btn" onclick="handlePresetClick(3)" id="btn-stage-3" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">3</button>
+           <button class="stage-btn" onclick="handlePresetClick(4)" id="btn-stage-4" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">4</button>
+
+   <!-- Stage 3 専用サブステージセレクタ (初期非表示) -->
+   <div id="sub-stage-container-3" style="display: none; gap: 4px; align-items: center; background: #0f172a; padding: 4px 8px; border-radius: 6px; border: 1px solid #334155; margin-top: 4px;">
+     <span style="font-size: 10px; color: #94a3b8; font-weight: bold; margin-right: 2px;">階段攻略:</span>
+     <button class="sub-stage-btn" onclick="handlePresetClick('3-1')" id="btn-sub-3-1" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer;">3-1 分岐</button>
+     <button class="sub-stage-btn" onclick="handlePresetClick('3-2')" id="btn-sub-3-2" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer;">3-2 合流</button>
+     <button class="sub-stage-btn" onclick="handlePresetClick('3-3')" id="btn-sub-3-3" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer;">3-3 本番階段</button>
+     <button class="sub-stage-btn" onclick="handlePresetClick('3-4')" id="btn-sub-3-4" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer;">3-4 統括</button>
+   </div>
+
+   <!-- Stage 4 専用サブステージセレクタ (初期非表示) -->
+   <div id="sub-stage-container-4" style="display: none; gap: 4px; align-items: center; background: #0f172a; padding: 4px 8px; border-radius: 6px; border: 1px solid #334155; margin-top: 4px;">
+     <span style="font-size: 10px; color: #38bdf8; font-weight: bold; margin-right: 2px;">蓄電攻略:</span>
+     <button class="sub-stage-btn" onclick="handlePresetClick('4-1')" id="btn-sub-4-1" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer;">4-1 並列蓄電</button>
+     <button class="sub-stage-btn" onclick="handlePresetClick('4-2')" id="btn-sub-4-2" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer;">4-2 直流遮断</button>
+   </div>
+
              <button class="stage-btn" onclick="handlePresetClick(5)" id="btn-stage-5" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">5</button>
+
+
              <button class="stage-btn" onclick="handlePresetClick(6)" id="btn-stage-6" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">6</button>
             <button class="stage-btn" onclick="handlePresetClick(7)" id="btn-stage-7" style="background: #1e293b; color: #94a3b8; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; min-width: 26px;">7</button>
 
