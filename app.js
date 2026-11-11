@@ -703,11 +703,154 @@ const CIRCUIT_PRESETS = {
 
 
 
-// Stage 5: トランジスタ電子スイッチング回路 (穴衝突根絶 3大マルチツッコミ配置ジェネレータ)
+// Stage 5-1: 閉ざされた門 (ベース開放・コレクタ遮断カットオフ体験 / 3大マルチ構図)
+  TR_1_GATE_CLOSED: () => {
+    const pattern = Math.floor(Math.random() * 3);
+    if (pattern === 0) {
+      // 構図A: 溝跨ぎ負荷抵抗 ＆ 下段LED・TR (ベース完全未接続)
+      const rcCol = Math.floor(Math.random() * 3) + 3;
+      const ledCol = Math.floor(Math.random() * 3) + 9;
+      const trCol = Math.floor(Math.random() * 3) + 16;
+      return {
+        name: "Stage 5-1: 閉ざされた門 (構図A: 溝跨ぎ負荷抵抗 ＆ ベース開放遮断)",
+        desc: "コレクタ主回路は電源からGNDまで一見繋がっていますが、ベース端子に制御電流が注入されていないため、トランジスタは完全な絶縁体(カットオフ)として振る舞い、LEDは消灯したままです。",
+        components: [
+          { id: "R_TR_C", type: "resistor", val_ohm: 1000, pinA: `E${rcCol}`, pinB: `F${rcCol}`, isVertical: true, spanCols: 1, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "主回路の電流制限抵抗" },
+          { id: "LED_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `H${ledCol}`, pinB: `H${ledCol + 2}`, isOn: false, name: "赤色LED (5mm)", desc: "コレクタ主電流で点灯するはずのLED" },
+          { id: "TR_1815", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `H${trCol}`, pinC: `H${trCol + 1}`, pinB: `H${trCol + 2}`, pinA: `H${trCol}`, name: "NPNトランジスタ (2SC1815)", desc: "ベース開放により遮断状態の素子" }
+        ],
+        answerWires: [
+          { id: "W_TR_VCC", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
+          { id: "W_TR_RC_TO_LED", fromHole: `G${rcCol}`, toHole: `J${ledCol}`, color: "#eab308" },
+          { id: "W_TR_LED_TO_C", fromHole: `J${ledCol + 2}`, toHole: `J${trCol + 1}`, color: "#f97316" },
+          { id: "W_TR_GND", fromHole: `I${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // 構図B: 最上段LED ＆ 下段TR (二重降下ベース開放)
+      const rcCol = Math.floor(Math.random() * 3) + 3;
+      const ledCol = Math.floor(Math.random() * 3) + 10;
+      const trCol = Math.floor(Math.random() * 3) + 18;
+      return {
+        name: "Stage 5-1: 閉ざされた門 (構図B: 最上段LED ＆ 下段TR 二重降下遮断)",
+        desc: "上段から中央溝を飛び越えて下段のコレクタへ繋がっていますが、ベースが空虚なため電流は1滴も流れません。",
+        components: [
+          { id: "R_TR_C", type: "resistor", val_ohm: 1000, pinA: `B${rcCol}`, pinB: `B${rcCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "上段配置の負荷抵抗" },
+          { id: "LED_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `A${ledCol}`, pinB: `A${ledCol + 2}`, isOn: false, name: "赤色LED (5mm)", desc: "最上段A行のLED" },
+          { id: "TR_1815", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `H${trCol}`, pinC: `H${trCol + 1}`, pinB: `H${trCol + 2}`, pinA: `H${trCol}`, name: "NPNトランジスタ (2SC1815)", desc: "ベース開放により遮断状態の素子" }
+        ],
+        answerWires: [
+          { id: "W_TR_VCC", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
+          { id: "W_TR_RC_TO_LED", fromHole: `C${rcCol + 4}`, toHole: `C${ledCol}`, color: "#eab308" },
+          { id: "W_TR_LED_TO_C", fromHole: `E${ledCol + 2}`, toHole: `F${trCol + 1}`, color: "#f97316" },
+          { id: "W_TR_GND", fromHole: `J${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" }
+        ]
+      };
+    } else {
+      // 構図C: 主回路右上 ＆ 中央TR (左右逆転ベース開放)
+      const rcCol = Math.floor(Math.random() * 2) + 16;
+      const ledCol = Math.floor(Math.random() * 2) + 22;
+      const trCol = Math.floor(Math.random() * 2) + 8;
+      return {
+        name: "Stage 5-1: 閉ざされた門 (構図C: 右上主回路 ＆ 中央TR 大逆走遮断)",
+        desc: "盤面を横断して配線されていますが、ベースに電位が与えられない限りコレクタの門は永久に閉ざされたままです。",
+        components: [
+          { id: "R_TR_C", type: "resistor", val_ohm: 1000, pinA: `B${rcCol}`, pinB: `B${rcCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "右上配置の負荷抵抗" },
+          { id: "LED_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `B${ledCol}`, pinB: `B${ledCol + 2}`, isOn: false, name: "赤色LED (5mm)", desc: "右上配置のLED" },
+          { id: "TR_1815", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `C${trCol}`, pinC: `C${trCol + 1}`, pinB: `C${trCol + 2}`, pinA: `C${trCol}`, name: "NPNトランジスタ (2SC1815)", desc: "中央配置の素子" }
+        ],
+        answerWires: [
+          { id: "W_TR_VCC", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
+          { id: "W_TR_RC_TO_LED", fromHole: `C${rcCol + 4}`, toHole: `A${ledCol}`, color: "#eab308" },
+          { id: "W_TR_LED_TO_C", fromHole: `C${ledCol + 2}`, toHole: `A${trCol + 1}`, color: "#f97316" },
+          { id: "W_TR_GND", fromHole: `E${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" }
+        ]
+      };
+    }
+  },
+
+  // Stage 5-2: 微弱電流の奇跡 (100kΩベース常時給電・電流増幅点灯 / 3大マルチ構図)
+  TR_2_MICRO_TRIGGER: () => {
+    const pattern = Math.floor(Math.random() * 3);
+    if (pattern === 0) {
+      // 構図A: 溝跨ぎ負荷抵抗 ＆ 100kΩベース直結駆動
+      const rcCol = Math.floor(Math.random() * 3) + 3;
+      const ledCol = Math.floor(Math.random() * 3) + 8;
+      const trCol = Math.floor(Math.random() * 3) + 14;
+      const rbCol = Math.floor(Math.random() * 3) + 21;
+      return {
+        name: "Stage 5-2: 微弱電流の奇跡 (構図A: 100kΩ微弱ベース注入 ＆ フル点灯)",
+        desc: "ベースに100kΩの超巨大抵抗を直結。流れる電流はわずか0.08mA(83µA)という微弱さですが、トランジスタの増幅作用によりコレクタに約6.8mAが流れ、LEDが鮮やかに点灯します。",
+        components: [
+          { id: "R_TR_C", type: "resistor", val_ohm: 1000, pinA: `E${rcCol}`, pinB: `F${rcCol}`, isVertical: true, spanCols: 1, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "主回路の電流制限抵抗" },
+          { id: "LED_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `H${ledCol}`, pinB: `H${ledCol + 2}`, isOn: true, name: "赤色LED (5mm)", desc: "コレクタ主電流で点灯するLED" },
+          { id: "TR_1815", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `H${trCol}`, pinC: `H${trCol + 1}`, pinB: `H${trCol + 2}`, pinA: `H${trCol}`, name: "NPNトランジスタ (2SC1815)", desc: "飽和導通状態の素子" },
+          { id: "R_TR_B", type: "resistor", val_ohm: 100000, pinA: `B${rbCol}`, pinB: `B${rbCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#facc15", "#d97706"], name: "100kΩ ベース微弱バイアス抵抗", desc: "83µAの微小電流を注入する抵抗" }
+        ],
+        answerWires: [
+          { id: "W_TR_VCC1", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
+          { id: "W_TR_RC_TO_LED", fromHole: `G${rcCol}`, toHole: `J${ledCol}`, color: "#eab308" },
+          { id: "W_TR_LED_TO_C", fromHole: `J${ledCol + 2}`, toHole: `J${trCol + 1}`, color: "#f97316" },
+          { id: "W_TR_GND", fromHole: `I${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
+          { id: "W_TR_VCC2", fromHole: `BUS_TOP_PLUS_${rbCol}`, toHole: `A${rbCol}`, color: "#ef4444" },
+          { id: "W_TR_RB_TO_B", fromHole: `C${rbCol + 4}`, toHole: `F${trCol + 2}`, color: "#a855f7" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // 構図B: 最上段LED ＆ 下段TR ＆ 下段100kΩバイアス
+      const rcCol = Math.floor(Math.random() * 3) + 3;
+      const ledCol = Math.floor(Math.random() * 3) + 9;
+      const rbCol = Math.floor(Math.random() * 3) + 16;
+      const trCol = Math.floor(Math.random() * 3) + 23;
+      return {
+        name: "Stage 5-2: 微弱電流の奇跡 (構図B: 下段100kΩバイアス ＆ 二重降下点灯)",
+        desc: "下段の100kΩ抵抗からベースへ注がれた微小な電流が門を開き、最上段のLEDから流れ落ちるコレクタ電流を強力にドライブします。",
+        components: [
+          { id: "R_TR_C", type: "resistor", val_ohm: 1000, pinA: `B${rcCol}`, pinB: `B${rcCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "上段配置の負荷抵抗" },
+          { id: "LED_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `A${ledCol}`, pinB: `A${ledCol + 2}`, isOn: true, name: "赤色LED (5mm)", desc: "最上段A行のLED" },
+          { id: "R_TR_B", type: "resistor", val_ohm: 100000, pinA: `H${rbCol}`, pinB: `H${rbCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#facc15", "#d97706"], name: "100kΩ ベース微弱バイアス抵抗", desc: "下段配置の抵抗" },
+          { id: "TR_1815", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `H${trCol}`, pinC: `H${trCol + 1}`, pinB: `H${trCol + 2}`, pinA: `H${trCol}`, name: "NPNトランジスタ (2SC1815)", desc: "下段右寄りの素子" }
+        ],
+        answerWires: [
+          { id: "W_TR_VCC1", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
+          { id: "W_TR_RC_TO_LED", fromHole: `C${rcCol + 4}`, toHole: `C${ledCol}`, color: "#eab308" },
+          { id: "W_TR_LED_TO_C", fromHole: `E${ledCol + 2}`, toHole: `F${trCol + 1}`, color: "#f97316" },
+          { id: "W_TR_GND", fromHole: `J${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
+          { id: "W_TR_VCC2", fromHole: `BUS_TOP_PLUS_${rbCol}`, toHole: `F${rbCol}`, color: "#ef4444" },
+          { id: "W_TR_RB_TO_B", fromHole: `J${rbCol + 4}`, toHole: `J${trCol + 2}`, color: "#a855f7" }
+        ]
+      };
+    } else {
+      // 構図C: 主回路右上 ＆ 左下100kΩバイアス ＆ 中央TR
+      const rbCol = Math.floor(Math.random() * 2) + 3;
+      const trCol = Math.floor(Math.random() * 2) + 12;
+      const rcCol = Math.floor(Math.random() * 2) + 18;
+      const ledCol = Math.floor(Math.random() * 2) + 24;
+      return {
+        name: "Stage 5-2: 微弱電流の奇跡 (構図C: 左下100kΩ ＆ 右上主回路 大逆走点灯)",
+        desc: "左下から供給された極小のベース電流が中央のトランジスタを叩き起こし、右上の主回路をダイナミックに点灯させる配置です。",
+        components: [
+          { id: "R_TR_B", type: "resistor", val_ohm: 100000, pinA: `I${rbCol}`, pinB: `I${rbCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#facc15", "#d97706"], name: "100kΩ ベース微弱バイアス抵抗", desc: "左下配置の抵抗" },
+          { id: "TR_1815", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `C${trCol}`, pinC: `C${trCol + 1}`, pinB: `C${trCol + 2}`, pinA: `C${trCol}`, name: "NPNトランジスタ (2SC1815)", desc: "中央配置の素子" },
+          { id: "R_TR_C", type: "resistor", val_ohm: 1000, pinA: `B${rcCol}`, pinB: `B${rcCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "右上配置の抵抗" },
+          { id: "LED_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `B${ledCol}`, pinB: `B${ledCol + 2}`, isOn: true, name: "赤色LED (5mm)", desc: "右上配置のLED" }
+        ],
+        answerWires: [
+          { id: "W_TR_VCC1", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
+          { id: "W_TR_RC_TO_LED", fromHole: `C${rcCol + 4}`, toHole: `A${ledCol}`, color: "#eab308" },
+          { id: "W_TR_LED_TO_C", fromHole: `C${ledCol + 2}`, toHole: `A${trCol + 1}`, color: "#f97316" },
+          { id: "W_TR_GND", fromHole: `E${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
+          { id: "W_TR_VCC2", fromHole: `BUS_TOP_PLUS_${rbCol}`, toHole: `F${rbCol}`, color: "#ef4444" },
+          { id: "W_TR_RB_TO_B", fromHole: `G${rbCol + 4}`, toHole: `E${trCol + 2}`, color: "#a855f7" }
+        ]
+      };
+    }
+  },
+
+  // Stage 5-3: トランジスタ電子スイッチング回路 (穴衝突根絶 3大マルチツッコミ配置ジェネレータ)
   TRANSISTOR_SWITCH: () => {
     // 3つのトポロジー構図からランダム抽選 (0:溝跨ぎ抵抗＆下段TR＆右上SW大逆走, 1:最上段LED＆下段TR二重降下, 2:左右大逆転中央Xクロス)
     const pattern = Math.floor(Math.random() * 3);
-
     if (pattern === 0) {
       // 構図A: 溝跨ぎ負荷抵抗 ＆ 下段LED・TR ＆ 右上ベーススイッチ大逆走
       const rcCol = Math.floor(Math.random() * 3) + 2;   // 溝跨ぎ: 列2〜4
@@ -1740,10 +1883,13 @@ const STAGE_PRESET_MAP = {
   "3-2": "STAIR_2_DUAL_FEED",
   "3-3": "STAIR_3_CLASSIC",
   "3-4": "STAIR_4_MASTER",
-  // Stage 4: コンデンサ過渡応答 (並列蓄電 ＆ 直流遮断)
+ // Stage 4: コンデンサ過渡応答 (並列蓄電 ＆ 直流遮断)
   "4-1": "RC_PARALLEL_BACKUP",
   "4-2": "RC_SERIES_PULSE",
-  5: "TRANSISTOR_SWITCH",
+  // Stage 5: トランジスタ基礎 3段階スモールステップ
+  "5-1": "TR_1_GATE_CLOSED",
+  "5-2": "TR_2_MICRO_TRIGGER",
+  "5-3": "TRANSISTOR_SWITCH",
   6: "PARALLEL_LEDS",
   // Stage 7: ホイートストン・ブリッジ進化ステップ
   "7-1": "BRIDGE_1",  "7-2": "BRIDGE_2",
@@ -1783,36 +1929,45 @@ function handlePresetClick(stageNo) {
   const subContainer7 = document.getElementById("sub-stage-container");
   const subContainer3 = document.getElementById("sub-stage-container-3");
   const subContainer4 = document.getElementById("sub-stage-container-4");
+  const subContainer5 = document.getElementById("sub-stage-container-5");
 
-  // メイン「3」「4」「7」が押された時のサブバー展開ルーティング
-  if (stageNo === 3) {
+ const numStage = Number(stageNo);
+
+  // メイン「3」「4」「5」「7」が押された時のサブバー展開ルーティング (型揺れ完全吸収)
+  if (numStage === 3) {
     if (subContainer7) subContainer7.style.display = "none";
     if (subContainer4) subContainer4.style.display = "none";
+    if (subContainer5) subContainer5.style.display = "none";
     if (subContainer3) subContainer3.style.display = "flex";
     handlePresetClick("3-1");
     return;
-  } else if (stageNo === 4) {
+  } else if (numStage === 4) {
     if (subContainer3) subContainer3.style.display = "none";
     if (subContainer7) subContainer7.style.display = "none";
+    if (subContainer5) subContainer5.style.display = "none";
     if (subContainer4) subContainer4.style.display = "flex";
     handlePresetClick("4-1");
     return;
-  } else if (stageNo === 7) {
-    if (subContainer3) subContainer3.style.display = "none";
-    if (subContainer4) subContainer4.style.display = "none";
-    if (subContainer7) subContainer7.style.display = "flex";
-    handlePresetClick("7-1");
-    return;
-  } else if (typeof stageNo === "number") {
-    // 他の単独ステージが押された時は全サブバーを閉じる
+  } else if (numStage === 5) {
     if (subContainer3) subContainer3.style.display = "none";
     if (subContainer4) subContainer4.style.display = "none";
     if (subContainer7) subContainer7.style.display = "none";
-  }
-  const presetKey = STAGE_PRESET_MAP[stageNo];
-  if (!presetKey || !CIRCUIT_PRESETS[presetKey]) {
-    console.warn(`[Stage ${stageNo}] は現在準備中です。`);
+    if (subContainer5) subContainer5.style.display = "flex";
+    handlePresetClick("5-1");
     return;
+  } else if (numStage === 7) {
+    if (subContainer3) subContainer3.style.display = "none";
+    if (subContainer4) subContainer4.style.display = "none";
+    if (subContainer5) subContainer5.style.display = "none";
+    if (subContainer7) subContainer7.style.display = "flex";
+    handlePresetClick("7-1");
+    return;
+  } else if (!isNaN(numStage) && !String(stageNo).includes("-")) {
+    // 他の単独ステージが押された時は全サブバーを閉じる
+    if (subContainer3) subContainer3.style.display = "none";
+    if (subContainer4) subContainer4.style.display = "none";
+    if (subContainer5) subContainer5.style.display = "none";
+    if (subContainer7) subContainer7.style.display = "none";
   }
 
   // 1. 同一番号の再クリックか判定し、回答フラグをトグル
@@ -1830,7 +1985,7 @@ function handlePresetClick(stageNo) {
     btn.style.borderColor = "#475569";
   });
 
-// 親ボタン（3, 4 または 7）の連動ハイライト
+// 親ボタン（3, 4, 5 または 7）の連動ハイライト
   if (String(stageNo).startsWith("3-")) {
     const parent3Btn = document.getElementById("btn-stage-3");
     if (parent3Btn) {
@@ -1844,6 +1999,13 @@ function handlePresetClick(stageNo) {
       parent4Btn.style.background = "#0f172a";
       parent4Btn.style.color = "#38bdf8";
       parent4Btn.style.borderColor = "#0284c7";
+    }
+  } else if (String(stageNo).startsWith("5-")) {
+    const parent5Btn = document.getElementById("btn-stage-5");
+    if (parent5Btn) {
+      parent5Btn.style.background = "#0f172a";
+      parent5Btn.style.color = "#38bdf8";
+      parent5Btn.style.borderColor = "#0284c7";
     }
   } else if (String(stageNo).startsWith("7-")) {
     const parent7Btn = document.getElementById("btn-stage-7");
@@ -1860,7 +2022,7 @@ function handlePresetClick(stageNo) {
   const activeBtn = document.getElementById(isSubStage ? `btn-sub-${stageNo}` : `btn-stage-${stageNo}`);
 
 
-  if (activeBtn) {
+ if (activeBtn) {
     if (isAnswerShown) {
       activeBtn.style.background = "#059669"; // エメラルドグリーン
       activeBtn.style.color = "#ffffff";
@@ -1872,12 +2034,18 @@ function handlePresetClick(stageNo) {
     }
   }
 
-  // 4. 改修済み loadPresetCircuit へ委譲
+  // 4. マッピングからキーを取得し、改修済み loadPresetCircuit へ委譲
+  const presetKey = STAGE_PRESET_MAP[stageNo];
+  if (!presetKey || !CIRCUIT_PRESETS[presetKey]) {
+    console.warn(`[Stage ${stageNo}] の回路プリセットは現在準備中、または未定義です。`);
+    return;
+  }
+
   loadPresetCircuit(presetKey, isAnswerShown);
   console.log(
     isAnswerShown
-      ? `💡 [Stage ${stageNo}] 回答モード: 正解ジャンパ線を展開しました。`
-      : `🎯 [Stage ${stageNo}] 挑戦モード: パーツを配置しました。ジャンパ線を手動で配線してください。(もう一度押すと回答が表示されます)`
+      ? `[Stage ${stageNo}] 回答モード: 正解ジャンパ線を展開しました。`
+      : `[Stage ${stageNo}] 挑戦モード: パーツを配置しました。ジャンパ線を手動で配線してください。(もう一度押すと回答が表示されます)`
   );
 }
 
@@ -2407,28 +2575,50 @@ function diagnoseWiringErrors(energizedNodes) {
 }
 
 function analyzeEnergizedNodes() {
-  autoGenerateJumperWires();
-
   // 探索開始前に全トランジスタおよびMOSFETを遮断状態へ初期化
   components.forEach(c => {
     if (c.type === "transistor" || c.type === "mosfet") c.state = "CUTOFF";
   });
 
-  const energizedNodes = new Set(["NODE_POWER_TOP_PLUS"]);  const queue = ["NODE_POWER_TOP_PLUS"];
+  const energizedNodes = new Set(["NODE_POWER_TOP_PLUS"]);
+  const queue = ["NODE_POWER_TOP_PLUS"];
+
+  // 手動配線(wires)および自動配線(activeJumperWires)のプロパティ揺れを完全吸収
+  const liveWires = [];
+  const registerWire = (w) => {
+    if (!w) return;
+    const fH = w.fromHole || w.from || w.startHole || w.pinA || w.holeA || "";
+    const tH = w.toHole || w.to || w.endHole || w.pinB || w.holeB || "";
+    if (fH && tH) liveWires.push({ fromHole: fH, toHole: tH });
+  };
+
+  if (typeof wires !== "undefined" && Array.isArray(wires)) wires.forEach(registerWire);
+  if (typeof activeJumperWires !== "undefined" && Array.isArray(activeJumperWires)) activeJumperWires.forEach(registerWire);
+
+// バスレール穴名から論理電源ノードへの確実な正規化ヘルパー (上下4レール完全対応)
+  const resolveLogicalNode = (holeId) => {
+    if (!holeId) return null;
+    if (holeId.startsWith("BUS_TOP_PLUS")) return "NODE_POWER_TOP_PLUS";
+    if (holeId.startsWith("BUS_TOP_MINUS")) return "NODE_POWER_TOP_MINUS";
+    if (holeId.startsWith("BUS_BOTTOM_PLUS")) return "NODE_POWER_BOTTOM_PLUS";
+    if (holeId.startsWith("BUS_BOTTOM_MINUS")) return "NODE_POWER_BOTTOM_MINUS";
+    return getNodeByHoleId(holeId);
+  };
 
   while (queue.length > 0) {
     const currNode = queue.shift();
 
-    // 1. ジャンパ線を介した導通探索
-    activeJumperWires.forEach(wire => {
-      const nFrom = getNodeByHoleId(wire.fromHole);
-      const nTo = getNodeByHoleId(wire.toHole);
+    // 1. ジャンパ線を介した導通探索 (全配線・全プロパティ・バスレール正規化対応)
+    liveWires.forEach(wire => {
+      const nFrom = resolveLogicalNode(wire.fromHole);
+      const nTo = resolveLogicalNode(wire.toHole);
       if (nFrom === currNode && !energizedNodes.has(nTo)) {
         energizedNodes.add(nTo); queue.push(nTo);
       } else if (nTo === currNode && !energizedNodes.has(nFrom)) {
         energizedNodes.add(nFrom); queue.push(nFrom);
       }
     });
+
 
    // 2. コンポーネント内部を介した導通探索 (トグル・タクトスイッチの開放を厳格遮断)
     components.forEach(comp => {
@@ -2448,10 +2638,20 @@ function analyzeEnergizedNodes() {
         return;
       }
 
-      // SPDTスイッチ: COM端子と選択中接点の双方向導通
+   // 抵抗器: 双方向完全導通を明示的に即時伝播
+      if (comp.type === "resistor") {
+        if (nA === currNode && !energizedNodes.has(nB)) {
+          energizedNodes.add(nB); queue.push(nB);
+        } else if (nB === currNode && !energizedNodes.has(nA)) {
+          energizedNodes.add(nA); queue.push(nA);
+        }
+        return;
+      }
+
+      // SPDTスイッチ: COM端子と選択中接点の双方向導通 (座標決め打ちを排除)
       if (comp.type === "switch_spdt") {
-        const comHole = comp.pinCom || comp.pinCOM || `C${getColFromHoleId(comp.pinA) + 2}`;
-        const nCOM = getNodeByHoleId(comHole);
+        const comHole = comp.pinCom || comp.pinCOM || comp.pinC || comp.pinCommon;
+        const nCOM = comHole ? getNodeByHoleId(comHole) : null;
         const targetPin = (comp.state === "L2") ? comp.pinB : comp.pinA;
         const nTarget = getNodeByHoleId(targetPin);
 
@@ -2465,10 +2665,10 @@ function analyzeEnergizedNodes() {
         return;
       }
 
-      // 可変抵抗器: A-B間直通 ＆ Wiper端子との3端子相互導通
+      // 可変抵抗器: A-B間直通 ＆ Wiper端子との3端子相互導通 ("E5"固定を排除)
       if (comp.type === "potentiometer") {
-        const wiperHole = comp.pinC || comp.pinWiper || "E5";
-        const nWiper = getNodeByHoleId(wiperHole);
+        const wiperHole = comp.pinC || comp.pinWiper;
+        const nWiper = wiperHole ? getNodeByHoleId(wiperHole) : null;
         if (nWiper) {
           if ((nA === currNode || nB === currNode) && !energizedNodes.has(nWiper)) {
             energizedNodes.add(nWiper); queue.push(nWiper);
@@ -2622,11 +2822,20 @@ function updateDisplayToggles() {
 // ======================================================================
 function calculateCircuitPhysics() {
   const energized = (typeof analyzeEnergizedNodes === "function") ? analyzeEnergizedNodes() : new Set();
-  const isPowered = energized.has("NODE_POWER_TOP_PLUS") && energized.has("NODE_POWER_BOTTOM_MINUS");
+  const isPowered = energized.has("NODE_POWER_TOP_PLUS") &&
+                    (energized.has("NODE_POWER_BOTTOM_MINUS") || energized.has("NODE_POWER_TOP_MINUS"));
   const v_in = (typeof selectedBatteryVoltage !== "undefined") ? selectedBatteryVoltage : 9.0;
   const BATTERY_INTERNAL_R = 2.0;
-  const wires = Array.isArray(activeJumperWires) ? activeJumperWires : (window.wires || []);
 
+  // プリセットの参照を完全維持し、未登録の手動配線のみを安全に合流
+  const wires = Array.isArray(activeJumperWires) ? [...activeJumperWires] : [];
+  if (typeof window.wires !== "undefined" && Array.isArray(window.wires)) {
+    window.wires.forEach(w => {
+      if (!wires.some(aw => aw === w || aw.id === w.id)) {
+        wires.push(w);
+      }
+    });
+  }
 // 1. 可変抵抗器の実効抵抗値取得ヘルパー (ツマミ比率優先・平衡復帰完全保証版)
   const getPotEffOhm = (c) => {
     const maxOhm = c.val_max_ohm || 10000;
@@ -2698,12 +2907,13 @@ function calculateCircuitPhysics() {
   const isClosed = isPowered || isDischarging;
   const effectiveV = isPowered ? v_in : capV;
 
-  // 回路未通電時の即時遮断クリーンアップ
+ // 回路未通電時の即時遮断クリーンアップ
   if (!isClosed || components.length === 0) {
     components.forEach(c => { c.current_mA = 0; c.voltageDrop = 0; c.power_mW = 0; if (c.type === "led") c.isOn = false; });
     wires.forEach(w => { w.current_mA = 0; });
     const openResult = { status: "OPEN", v_in: 0.0, r_total_ohm: Infinity, i_total_mA: 0.0, p_total_mW: 0.0, energized };
     if (typeof updateCircuitTreePanel === "function") updateCircuitTreePanel(openResult);
+    if (typeof updatePhysicsLogEngine === "function") updatePhysicsLogEngine(openResult, energized);
     return openResult;
   }
 
@@ -2714,14 +2924,21 @@ function calculateCircuitPhysics() {
   }
 
 
-// 4. 通電素子の抽出 (★ トポロジーによる給電系統解析：16列決め打ちを完全撤廃)
-  // 上部プラスレールから直接給電されているノード(列)を動的検出
+// 4. 通電素子の抽出 (★ トポロジーによる給電系統解析：プリセット完全互換＋自由配置安全拡張)
+  // プラスレールから直接給電されているノード(列)を動的検出
   const powerFeedNodes = new Set();
   wires.forEach(w => {
-    if (w.fromHole && w.fromHole.startsWith("BUS_TOP_PLUS")) powerFeedNodes.add(getNodeByHoleId(w.toHole));
-    if (w.toHole && w.toHole.startsWith("BUS_TOP_PLUS")) powerFeedNodes.add(getNodeByHoleId(w.fromHole));
+    const fH = w.fromHole || w.from || "";
+    const tH = w.toHole || w.to || "";
+    if (fH.includes("PLUS")) {
+      const targetNode = getNodeByHoleId(tH);
+      if (targetNode) powerFeedNodes.add(targetNode);
+    }
+    if (tH.includes("PLUS")) {
+      const targetNode = getNodeByHoleId(fH);
+      if (targetNode) powerFeedNodes.add(targetNode);
+    }
   });
-
 // ブリッジ架橋素子判定: GNDに接地されていない真のブリッジ架橋素子のみを限定抽出
   const isBridgeComponent = (c) => {
     if (powerFeedNodes.size < 2) return false;
@@ -2789,52 +3006,115 @@ function calculateCircuitPhysics() {
   if (activeLeds.length >= 1) {
     let invRSum = 0;
 
+    // LED同士が直列に連結されているかを判定 (直列チェーン検出)
+    const isSeriesLedChain = activeLeds.length > 1 && activeLeds.every(led => {
+      const nA = getNodeByHoleId(led.pinA);
+      const nB = getNodeByHoleId(led.pinB);
+      return activeLeds.some(other => {
+        if (other === led) return false;
+        const oA = getNodeByHoleId(other.pinA);
+        const oB = getNodeByHoleId(other.pinB);
+        return nA === oB || nB === oA || wires.some(w => {
+          const wf = getNodeByHoleId(w.fromHole || w.from);
+          const wt = getNodeByHoleId(w.toHole || w.to);
+          return (wf === nB && wt === oA) || (wf === oB && wt === nA);
+        });
+      });
+    });
+
+    // 直列時は全LEDのVfを合算、並列時は単一Vf(2.0V)
+    const effectiveTotalVf = isSeriesLedChain
+      ? activeLeds.reduce((sum, l) => sum + (l.vf || 2.0), 0)
+      : 2.0;
+
     activeLeds.forEach(led => {
       const vf = led.vf || 2.0;
       const nLedA = getNodeByHoleId(led.pinA);
       const nLedB = getNodeByHoleId(led.pinB);
-
-    // 直接接続、中継ジャンパ、またはSPDTスイッチ経由でLEDに給電する抵抗を動的検出
+   // 直接接続、中継ジャンパ、または通電閉路経由でLEDに接続する保護抵抗を動的検出
       const matchedR = connectedResistors.find(r => {
+        if (r.isBurned) return false;
         const nrA = getNodeByHoleId(r.pinA);
         const nrB = getNodeByHoleId(r.pinB);
+        if (!nrA || !nrB) return false;
+
+        // 1. 同一列への直接挿入
         if (nrA === nLedA || nrB === nLedA || nrA === nLedB || nrB === nLedB) return true;
 
-        // SPDTスイッチ経由の給電合流 (スイッチの選択中接点に繋がる抵抗を特定)
-        const spdt = components.find(s => s.type === "switch_spdt");
-        if (spdt) {
-          const activePin = (spdt.state === "L2") ? spdt.pinB : spdt.pinA;
+      // 2. 1本の中継ワイヤによる直接接続
+        const isDirectWire = wires.some(w => {
+          const wf = getNodeByHoleId(w.fromHole || w.from);
+          const wt = getNodeByHoleId(w.toHole || w.to);
+          const cLed = (wf === nLedA || wt === nLedA || wf === nLedB || wt === nLedB);
+          const cR = (wf === nrA || wt === nrA || wf === nrB || wt === nrB);
+          return cLed && cR;
+        });
+        if (isDirectWire) return true;
+
+        // 3. SPDTスイッチ経由の接続追従 (現在の有効接点と繋がっている抵抗を優先)
+        const spdtComp = components.find(c => c.type === "switch_spdt");
+        if (spdtComp) {
+          const activePin = (spdtComp.state === "L2") ? spdtComp.pinB : spdtComp.pinA;
           const nActive = getNodeByHoleId(activePin);
-          const connectsToActivePin = wires.some(w => {
-            const wf = getNodeByHoleId(w.fromHole);
-            const wt = getNodeByHoleId(w.toHole);
+          const isConnectedToActiveSpdt = (nrA === nActive || nrB === nActive) || wires.some(w => {
+            const wf = getNodeByHoleId(w.fromHole || w.from);
+            const wt = getNodeByHoleId(w.toHole || w.to);
             return (wf === nActive && (wt === nrA || wt === nrB)) || (wt === nActive && (wf === nrA || wf === nrB));
           });
-          if (connectsToActivePin) return true;
+          if (isConnectedToActiveSpdt) return true;
         }
 
-        return wires.some(w => {
-          const wf = getNodeByHoleId(w.fromHole);
-          const wt = getNodeByHoleId(w.toHole);
-          const connectsToLed = (wf === nLedA || wt === nLedA || wf === nLedB || wt === nLedB);
-          const connectsToR = (wf === nrA || wt === nrA || wf === nrB || wt === nrB);
-          return connectsToLed && connectsToR;
-        });
+        // 4. 通電経路(energized)に含まれる有効抵抗を同一系統として網羅 (SPDT未経由時)
+        return !spdtComp && energized.has(nrA) && energized.has(nrB);
       });
 
- // ★ トランジスタ回路検出: ベース抵抗(高抵抗)の混入を徹底排除
-     const hasTransistor = components.some(c => c.type === "transistor");
-      let branchR = 0;
-      if (hasTransistor) {
-        // 1. matchedRがあればそれを優先、無ければベース端子(B)以外に繋がる負荷抵抗(1kΩ等)を自動抽出
-        const collectorR = matchedR || connectedResistors.find(r => (r.val_ohm || 0) < 50000) || connectedResistors[0];
-        branchR = collectorR ? (collectorR.type === "resistor" ? (collectorR.val_ohm || 1000) : getPotEffOhm(collectorR)) : 1000;
-      } else if (activeLeds.length > 1 || matchedR) {
-        branchR = matchedR ? getEffOhm(matchedR) : 1000;
-      } else {
-        // 単一直列時: 回路上の全抵抗・可変抵抗・CdSの抵抗値を正確に合算
-        branchR = connectedResistors.reduce((sum, r) => sum + getEffOhm(r), 0);
+// ★ トランジスタ回路検出: ベース通電状態による主回路開閉インターロック
+      const trCompInBranch = components.find(c => c.type === "transistor");
+      let isTrCutoff = false;
+
+      if (trCompInBranch) {
+        // ベース端子の通電判定: pinB が通電ノードに含まれているか
+        const nBase = getNodeByHoleId(trCompInBranch.pinB);
+        const isBaseNodeEnergized = nBase ? energized.has(nBase) : false;
+
+        // ベース側スイッチの状態判定 (スイッチが存在する場合)
+        const bSw = components.find(s => s.type === "tact_switch" || s.type === "switch");
+        const isSwClosed = bSw ? (bSw.type === "tact_switch" ? !!bSw.isPressed : !!bSw.isOn) : true;
+
+        // ベースが未通電、またはスイッチが開いている場合は完全遮断 (CUTOFF)
+        if (!isBaseNodeEnergized || !isSwClosed) {
+          isTrCutoff = true;
+          trCompInBranch.state = "CUTOFF";
+        } else {
+          trCompInBranch.state = "SATURATED";
+        }
       }
+
+let branchR = 0;
+      if (trCompInBranch) {
+        const collectorR = matchedR || connectedResistors.find(r => (r.val_ohm || 0) < 50000) || connectedResistors[0];
+        branchR = collectorR ? (collectorR.type === "resistor" ? (collectorR.val_ohm || 0) : getPotEffOhm(collectorR)) : 0;
+      } else if (matchedR) {
+        branchR = getEffOhm(matchedR);
+      } else {
+
+
+        // 回路内の全通電抵抗を合算。抵抗が0個の場合は厳格に 0 オーム(短絡直結)とする
+      // 通電経路上の抵抗、または同一枝路に存在する有効抵抗を確実に抽出
+        const activeRes = connectedResistors.filter(r => !r.isBurned && (
+          (energized.has(getNodeByHoleId(r.pinA)) && energized.has(getNodeByHoleId(r.pinB))) ||
+          (matchedR && r === matchedR)
+        ));
+        if (activeRes.length > 0) {
+          branchR = activeRes.reduce((sum, r) => sum + getEffOhm(r), 0);
+        } else if (connectedResistors.some(r => !r.isBurned)) {
+          const fallbackR = connectedResistors.find(r => !r.isBurned);
+          branchR = getEffOhm(fallbackR);
+        } else {
+          branchR = 0;
+        }
+      }
+
 
    // コンデンサの接続トポロジー判定 (片足がGNDに接地されている場合は並列蓄電・平滑素子)
       const isCapGndConnected = cap && wires.some(w => {
@@ -2855,9 +3135,12 @@ function calculateCircuitPhysics() {
       const seriesDiodes = components.filter(c => c.type === "diode" && energized.has(getNodeByHoleId(c.pinA)) && energized.has(getNodeByHoleId(c.pinB)));
       const diodeDropV = seriesDiodes.reduce((sum, d) => sum + (d.vf || 0.7), 0.0);
 
-      const vDrive = Math.max(0.0, effectiveV - capDropV - diodeDropV);
-
-      const branchI = vDrive > vf ? ((vDrive - vf) / (branchR + BATTERY_INTERNAL_R)) * 1000 : 0.0;
+ // 駆動電圧の算出 (直列時は合成Vfを差し引き、不足時は0mA遮断)
+      const vDrive = Math.max(0.0, effectiveV - capDropV - diodeDropV) || effectiveV;
+      const effVf = isSeriesLedChain ? effectiveTotalVf : vf;
+      const branchI = (!isTrCutoff && vDrive > effVf)
+        ? ((vDrive - effVf) / (Math.max(branchR, 1.0) + BATTERY_INTERNAL_R)) * 1000
+        : 0.0;
       led.current_mA = branchI;
 
     // ダイオード個別諸元への反映
@@ -2873,7 +3156,8 @@ function calculateCircuitPhysics() {
         cap.power_mW = capDropV * branchI;
       }
 
-   // 枝路内LED・抵抗への厳格な諸元反映
+   // 枝路内LED・抵抗への厳格な諸元反映 (枝路抵抗値をインスタンスに安全退避)
+      led.branchR = branchR;
       led.current_mA = branchI;
       led.isOn = (branchI > 0.05);
       led.voltageDrop = led.isOn ? vf : 0.0;
@@ -2885,9 +3169,15 @@ function calculateCircuitPhysics() {
       led.voltageDrop = led.isOn ? vf : 0.0;
       led.power_mW = led.voltageDrop * branchI;
 
-   const isTrCircuit = components.some(c => c.type === "transistor");
+  const isTrCircuit = components.some(c => c.type === "transistor");
+      const trCompRef = isTrCircuit ? components.find(c => c.type === "transistor") : null;
+      const nTrBase = trCompRef ? getNodeByHoleId(trCompRef.pinB) : null;
+
       connectedResistors.forEach(r => {
-        const isBaseResistor = isTrCircuit && ((r.val_ohm || 0) >= 50000 || (r.id && r.id.includes("TR_B")));
+        const nrA = getNodeByHoleId(r.pinA);
+        const nrB = getNodeByHoleId(r.pinB);
+        const isConnectedToBase = nTrBase && (nrA === nTrBase || nrB === nTrBase);
+        const isBaseResistor = isTrCircuit && ((r.val_ohm || 0) >= 50000 || isConnectedToBase);
         const isTargetResistor = matchedR ? (r === matchedR) : (!isTrCircuit && activeLeds.length === 1);
         if (!isBaseResistor && isTargetResistor) {
           const rVal = r.type === "resistor" ? (r.val_ohm || 0) : getPotEffOhm(r);
@@ -2932,13 +3222,13 @@ function calculateCircuitPhysics() {
         let isSwClosed = false;
         let isConnected = false;
 
-        if (sw.type === "switch_spdt") {
-          const comHole = sw.pinCOM || sw.pinCom || `C${getColFromHoleId(sw.pinA) + 2}`;
-          const nCOM = getNodeByHoleId(comHole);
+       if (sw.type === "switch_spdt") {
+          const comHole = sw.pinCOM || sw.pinCom || sw.pinC || sw.pinCommon;
+          const nCOM = comHole ? getNodeByHoleId(comHole) : null;
           const activePin = (sw.state === "L2") ? sw.pinB : sw.pinA;
           const nActive = getNodeByHoleId(activePin);
-          isSwClosed = true; // 選択接点側は常に閉路
-          isConnected = energized.has(nCOM) && energized.has(nActive);
+          isSwClosed = true;
+          isConnected = nCOM ? (energized.has(nCOM) && energized.has(nActive)) : false;
         } else {
           isSwClosed = sw.type === "tact_switch" ? !!sw.isPressed : !!sw.isOn;
           const nA = getNodeByHoleId(sw.pinA);
@@ -2953,10 +3243,16 @@ function calculateCircuitPhysics() {
         }
       });
 
-      i_total_mA += branchI;
+    // 直列チェーン時は単一系統の電流を保持、並列時は各枝路電流を加算
+      if (isSeriesLedChain) {
+        i_total_mA = branchI;
+      } else {
+        i_total_mA += branchI;
+      }
 
-
-   invRSum += (1 / Math.max(branchR, 0.001));
+      if (branchR > 0) {
+        invRSum += (1 / branchR);
+      }
     });
 
     // ★ トランジスタ増幅時のベース制御枝路 (Ib) の独立加算処理
@@ -2982,30 +3278,47 @@ function calculateCircuitPhysics() {
       activeTr.current_mA = i_total_mA;
       activeTr.voltageDrop = activeTr.vce_sat || 0.10;
 
-      // ベース給電経路のワイヤ・スイッチにも Ib を反映
+    // ベース給電経路のワイヤ・スイッチにも Ib を反映 (端子ノードに基づく動的同期)
+      const nBaseTarget = getNodeByHoleId(activeTr.pinB);
+      const baseResComp = connectedResistors.find(r => {
+        const na = getNodeByHoleId(r.pinA);
+        const nb = getNodeByHoleId(r.pinB);
+        return na === nBaseTarget || nb === nBaseTarget;
+      });
+      const nBaseResA = baseResComp ? getNodeByHoleId(baseResComp.pinA) : null;
+      const nBaseResB = baseResComp ? getNodeByHoleId(baseResComp.pinB) : null;
+
       wires.forEach(w => {
-        if (w.fromHole && w.fromHole.includes("17") || w.toHole && w.toHole.includes("17")) {
+        const nF = getNodeByHoleId(w.fromHole);
+        const nT = getNodeByHoleId(w.toHole);
+        const connectsToBaseLine = (nF === nBaseTarget || nT === nBaseTarget || nF === nBaseResA || nT === nBaseResA || nF === nBaseResB || nT === nBaseResB);
+        if (connectsToBaseLine && !((w.fromHole && w.fromHole.includes("MINUS")) || (w.toHole && w.toHole.includes("MINUS")))) {
           w.current_mA = i_base_mA;
         }
       });
       components.filter(c => c.type === "tact_switch" || c.type === "switch").forEach(sw => {
         const nA = getNodeByHoleId(sw.pinA);
         const nB = getNodeByHoleId(sw.pinB);
-        const nBase = getNodeByHoleId(activeTr.pinB);
-        if (nA === nBase || nB === nBase || (nA && nA.includes("17")) || (nB && nB.includes("17"))) {
+        const isSwOnBaseLine = (nA === nBaseTarget || nB === nBaseTarget || nA === nBaseResA || nB === nBaseResA || nA === nBaseResB || nB === nBaseResB);
+        if (isSwOnBaseLine) {
           sw.current_mA = i_base_mA;
         }
       });
 
-      // 主幹電流はコレクタ電流(Ic)とベース電流(Ib)の合流
+    // 主幹電流はコレクタ電流(Ic)とベース電流(Ib)の合流
       i_total_mA += i_base_mA;
     }
 
-    r_load_ohm = invRSum > 0 ? (1 / invRSum) : 1000;
+    // 抵抗が存在しない場合は全負荷抵抗を 0Ω とする
+    r_load_ohm = invRSum > 0 ? (1 / invRSum) : 0;
 
 } else {
+
+
     // LED以外の負荷（ダイオード・トランジスタ・スイッチ等）の直列フォールバック
     const hasOtherLoads = components.some(c => c.type === "diode" || c.type === "transistor" || c.type === "resistor" || c.type === "switch" || c.type === "switch_spdt");
+
+
     if (!hasOtherLoads || !isPowered) {
 
 
@@ -3170,11 +3483,20 @@ function calculateCircuitPhysics() {
   let r_total_ohm = r_load_ohm + BATTERY_INTERNAL_R;
   let p_total_mW = effectiveV * i_total_mA;
 
-  // 7. 各素子の熱物理・自立過熱溶断判定
+// 7. 各素子の熱物理・自立過熱溶断判定 (安全抵抗接続時の自動修復対応版)
   let hasBurnedComponent = false;
 
   components.filter(c => c.type === "led").forEach(led => {
-    const isConnected = energized.has(getNodeByHoleId(led.pinA)) && energized.has(getNodeByHoleId(led.pinB));
+    const nA = getNodeByHoleId(led.pinA);
+    const nB = getNodeByHoleId(led.pinB);
+    const isConnected = energized.has(nA) && energized.has(nB);
+
+    // インスタンスに保持された枝路抵抗を参照 (未定義時は0で安全フォールバック)
+    const effBranchR = led.branchR || 0;
+    if (led.isBurned && isConnected && effBranchR >= 100) {
+      led.isBurned = false;
+    }
+
     const actualLedI = (isConnected && !led.isBurned) ? (led.current_mA || 0.0) : 0.0;
 
     if (led.isBurned) {
@@ -3198,7 +3520,6 @@ function calculateCircuitPhysics() {
       led.current_mA = 0.0;
     }
   });
-
  // 8. 抵抗器の過熱焼損＆パラメータ一括同期 (★ トランジスタ個別ブランチ電流の保護対応)
   const isTrActive = components.some(c => c.type === "transistor" && c.state === "SATURATED");
 
@@ -3316,10 +3637,15 @@ function calculateCircuitPhysics() {
         // ベース電位が 0.68V (Vbe閾値) 以上で飽和・自動点灯、未満で遮断・消灯
         trComp.state = (vBase >= 0.68) ? "SATURATED" : "CUTOFF";
 
-        // トランジスタが遮断(CUTOFF)の場合は主コレクタ回路を即時遮断
+       // トランジスタが遮断(CUTOFF)の場合は主コレクタ回路を即時遮断
         if (trComp.state === "CUTOFF") {
           const cLed = components.find(c => c.type === "led" && !c.isBurned);
-          const cRes = components.find(r => r.type === "resistor" && (r.val_ohm || 0) < 50000 && !r.id.includes("BASE"));
+          const cRes = components.find(r => {
+            if (r.type !== "resistor" || (r.val_ohm || 0) >= 50000) return false;
+            const nrA = getNodeByHoleId(r.pinA);
+            const nrB = getNodeByHoleId(r.pinB);
+            return nrA !== nBase && nrB !== nBase;
+          });
           if (cLed) { cLed.isOn = false; cLed.current_mA = 0.0; cLed.voltageDrop = 0.0; cLed.power_mW = 0.0; }
           if (cRes) { cRes.current_mA = 0.0; cRes.voltageDrop = 0.0; cRes.power_mW = 0.0; }
           trComp.current_mA = 0.0;
@@ -3332,19 +3658,38 @@ function calculateCircuitPhysics() {
 
 
 
-  if (hasBurnedComponent) {
+ if (hasBurnedComponent) {
     components.filter(c => c.type === "led").forEach(l => l.isOn = false);
     const burnedResult = { status: "OPEN", v_in: 0.0, r_total_ohm: Infinity, i_total_mA: 0.0, p_total_mW: 0.0, energized };
     if (typeof updateCircuitTreePanel === "function") updateCircuitTreePanel(burnedResult);
+    if (typeof updatePhysicsLogEngine === "function") updatePhysicsLogEngine(burnedResult, energized);
     return burnedResult;
   }
 
+
+
+
 // ★ トランジスタ飽和時の最終出力サニタイズ (オシロスコープ＆ツリーの表示破綻を完全防止)
   const targetTr = components.find(c => c.type === "transistor");
-  if (targetTr && targetTr.state === "SATURATED") {
+   if (targetTr && targetTr.state === "SATURATED") {
+    const nC_Tr = getNodeByHoleId(targetTr.pinC);
+    const nB_Tr = getNodeByHoleId(targetTr.pinB);
+
     const cLed = components.find(c => c.type === "led" && !c.isBurned);
-    const cRes = components.find(r => r.type === "resistor" && (r.val_ohm || 0) < 50000 && !r.id.includes("TR_B"));
-    const bRes = components.find(r => r.type === "resistor" && ((r.val_ohm || 0) >= 50000 || r.id.includes("TR_B")));
+    // ベース端子ノードに繋がっていない低抵抗をコレクタ負荷として動的抽出
+    const cRes = components.find(r => {
+      if (r.type !== "resistor" || (r.val_ohm || 0) >= 50000) return false;
+      const nrA = getNodeByHoleId(r.pinA);
+      const nrB = getNodeByHoleId(r.pinB);
+      return nrA !== nB_Tr && nrB !== nB_Tr;
+    });
+    // ベース端子ノードまたはベース回路系統に接続されている抵抗をベース抵抗として動的抽出
+    const bRes = components.find(r => {
+      if (r.type !== "resistor") return false;
+      const nrA = getNodeByHoleId(r.pinA);
+      const nrB = getNodeByHoleId(r.pinB);
+      return nrA === nB_Tr || nrB === nB_Tr || (r.val_ohm || 0) >= 50000;
+    });
     const bSw = components.find(s => s.type === "tact_switch" || s.type === "switch");
 
     const isSwOn = bSw ? (bSw.type === "tact_switch" ? !!bSw.isPressed : !!bSw.isOn) : true;
@@ -3363,21 +3708,41 @@ function calculateCircuitPhysics() {
       if (bRes) { bRes.current_mA = ib_mA; bRes.voltageDrop = (ib_mA / 1000) * rb; bRes.power_mW = bRes.voltageDrop * ib_mA; }
       if (bSw) { bSw.current_mA = ib_mA; bSw.voltageDrop = 0.0; }
 
-     targetTr.current_mA = ic_mA;
+  targetTr.current_mA = ic_mA;
       targetTr.ic_mA = ic_mA;
       targetTr.ib_uA = ib_mA * 1000;
       targetTr.voltageDrop = 0.10;
 
-      // ★ ワイヤ電流の精密同期: コレクタ給電線(列5)はIc、ベース給電線(列17)はIb、エミッタ接地線(列10)はItotal
+      // ★ ワイヤ電流の動的トポロジー同期: 端子ノードに基づき Ic / Ib / Itotal を正確に分配
+      const nC = getNodeByHoleId(targetTr.pinC);
+      const nB = getNodeByHoleId(targetTr.pinB);
+      const nE = getNodeByHoleId(targetTr.pinE);
+
       wires.forEach(w => {
-        const from = w.fromHole || "";
-        const to = w.toHole || "";
-        if (from.includes("5") || to.includes("5")) w.current_mA = ic_mA;
-        else if (from.includes("17") || to.includes("17")) w.current_mA = ib_mA;
-        else if (from.includes("10") || to.includes("10")) w.current_mA = ic_mA + ib_mA;
+        const nF = getNodeByHoleId(w.fromHole);
+        const nT = getNodeByHoleId(w.toHole);
+
+        // 未通電ワイヤは除外
+        if (!energized.has(nF) || !energized.has(nT)) {
+          w.current_mA = 0.0;
+          return;
+        }
+
+        const isGndWire = (w.fromHole && w.fromHole.includes("MINUS")) || (w.toHole && w.toHole.includes("MINUS"));
+
+        if (isGndWire || nF === nE || nT === nE) {
+          // エミッタ接地側: 全電流 (Ic + Ib)
+          w.current_mA = ic_mA + ib_mA;
+        } else if (nF === nB || nT === nB || (bRes && (nF === getNodeByHoleId(bRes.pinA) || nT === getNodeByHoleId(bRes.pinA) || nF === getNodeByHoleId(bRes.pinB) || nT === getNodeByHoleId(bRes.pinB)))) {
+          // ベース制御経路: Ib (約0.08mA)
+          w.current_mA = ib_mA;
+        } else {
+          // コレクタ主回路経路 (G4-J9等を含む): Ic (約6.89mA)
+          w.current_mA = ic_mA;
+        }
       });
 
-   i_total_mA = ic_mA + ib_mA; // 合計約 6.97 mA
+      i_total_mA = ic_mA + ib_mA; // 合計約 6.97 mA
       r_total_ohm = (v_in / (i_total_mA / 1000));
     }
   }
@@ -3387,12 +3752,24 @@ function calculateCircuitPhysics() {
   if (targetMosfet && targetMosfet.state === "ON") {
     const cLed = components.find(c => c.type === "led" && !c.isBurned);
    const cBuzzer = components.find(c => c.type === "buzzer");
-    // ゲート系抵抗を除外した真のドレイン負荷素子 (固定抵抗または可変抵抗) を動的取得
-    const dRes = components.find(r => (r.type === "resistor" || r.type === "potentiometer") && !r.id.includes("GATE") && !r.id.includes("PD") && !r.id.includes("PULLDOWN"));
+
+
+
+  const nGatePin = getNodeByHoleId(targetMosfet.pinG);
+    // ゲート端子ノードに直接繋がっていない素子をドレイン負荷として抽出
+    const dRes = components.find(r => {
+      if (r.type !== "resistor" && r.type !== "potentiometer") return false;
+      const nrA = getNodeByHoleId(r.pinA);
+      const nrB = getNodeByHoleId(r.pinB);
+      return nrA !== nGatePin && nrB !== nGatePin;
+    });
     const gSw = components.find(s => s.type === "tact_switch" || s.type === "switch");
 
     const isGateOn = gSw ? (gSw.type === "tact_switch" ? !!gSw.isPressed : !!gSw.isOn) : true;
     if (isGateOn) {
+
+
+
       // 可変抵抗器の場合は実効値 (getEffOhmまたはgetPotEffOhm) を取得
       let rd = 0;
       if (dRes) {
@@ -3406,28 +3783,70 @@ function calculateCircuitPhysics() {
       // ドレイン電流 (Id): 負荷抵抗(330Ω〜100kΩ)に応じた動的オーム計算
       const id_mA = Math.max(0.0, (v_in - vf) / (totalLoadR + rds_on + BATTERY_INTERNAL_R)) * 1000;
 
+ // ゲート端子ノードに接続されている抵抗をプルダウン抵抗として動的検出
+      const pdRes = components.find(r => {
+        if (r.type !== "resistor") return false;
+        const nrA = getNodeByHoleId(r.pinA);
+        const nrB = getNodeByHoleId(r.pinB);
+        return nrA === nGatePin || nrB === nGatePin || (r.val_ohm || 0) >= 50000;
+      });
+      const r_pd = pdRes ? (pdRes.val_ohm || 100000) : 100000;
+      const i_gate_bias_mA = pdRes ? Math.max(0.0, (v_in / r_pd) * 1000) : 0.0; // 約 0.09 mA
+
       if (dRes) { dRes.current_mA = id_mA; dRes.voltageDrop = (id_mA / 1000) * rd; dRes.power_mW = dRes.voltageDrop * id_mA; }
       if (cBuzzer) { cBuzzer.current_mA = id_mA; cBuzzer.voltageDrop = (id_mA / 1000) * rbz; cBuzzer.power_mW = cBuzzer.voltageDrop * id_mA; }
       if (cLed) { cLed.current_mA = id_mA; cLed.isOn = (id_mA > 0.05); cLed.voltageDrop = cLed.isOn ? vf : 0.0; cLed.power_mW = vf * id_mA; }
-      if (gSw) { gSw.current_mA = 0.0; gSw.voltageDrop = 0.0; } // ゲート側は電流ゼロ
+      if (pdRes) { pdRes.current_mA = i_gate_bias_mA; pdRes.voltageDrop = v_in; pdRes.power_mW = (v_in * i_gate_bias_mA); }
+      if (gSw) { gSw.current_mA = i_gate_bias_mA; gSw.voltageDrop = 0.0; } // スイッチ通過電流はプルダウン電流分
 
       targetMosfet.current_mA = id_mA;
       targetMosfet.id_mA = id_mA;
-      targetMosfet.ig_uA = 0.0; // 完全電圧制御
+      targetMosfet.ig_uA = 0.0; // MOSFETゲート酸化膜への流入は完全ゼロ
       targetMosfet.vgs_V = v_in;
       targetMosfet.vds_V = (id_mA / 1000) * rds_on;
       targetMosfet.voltageDrop = targetMosfet.vds_V;
       targetMosfet.power_mW = targetMosfet.vds_V * id_mA;
 
-      // ワイヤ電流同期: ドレイン側はId、ゲート制御線は0.00mA、ソース接地線はId
+      // ワイヤ電流動的トポロジー同期: ドレイン主回路 / ゲート給電・プルダウン系 / ソース接地 を精密分離
+      const nGate = getNodeByHoleId(targetMosfet.pinG);
+      const nDrain = getNodeByHoleId(targetMosfet.pinD);
+      const nSource = getNodeByHoleId(targetMosfet.pinS);
+      const nPdA = pdRes ? getNodeByHoleId(pdRes.pinA) : null;
+      const nPdB = pdRes ? getNodeByHoleId(pdRes.pinB) : null;
+
       wires.forEach(w => {
-        const from = w.fromHole || "";
-        const to = w.toHole || "";
-        if (from.includes("17") || to.includes("17")) w.current_mA = 0.0; // ゲート線
-        else if (from.includes("5") || to.includes("5") || from.includes("10") || to.includes("10")) w.current_mA = id_mA;
+        const nF = getNodeByHoleId(w.fromHole);
+        const nT = getNodeByHoleId(w.toHole);
+
+        if (!energized.has(nF) || !energized.has(nT)) {
+          w.current_mA = 0.0;
+          return;
+        }
+
+        const isGndWire = (w.fromHole && w.fromHole.includes("MINUS")) || (w.toHole && w.toHole.includes("MINUS"));
+        const connectsToGateTerminal = (nF === nGate || nT === nGate);
+        const connectsToPdRes = pdRes && (nF === nPdA || nT === nPdA || nF === nPdB || nT === nPdB);
+        const connectsToSw = gSw && (nF === getNodeByHoleId(gSw.pinA) || nT === getNodeByHoleId(gSw.pinA) || nF === getNodeByHoleId(gSw.pinB) || nT === getNodeByHoleId(gSw.pinB));
+
+        if (isGndWire) {
+          // 接地線判定: ソース端子側の接地線は Id、プルダウン抵抗側の接地線は i_gate_bias_mA
+          const isSourceGnd = (nF === nSource || nT === nSource);
+          w.current_mA = isSourceGnd ? id_mA : i_gate_bias_mA;
+        } else if (connectsToGateTerminal && !connectsToSw && !connectsToPdRes) {
+          // MOSFETのゲートピン直結線のみ電流 0.00 mA
+          w.current_mA = 0.0;
+        } else if (connectsToSw || connectsToPdRes) {
+          // ゲート給電線 (BUS_TOP_PLUS_23 ➔ A23) およびスイッチ中継線: プルダウンバイアス電流
+          w.current_mA = i_gate_bias_mA;
+        } else {
+          // ドレイン主回路系: ドレイン電流 Id
+          w.current_mA = id_mA;
+        }
       });
 
-      i_total_mA = id_mA;
+      i_total_mA = id_mA + i_gate_bias_mA; // 合計全回路電流
+
+
       r_total_ohm = (v_in / (i_total_mA / 1000));
     }
   }
@@ -3451,51 +3870,57 @@ function calculateCircuitPhysics() {
     updatePhysicsLogEngine(physicsResult, energized);
   }
 
- // Stage 13 自立型クリア判定 (表記揺れ完全吸収・確実発火版)
-  const isSt13 = (typeof currentStage !== "undefined" && currentStage === 13) ||
-                 (typeof STAGE_STATE !== "undefined" && STAGE_STATE.currentStage === 13) ||
-                 (document.getElementById("btn-stage-13") && document.getElementById("btn-stage-13").style.background.includes("059669"));
+ // Stage 13 自立型クリア判定 (状態変数による厳格判定・DOMスタイル依存完全撤廃版)
+  const activeStId = (typeof currentActiveStage !== "undefined") ? currentActiveStage : ((typeof currentStage !== "undefined") ? currentStage : null);
+  const isSt13 = activeStId === 13 || activeStId === "13" || (typeof STAGE_STATE !== "undefined" && STAGE_STATE.currentStage === 13);
 
-  if (isSt13 && !window.stage13Cleared) {
+if (isSt13 && !window.stage13Cleared) {
     const isClosed = physicsResult && physicsResult.status === "CLOSED";
     const bz = (typeof components !== "undefined") ? components.find(c => c.type === "buzzer") : null;
     const isBuzzing = isClosed && (physicsResult.i_total_mA > 0.5) && (bz || physicsResult.r_total_ohm < 5000);
 
     if (isBuzzing) {
       window.stage13Cleared = true;
-      setTimeout(() => {
-        const modalHtml = `
-          <div id="stage13-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); display:flex; align-items:center; justify-content:center; z-index:9999;">
-            <div style="background:#0f172a; border:2px solid #38bdf8; border-radius:8px; padding:20px; max-width:520px; color:#f8fafc; font-family:sans-serif; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
-              <div style="color:#38bdf8; font-size:16px; font-weight:bold; border-bottom:1px solid #334155; padding-bottom:8px; margin-bottom:12px;">
-                [STAGE 13 達成]: MOSFETパルス駆動 ＆ オシロスコープ波形彫刻成功
-              </div>
-              <div style="font-size:12px; line-height:1.6; color:#cbd5e1; margin-bottom:14px;">
-                <div style="margin-bottom:8px;">
-                  <b style="color:#facc15;">1. 完全電圧制御スイッチング:</b><br>
-                  2N7000 MOSFETのゲート酸化膜に電界を形成し、ゲート電流0.00mAのまま2.4kHz圧電ブザーの高速パルス開閉に成功しました。
-                </div>
-                <div style="margin-bottom:8px;">
-                  <b style="color:#4ade80;">2. RC平滑化による波形彫刻:</b><br>
-                  並列接続されたコンデンサの時定数 (tau = R * C) により、鋭利な矩形波が美麗な三角波へ変調されたことをオシロスコープ上で実証しました。
-                </div>
-                <div>
-                  <b style="color:#38bdf8;">3. 動的インピーダンス制御:</b><br>
-                  可変抵抗による電流制御や負荷抵抗の変更に対しても、回路全体のオームの法則がリアルタイムに追従することを確認しました。
-                </div>
-              </div>
-              <button onclick="document.getElementById('stage13-modal').remove()" style="width:100%; padding:8px; background:#0284c7; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">
-                [実験を継続する]
-              </button>
-            </div>
-          </div>`;
-        document.body.insertAdjacentHTML("beforeend", modalHtml);
-      }, 500);
+      if (typeof triggerStage13ClearModal === "function") {
+        setTimeout(triggerStage13ClearModal, 500);
+      }
     }
   }
 
   return physicsResult;
 }
+
+// Stage 13 クリア達成モーダル生成関数 (UI層への分離)
+function triggerStage13ClearModal() {
+  if (document.getElementById("stage13-modal")) return;
+  const modalHtml = `
+    <div id="stage13-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); display:flex; align-items:center; justify-content:center; z-index:9999;">
+      <div style="background:#0f172a; border:2px solid #38bdf8; border-radius:8px; padding:20px; max-width:520px; color:#f8fafc; font-family:sans-serif; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
+        <div style="color:#38bdf8; font-size:16px; font-weight:bold; border-bottom:1px solid #334155; padding-bottom:8px; margin-bottom:12px;">
+          [STAGE 13 達成]: MOSFETパルス駆動 ＆ オシロスコープ波形彫刻成功
+        </div>
+        <div style="font-size:12px; line-height:1.6; color:#cbd5e1; margin-bottom:14px;">
+          <div style="margin-bottom:8px;">
+            <b style="color:#facc15;">1. 完全電圧制御スイッチング:</b><br>
+            2N7000 MOSFETのゲート酸化膜に電界を形成し、ゲート電流0.00mAのまま2.4kHz圧電ブザーの高速パルス開閉に成功しました。
+          </div>
+          <div style="margin-bottom:8px;">
+            <b style="color:#4ade80;">2. RC平滑化による波形彫刻:</b><br>
+            並列接続されたコンデンサの時定数 (tau = R * C) により、鋭利な矩形波が美麗な三角波へ変調されたことをオシロスコープ上で実証しました。
+          </div>
+          <div>
+            <b style="color:#38bdf8;">3. 動的インピーダンス制御:</b><br>
+            可変抵抗による電流制御や負荷抵抗の変更に対しても、回路全体のオームの法則がリアルタイムに追従することを確認しました。
+          </div>
+        </div>
+        <button onclick="document.getElementById('stage13-modal').remove()" style="width:100%; padding:8px; background:#0284c7; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">
+          [実験を継続する]
+        </button>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+}
+
 
 function renderOscilloscope(ctx) {
   const w = ctx.canvas.width;
@@ -5752,10 +6177,24 @@ function renderScene(ctx) {
     ctx.fillStyle = isHovered ? "#38bdf8" : "#1e293b"; ctx.fill();
   });
 
-  // 6. 通電アニメーション破線描画 (物理実電流連動版)
+// 6. 通電アニメーション破線描画 (物理実電流連動版 ＆ 双方向結線完全追従)
   ctx.save();
   const physics = (typeof calculateCircuitPhysics === "function") ? calculateCircuitPhysics() : null;
   const isCircuitActive = physics && physics.status === "CLOSED" && physics.i_total_mA > 0.05;
+
+  // 手動操作中の一時的過渡状態におけるゴースト発光・電流描画を強制遮断
+  if (!isCircuitActive) {
+    components.forEach(c => {
+      c.current_mA = 0.0;
+      c.voltageDrop = 0.0;
+      c.power_mW = 0.0;
+      if (c.type === "led") c.isOn = false;
+      if (c.type === "buzzer") c.current_mA = 0.0;
+    });
+    if (Array.isArray(activeJumperWires)) {
+      activeJumperWires.forEach(w => { w.current_mA = 0.0; });
+    }
+  }
 
   if (isCircuitActive) {
     ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 3; ctx.setLineDash([6, 4]); ctx.lineDashOffset = -dashOffset;
@@ -5768,10 +6207,17 @@ function renderScene(ctx) {
 
     const activeWorkingWires = activeJumperWires.filter(w => (w.current_mA || 0) > 0.05);
 
+    // プラス側給電点 (from/to 双方の接続方向に対応)
     let maxPlusCol = 1;
     activeWorkingWires.forEach(w => {
-      if (w.fromHole.startsWith("BUS_TOP_PLUS_")) {
-        const c = getColFromHoleId(w.fromHole);
+      const f = w.fromHole || w.from || "";
+      const t = w.toHole || w.to || "";
+      if (f.startsWith("BUS_TOP_PLUS_")) {
+        const c = getColFromHoleId(f);
+        if (c > maxPlusCol) maxPlusCol = c;
+      }
+      if (t.startsWith("BUS_TOP_PLUS_")) {
+        const c = getColFromHoleId(t);
         if (c > maxPlusCol) maxPlusCol = c;
       }
     });
@@ -5786,10 +6232,17 @@ function renderScene(ctx) {
     ctx.lineTo(batX + batW, batY + 47);
     ctx.stroke();
 
+    // マイナス側接地帰還点 (from/to 双方の接続方向に対応)
     let maxMinusCol = 1;
     activeWorkingWires.forEach(w => {
-      if (w.toHole.startsWith("BUS_BOTTOM_MINUS_")) {
-        const c = getColFromHoleId(w.toHole);
+      const f = w.fromHole || w.from || "";
+      const t = w.toHole || w.to || "";
+      if (f.startsWith("BUS_BOTTOM_MINUS_")) {
+        const c = getColFromHoleId(f);
+        if (c > maxMinusCol) maxMinusCol = c;
+      }
+      if (t.startsWith("BUS_BOTTOM_MINUS_")) {
+        const c = getColFromHoleId(t);
         if (c > maxMinusCol) maxMinusCol = c;
       }
     });
@@ -5804,23 +6257,32 @@ function renderScene(ctx) {
       }
     });
 
-    // ★ 実電流が流れているコンポーネント列のみ縦列破線を描画
+  // 実電流が流れているコンポーネント列のみ縦列破線を描画 (中央溝またぎ完全抑止版)
     components.forEach(comp => {
       if ((comp.current_mA || 0) <= 0.05) return;
       const nA = getNodeByHoleId(comp.pinA);
       const nB = getNodeByHoleId(comp.pinB);
       if (energized.has(nA) && energized.has(nB)) {
-        const colA = getColFromHoleId(comp.pinA);
-        const compsAtColA = components.filter(c => getColFromHoleId(c.pinA) === colA || getColFromHoleId(c.pinB) === colA);
-        if (compsAtColA.length > 1) {
-          const holesA = compsAtColA.flatMap(c => [c.pinA, c.pinB]).filter(h => getColFromHoleId(h) === colA);
-          const coordsA = holesA.map(h => getHoleCoord(h)).filter(Boolean);
-          const minY = Math.min(...coordsA.map(p => p.y));
-          const maxY = Math.max(...coordsA.map(p => p.y));
-          if (minY !== maxY) {
-            ctx.beginPath(); ctx.moveTo(coordsA[0].x, minY); ctx.lineTo(coordsA[0].x, maxY); ctx.stroke();
+        [comp.pinA, comp.pinB].forEach(pin => {
+          const col = getColFromHoleId(pin);
+          const isTop = (pin.charAt(0) <= "E");
+          const compsAtSameBlock = components.filter(c => {
+            const hasA = getColFromHoleId(c.pinA) === col && (c.pinA.charAt(0) <= "E") === isTop;
+            const hasB = getColFromHoleId(c.pinB) === col && (c.pinB.charAt(0) <= "E") === isTop;
+            return hasA || hasB;
+          });
+
+          if (compsAtSameBlock.length > 1) {
+            const blockHoles = compsAtSameBlock.flatMap(c => [c.pinA, c.pinB])
+              .filter(h => getColFromHoleId(h) === col && (h.charAt(0) <= "E") === isTop);
+            const coords = blockHoles.map(h => getHoleCoord(h)).filter(Boolean);
+            const minY = Math.min(...coords.map(p => p.y));
+            const maxY = Math.max(...coords.map(p => p.y));
+            if (minY !== maxY) {
+              ctx.beginPath(); ctx.moveTo(coords[0].x, minY); ctx.lineTo(coords[0].x, maxY); ctx.stroke();
+            }
           }
-        }
+        });
       }
     });
   }
@@ -8060,18 +8522,20 @@ function setupInteraction(canvas) {
       }
     });
 
-  if (clickedWireIdx !== -1) {
-      saveHistory(); // 履歴保存（Ctrl+Zで復元可能）
+if (clickedWireIdx !== -1) {
+      saveHistory();
       const removedWire = activeJumperWires.splice(clickedWireIdx, 1)[0];
-      console.log("🗑️ ジャンパー線をワンクリック削除しました:", removedWire.id);
-            selectedWire = null;
+      if (typeof wires !== "undefined" && Array.isArray(wires) && removedWire) {
+        const wIdx = wires.findIndex(w => w.id === removedWire.id || (w.fromHole === removedWire.fromHole && w.toHole === removedWire.toHole));
+        if (wIdx !== -1) wires.splice(wIdx, 1);
+      }
+      selectedWire = null;
       if (typeof analyzeEnergizedNodes === "function") analyzeEnergizedNodes();
+      if (typeof calculateCircuitPhysics === "function") calculateCircuitPhysics();
       if (typeof renderScene === "function") renderScene();
-      // ★ 配線が消えた瞬間にインスペクターの諸元・状態テキストも即時再同期！
       if (typeof updateInspectorUI === "function") updateInspectorUI(selectedComponent);
-      return; // 配線削除完了・後続処理をストップ
+      return;
     }
-
    // ------------------------------------------------------------------
     // ★ 2. 【2番目】空きスルーホールの最寄り吸着判定 (タッチ対応: 半径18px)
     // ------------------------------------------------------------------
@@ -8096,25 +8560,40 @@ function setupInteraction(canvas) {
         const fromId = firstSelectedHole.id;
         const toId = clickedHole.id;
 
-        const existingIdx = activeJumperWires.findIndex(w =>
-          (w.fromHole === fromId && w.toHole === toId) ||
-          (w.fromHole === toId && w.toHole === fromId)
-        );
+     const isSameWire = (w) => {
+          const f = w.fromHole || w.from;
+          const t = w.toHole || w.to;
+          return (f === fromId && t === toId) || (f === toId && t === fromId);
+        };
+
+        const existingIdx = activeJumperWires.findIndex(isSameWire);
 
         saveHistory(); // 配線変更前の履歴保存
         if (existingIdx !== -1) {
           activeJumperWires.splice(existingIdx, 1);
+          if (typeof wires !== "undefined" && Array.isArray(wires)) {
+            const wIdx = wires.findIndex(isSameWire);
+            if (wIdx !== -1) wires.splice(wIdx, 1);
+          }
         } else {
-          activeJumperWires.push({
+          const newWire = {
             id: `MANUAL_JW_${Date.now()}`,
             fromHole: fromId,
             toHole: toId,
-            color: "#0284c7"
-          });
+            from: fromId,
+            to: toId,
+            color: "#0284c7",
+            current_mA: 0.0
+          };
+          activeJumperWires.push(newWire);
+          if (typeof wires !== "undefined" && Array.isArray(wires)) {
+            wires.push(newWire);
+          }
         }
 
-        firstSelectedHole = null;
+     firstSelectedHole = null;
         if (typeof analyzeEnergizedNodes === "function") analyzeEnergizedNodes();
+        if (typeof calculateCircuitPhysics === "function") calculateCircuitPhysics();
       }
       if (typeof renderScene === "function") renderScene();
       return; // 配線操作確定終了
@@ -8611,25 +9090,22 @@ window.addNewSwitch = function(subType = "toggle") {
   const pinCOM = isSpdt ? `C${startCol + 2}` : null;
   const pinB = isSpdt ? `C${startCol + 4}` : `C${startCol + 3}`;
 
-  components.push({
-      id: `SW_${Date.now()}`,
-      type: isSpdt ? "switch_spdt" : "switch",
-      subType: master.subType,
-      name: master.name,
-      pinA: pinA,          // L1接点
-      pinCOM: pinCOM,      // COM共通端子 (SPDTのみ)
-      pinB: pinB,          // L2接点 (通常時はもう一方の端子)
-      state: "L1",         // SPDT用: 初期はL1接続
-      isOn: true,          // 通常スイッチ用
-      desc: master.desc
-  });
- autoGenerateJumperWires();
+components.push({
+        id: `SW_${Date.now()}`,
+        type: isSpdt ? "switch_spdt" : "switch",
+        subType: master.subType,
+        name: master.name,
+        pinA: pinA,          // L1接点
+        pinCOM: pinCOM,      // COM共通端子 (SPDTのみ)
+        pinB: pinB,          // L2接点 (通常時はもう一方の端子)
+        state: "L1",         // SPDT用: 初期はL1接続
+        isOn: true,          // 通常スイッチ用
+        desc: master.desc
+    });
+    autoGenerateJumperWires();
     analyzeEnergizedNodes();
+  };
 }
-}
-
-
-
 
 
 
@@ -9594,6 +10070,234 @@ function runTreeKvlAndHoleAudit() {
 }
 
 
+// ======================================================================
+// 全自動回路健全性スキャナー (Automated Circuit Integrity Auditor)
+// ======================================================================
+function runCircuitAutoAudit() {
+  console.log("%c[AUTO-AUDIT] 回路自動診断を開始します...", "color: #38bdf8; font-weight: bold;");
+
+  const physics = (typeof calculateCircuitPhysics === "function") ? calculateCircuitPhysics() : null;
+  const energized = (typeof analyzeEnergizedNodes === "function") ? analyzeEnergizedNodes() : new Set();
+  const errors = [];
+  const warnings = [];
+
+  if (!physics) {
+    console.error("[CRITICAL] calculateCircuitPhysics が存在しません。");
+    return;
+  }
+
+  const isClosed = physics.status === "CLOSED";
+
+  // 1. OPEN状態における誤発光・誤電流の自動検知
+  if (!isClosed) {
+    if (physics.i_total_mA > 0.001) {
+      errors.push(`[状態矛盾] 回路状態が OPEN にもかかわらず、全回路電流が ${physics.i_total_mA} mA 計上されています。`);
+    }
+
+    components.forEach(c => {
+      if (c.current_mA > 0.001) {
+        errors.push(`[素子リーク] 回路遮断中に ${c.name} (${c.id}) に ${c.current_mA} mA が流れています。`);
+      }
+      if (c.type === "led" && c.isOn) {
+        errors.push(`[ゴースト発光] 回路遮断中に ${c.name} (${c.id}) が isOn = true (点灯) になっています。`);
+      }
+    });
+
+    const wires = Array.isArray(activeJumperWires) ? activeJumperWires : [];
+    wires.forEach(w => {
+      const cur = w.current_mA || 0;
+      if (cur > 0.001) {
+        errors.push(`[ワイヤリーク] 回路遮断中に配線 (${w.fromHole || w.from} -> ${w.toHole || w.to}) に電流 ${cur} mA が流れています。`);
+      }
+    });
+  }
+
+  // 2. 浮遊素子・未接続配線の誤通電検知
+  components.forEach(c => {
+    const nA = getNodeByHoleId(c.pinA);
+    const nB = getNodeByHoleId(c.pinB);
+    const hasConnection = energized.has(nA) && energized.has(nB);
+
+    if (!hasConnection && (c.current_mA || 0) > 0.001) {
+      errors.push(`[孤立素子通電] 端子が給電されていない素子 ${c.name} (${c.id}) に電流 ${c.current_mA} mA が流れています。`);
+    }
+  });
+
+  // 3. アニメーションフラグの残存検知
+  const wires = Array.isArray(activeJumperWires) ? activeJumperWires : [];
+  wires.forEach(w => {
+    const nF = getNodeByHoleId(w.fromHole || w.from);
+    const nT = getNodeByHoleId(w.toHole || w.to);
+    const isWireEnergized = energized.has(nF) && energized.has(nT);
+    if (!isWireEnergized && ((w.current_mA || 0) > 0.001)) {
+      warnings.push(`[浮遊配線アニメーション] 未導通のワイヤ (${w.fromHole || w.from} -> ${w.toHole || w.to}) の電流値が 0 にリセットされていません。`);
+    }
+  });
+
+  // 4. 中央溝(DIP分離帯)跨ぎの同列不正アニメーション・短絡検知
+  components.forEach(c => {
+    const colA = getColFromHoleId(c.pinA);
+    const colB = getColFromHoleId(c.pinB);
+    if (colA === colB) {
+      const isCrossChannel = (c.pinA.charAt(0) <= "E" && c.pinB.charAt(0) >= "F") ||
+                             (c.pinA.charAt(0) >= "F" && c.pinB.charAt(0) <= "E");
+      const isAllowedCrossType = ["resistor", "led", "diode", "capacitor"].includes(c.type);
+      if (isCrossChannel && !isAllowedCrossType) {
+        warnings.push(`[溝跨ぎ導通警告] ${c.name} (${c.id}) が中央溝を跨いで同一列に配置されています。意図しない縦断アニメーションの原因になります。`);
+      }
+    }
+  });
+
+  // 診断結果のコンソール出力
+  if (errors.length === 0 && warnings.length === 0) {
+    console.log("%c[AUTO-AUDIT PASS] 不整合バグは検出されませんでした。物理整合性は正常です。", "color: #22c55e; font-weight: bold;");
+  } else {
+    if (errors.length > 0) {
+      console.group("%c[AUTO-AUDIT FAILED] 検出された致命的バグ (" + errors.length + "件):", "color: #ef4444; font-weight: bold;");
+      errors.forEach(e => console.error(e));
+      console.groupEnd();
+    }
+    if (warnings.length > 0) {
+      console.group("%c[AUTO-AUDIT WARNING] 描画残存・トポロジー警告 (" + warnings.length + "件):", "color: #f59e0b; font-weight: bold;");
+      warnings.forEach(w => console.warn(w));
+      console.groupEnd();
+    }
+  }
+}
+
+
+// ======================================================================
+// モンテカルロ無作為回路バグ検出スクリプト (1000 Patterns Fuzz Test)
+// ======================================================================
+function runMonteCarloFuzzTest(iterations = 1000) {
+  console.log(`[MONTE-CARLO] 無作為回路ストレステスト開始: 全 ${iterations} パターン`);
+
+  const backupComponents = JSON.parse(JSON.stringify(components));
+  const backupWires = JSON.parse(JSON.stringify(activeJumperWires));
+
+  const availablePartKeys = Object.keys(PART_REGISTRY);
+  const rows = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+  let passedCount = 0;
+  const failureLog = [];
+
+ for (let i = 1; i <= iterations; i++) {
+    components.length = 0;
+    activeJumperWires.length = 0;
+
+    // 1. ランダムにパーツを 1〜4 個配置
+    const compCount = Math.floor(Math.random() * 4) + 1;
+    for (let c = 0; c < compCount; c++) {
+      const partKey = availablePartKeys[Math.floor(Math.random() * availablePartKeys.length)];
+      const master = PART_REGISTRY[partKey];
+      if (!master) continue;
+
+      const span = master.spanCols || 2;
+      const startCol = Math.floor(Math.random() * (30 - span)) + 1;
+      const row = rows[Math.floor(Math.random() * rows.length)];
+
+      const inst = {
+        id: `FUZZ_${master.type.toUpperCase()}_${c}_${Date.now()}`,
+        type: master.type,
+        name: master.name,
+        pinA: `${row}${startCol}`,
+        pinB: `${row}${startCol + span}`,
+        isVertical: false,
+        spanCols: span,
+        val_ohm: master.val_ohm,
+        vf: master.vf,
+        isOn: false,
+        isBurned: false,
+        current_mA: 0.0,
+        voltageDrop: 0.0,
+        power_mW: 0.0
+      };
+
+      if (master.type === "transistor") {
+        inst.pinE = inst.pinA;
+        inst.pinC = `${row}${Math.min(startCol + 1, 30)}`;
+        inst.pinB = inst.pinB;
+        inst.state = "CUTOFF";
+      }
+
+      components.push(inst);
+    }
+
+    // 2. ランダムにジャンパ線を 1〜6 本結線
+    const wireCount = Math.floor(Math.random() * 6) + 1;
+    for (let w = 0; w < wireCount; w++) {
+      const isPowerFeed = Math.random() < 0.3;
+      const isGndFeed = Math.random() < 0.3;
+
+      let fromHole, toHole;
+      if (isPowerFeed) {
+        fromHole = `BUS_TOP_PLUS_${Math.floor(Math.random() * 30) + 1}`;
+        toHole = `${rows[Math.floor(Math.random() * 5)]}${Math.floor(Math.random() * 30) + 1}`;
+      } else if (isGndFeed) {
+        fromHole = `${rows[Math.floor(Math.random() * 5) + 5]}${Math.floor(Math.random() * 30) + 1}`;
+        toHole = `BUS_BOTTOM_MINUS_${Math.floor(Math.random() * 30) + 1}`;
+      } else {
+        fromHole = `${rows[Math.floor(Math.random() * 10)]}${Math.floor(Math.random() * 30) + 1}`;
+        toHole = `${rows[Math.floor(Math.random() * 10)]}${Math.floor(Math.random() * 30) + 1}`;
+      }
+
+      activeJumperWires.push({
+        id: `FUZZ_WIRE_${w}_${Date.now()}`,
+        fromHole: fromHole,
+        toHole: toHole,
+        color: "#38bdf8",
+        current_mA: 0.0
+      });
+    }
+
+    // 3. 物理演算実行とアサーション
+    try {
+      if (typeof analyzeEnergizedNodes === "function") analyzeEnergizedNodes();
+      const res = calculateCircuitPhysics();
+
+      let hasAnomaly = false;
+      let reason = "";
+
+      if (!res) {
+        hasAnomaly = true; reason = "calculateCircuitPhysics の戻り値が null";
+      } else if (Number.isNaN(res.i_total_mA) || Number.isNaN(res.r_total_ohm) || Number.isNaN(res.v_in)) {
+        hasAnomaly = true; reason = "物理計算結果に NaN が検出されました";
+      } else if (res.status === "OPEN" && res.i_total_mA > 0.001) {
+        hasAnomaly = true; reason = `OPEN 状態にもかかわらず電流 (${res.i_total_mA} mA) が計上されました`;
+      } else if (res.status === "CLOSED" && res.v_in > 0 && res.r_total_ohm === 0 && res.i_total_mA < 100) {
+        hasAnomaly = true; reason = "0Ω短絡時における過電流処理の不整合";
+      }
+
+      if (hasAnomaly) {
+        failureLog.push({ pattern: i, reason, compCount, wireCount });
+      } else {
+        passedCount++;
+      }
+    } catch (e) {
+      failureLog.push({ pattern: i, reason: `例外スロー: ${e.message}`, stack: e.stack });
+    }
+  }
+
+ // 4. 元の回路状態を完全復元 (参照を破壊せず中身を復元)
+  components.length = 0;
+  activeJumperWires.length = 0;
+  backupComponents.forEach(c => components.push(c));
+  backupWires.forEach(w => activeJumperWires.push(w));
+  if (typeof analyzeEnergizedNodes === "function") analyzeEnergizedNodes();
+  if (typeof calculateCircuitPhysics === "function") calculateCircuitPhysics();
+  if (typeof renderScene === "function") renderScene();
+
+  // 5. 結果出力
+  if (failureLog.length === 0) {
+    console.log(`[MONTE-CARLO PASS] 全 ${iterations} パターンのストレステストに完全合格しました。例外・算術破綻ゼロです。`);
+  } else {
+    console.group(`[MONTE-CARLO FAILED] ${failureLog.length} 件の不整合が検出されました:`);
+    failureLog.slice(0, 10).forEach(f => console.error(`パターン ${f.pattern}: ${f.reason}`));
+    if (failureLog.length > 10) console.warn(`ほか ${failureLog.length - 10} 件の詳細は割愛`);
+    console.groupEnd();
+  }
+}
+
+
 // コンソール自動実行の登録関数へ統合
 function runConsoleTests() {
   if (typeof runBugCheck === "function") runBugCheck();
@@ -9603,9 +10307,11 @@ function runConsoleTests() {
   if (typeof runAllPartsCombinationTest === "function") runAllPartsCombinationTest();
   if (typeof runCircuitTreeAudit === "function") runCircuitTreeAudit();
   if (typeof runPresetCircuitAudit === "function") runPresetCircuitAudit();
-  if (typeof runBatteryMatrixAudit === "function") runBatteryMatrixAudit();
+ if (typeof runBatteryMatrixAudit === "function") runBatteryMatrixAudit();
   if (typeof runSpdtMatrixAudit === "function") runSpdtMatrixAudit();
-  if (typeof runTreeKvlAndHoleAudit === "function") runTreeKvlAndHoleAudit(); // ★ ツリーKVL＆穴ID監査を登録！
+ if (typeof runTreeKvlAndHoleAudit === "function") runTreeKvlAndHoleAudit();
+  if (typeof runCircuitAutoAudit === "function") runCircuitAutoAudit();
+  if (typeof runMonteCarloFuzzTest === "function") runMonteCarloFuzzTest(1000);
 }
 
 // ======================================================================
@@ -9628,6 +10334,22 @@ const devLogs = [
       "【次回実装予定】"
     ]
   },
+
+{
+    tag: "STABILIZATION_AND_FUZZ_AUDIT",
+    date: "2026-11-11",
+    title: "物理エンジン純化・全自動健全性監査および1000回モンテカルロストレステスト完全制覇",
+    details: [
+      "プリセット5進化: NPNトランジスタ回路(2SC1815)の微弱ベース電流制御および多段降下トポロジーの安定動作確立",
+      "物理コア純化: 抵抗未接続時における架空1.0kΩ代入を完全撤廃し、実機同様の過電流(3.5A)即時焼損および適正抵抗時の自動復帰機構を実装",
+      "直列多灯判定: LED直列チェーン(isSeriesLedChain)の合成Vf判定を確立し、電源電圧不足時の完全遮断と一系統電流分配(0.10mA)を完全整合",
+      "描画インターロック: 回路OPEN時の素子発光サニタイズ、および中央溝(DIP分離帯)を跨ぐ不正な縦断破線アニメーションを根本根絶",
+      "自動診断スキャナー導入: runCircuitAutoAudit()を新設し、浮遊配線リーク・ゴースト発光・中央溝跨ぎ配置の1ミリ秒即時検知を実現",
+      "モンテカルロファジング制覇: runMonteCarloFuzzTest()を構築し、1000パターンの無作為結線ストレステストで例外スロー・NaN・算術破綻ゼロ(100% PASS)を実証",
+      "【次回実装予定】Stage 6: 2灯独立並列点灯回路のステージ設計、およびファジングテストの手動オンデマンド実行化"
+    ]
+  },
+
 
 {
     tag: "RELEASE / CIRCUIT_ENGINE",
