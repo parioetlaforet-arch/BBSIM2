@@ -966,11 +966,11 @@ const CIRCUIT_PRESETS = {
           { id: "W_PARA_GND2", fromHole: `H${led2Col + 2}`, toHole: `BUS_BOTTOM_MINUS_${led2Col + 2}`, color: "#3b82f6" }
         ]
       };
-    } else if (pattern === 1) {
+   } else if (pattern === 1) {
       // 構図B: 中央溝挟み撃ち (上段赤系統 ＆ 下段緑系統 上下サンドイッチ)
       const r1Col = Math.floor(Math.random() * 3) + 3;    // 上段赤抵抗: 列3〜5 (占有3〜9)
       const led1Col = Math.floor(Math.random() * 3) + 14; // 上段赤LED: 列14〜16 (占有14〜18)
-      const r2Col = Math.floor(Math.random() * 3) + 5;    // 下段緑抵抗: 列5〜7 (占有5〜11)
+      const r2Col = Math.floor(Math.random() * 3) + 6;    // 下段緑抵抗: 列6〜8 (占有6〜12)
       const led2Col = Math.floor(Math.random() * 3) + 17; // 下段緑LED: 列17〜19 (占有17〜21)
       return {
         name: "2灯並列点灯回路 (構図B: 上段赤系統 ＆ 下段緑系統 上下サンドイッチ)",
@@ -1729,17 +1729,17 @@ const CIRCUIT_PRESETS = {
           { id: "R_TR_C", type: "resistor", val_ohm: 1000, pinA: `C${rcCol}`, pinB: `C${rcCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "コレクタ電流制限抵抗" },
           { id: "LED_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: false, name: "赤色LED (5mm)", desc: "夜間に自動点灯する街灯LED" },
          { id: "TR_1815", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `C${trCol}`, pinC: `C${trCol + 1}`, pinB: `C${baseCol}`, pinA: `C${trCol}`, pinCOM: `C${trCol + 1}`, name: "NPNトランジスタ (2SC1815)", desc: "ベース分圧電位でコレクタ電流を開閉するスイッチング素子" },
-          { id: "R_BASE_PULLUP", type: "resistor", val_ohm: 47000, pinA: `B${pullCol}`, pinB: `B${baseCol}`, isVertical: false, colors: ["#eab308", "#7e22ce", "#f97316", "#d97706"], name: "47kΩ ベースプルアップ抵抗", desc: "電源からベースへバイアスを供給する分圧上流抵抗" },
-        { id: "CDS_NIGHT", type: "cds", pinA: `H${baseCol}`, pinB: `H${baseCol + 4}`, isVertical: false, lux: 150, name: "CdS光導電セル (5mm)", desc: "ベースとGNDの間で明暗を感知する受光素子" }
+        { id: "R_BASE_PULLUP", type: "resistor", val_ohm: 47000, pinA: `B${pullCol}`, pinB: `B${baseCol}`, isVertical: false, colors: ["#eab308", "#7e22ce", "#f97316", "#d97706"], name: "47kΩ ベースプルアップ抵抗", desc: "電源からベースへバイアスを供給する分圧上流抵抗" },
+          { id: "CDS_NIGHT", type: "cds", pinA: `C${baseCol}`, pinB: `C${baseCol + 2}`, isVertical: false, lux: 150, name: "CdS光導電セル (5mm)", desc: "ベースとGNDの間で明暗を感知する受光素子" }
         ],
         answerWires: [
           { id: "W_TR_VCC1", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
-          { id: "W_TR_RC_TO_LED", fromHole: `A${rcCol + 4}`, toHole: `A${ledCol}`, color: "#eab308" },
-          { id: "W_TR_LED_TO_C", fromHole: `A${ledCol + 2}`, toHole: `A${trCol + 1}`, color: "#f97316" },
-          { id: "W_TR_GND", fromHole: `E${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
+          { id: "W_TR_RC_TO_LED", fromHole: `G${rcCol}`, toHole: `G${ledCol}`, color: "#eab308" },
+          { id: "W_TR_LED_TO_C", fromHole: `G${ledCol + 2}`, toHole: `G${trCol + 1}`, color: "#f97316" },
+          { id: "W_TR_GND", fromHole: `J${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
           { id: "W_TR_VCC2", fromHole: `BUS_TOP_PLUS_${pullCol}`, toHole: `A${pullCol}`, color: "#ef4444" },
           { id: "W_CDS_BASE", fromHole: `E${baseCol}`, toHole: `F${baseCol}`, color: "#a855f7" },
-          { id: "W_CDS_GND", fromHole: `J${baseCol + 4}`, toHole: `BUS_BOTTOM_MINUS_${baseCol + 4}`, color: "#3b82f6" }
+          { id: "W_CDS_GND", fromHole: `E${baseCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${baseCol + 2}`, color: "#3b82f6" }
         ]
       };
     } else if (pattern === 1) {
@@ -1756,8 +1756,8 @@ const CIRCUIT_PRESETS = {
          { id: "R_TR_C", type: "resistor", val_ohm: 1000, pinA: `E${rcCol}`, pinB: `F${rcCol}`, isVertical: true, spanCols: 1, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "コレクタ電流制限抵抗" },
           { id: "LED_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `I${ledCol}`, pinB: `I${ledCol + 2}`, isOn: false, name: "赤色LED (5mm)", desc: "夜間に自動点灯する街灯LED" },
           { id: "TR_1815", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `I${trCol}`, pinC: `I${trCol + 1}`, pinB: `I${baseCol}`, pinA: `I${trCol}`, pinCOM: `I${trCol + 1}`, name: "NPNトランジスタ (2SC1815)", desc: "ベース分圧電位でコレクタ電流を開閉するスイッチング素子" },
-          { id: "R_BASE_PULLUP", type: "resistor", val_ohm: 47000, pinA: `B${pullCol}`, pinB: `B${baseCol}`, isVertical: false, colors: ["#eab308", "#7e22ce", "#f97316", "#d97706"], name: "47kΩ ベースプルアップ抵抗", desc: "電源からベースへバイアスを供給する分圧上流抵抗" },
-          { id: "CDS_NIGHT", type: "cds", pinA: `C${baseCol}`, pinB: `C${baseCol + 4}`, isVertical: false, lux: 150, name: "CdS光導電セル (5mm)", desc: "ベースとGNDの間で明暗を感知する受光素子" }
+        { id: "R_BASE_PULLUP", type: "resistor", val_ohm: 47000, pinA: `B${pullCol}`, pinB: `B${baseCol}`, isVertical: false, colors: ["#eab308", "#7e22ce", "#f97316", "#d97706"], name: "47kΩ ベースプルアップ抵抗", desc: "電源からベースへバイアスを供給する分圧上流抵抗" },
+          { id: "CDS_NIGHT", type: "cds", pinA: `C${baseCol}`, pinB: `C${baseCol + 2}`, isVertical: false, lux: 150, name: "CdS光導電セル (5mm)", desc: "ベースとGNDの間で明暗を感知する受光素子" }
         ],
         answerWires: [
           { id: "W_TR_VCC1", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
@@ -1766,7 +1766,7 @@ const CIRCUIT_PRESETS = {
           { id: "W_TR_GND", fromHole: `J${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
           { id: "W_TR_VCC2", fromHole: `BUS_TOP_PLUS_${pullCol}`, toHole: `A${pullCol}`, color: "#ef4444" },
           { id: "W_CDS_BASE", fromHole: `E${baseCol}`, toHole: `F${baseCol}`, color: "#a855f7" },
-          { id: "W_CDS_GND", fromHole: `E${baseCol + 4}`, toHole: `BUS_BOTTOM_MINUS_${baseCol + 4}`, color: "#3b82f6" }
+          { id: "W_CDS_GND", fromHole: `E${baseCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${baseCol + 2}`, color: "#3b82f6" }
         ]
       };
     } else {
@@ -1803,88 +1803,457 @@ const CIRCUIT_PRESETS = {
 
 
 
-  // Stage 12: NチャネルMOSFET・超高効率スイッチング回路 (動的ランダムジェネレータ)
+ // Stage 12: NチャネルMOSFET・超高効率スイッチング回路 (難易度維持型 3大マルチ構図ジェネレータ)
   STAGE_12_MOSFET_SWITCH: () => {
-    const rdCol = Math.floor(Math.random() * 2) + 2;     // ゾーン1: 列2〜3
-    const ledCol = Math.floor(Math.random() * 2) + 8;    // ゾーン2: 列8〜9
-    const mosCol = Math.floor(Math.random() * 2) + 13;   // ゾーン3: 列13〜14 (S: mosCol, G: +1, D: +2)
-    const pdEndCol = Math.floor(Math.random() * 3) + 18; // ゾーン4: 列18〜20
-    const swCol = Math.floor(Math.random() * 3) + 22;    // ゾーン5: 列22〜24
+    const pattern = Math.floor(Math.random() * 3);
 
-    return {
-      name: "NチャネルMOSFET・超高効率スイッチング回路 (2N7000 / ランダム配置)",
-      desc: "ドレイン主回路とゲート制御タクトスイッチが独立ゾーンへ散開配置されます。ゲート電流ゼロ(完全電圧制御)でドレイン電流を開閉し、100kΩプルダウン抵抗により確実な0V遮断を維持する現代パワーエレクトロニクスの基本を体験します。",
-      components: [
-        // 1. ドレイン主回路
-        { id: "R_MOS_D", type: "resistor", val_ohm: 1000, pinA: `C${rdCol}`, pinB: `C${rdCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ ドレイン負荷抵抗", desc: "ドレイン電流制限抵抗" },
-        { id: "LED_MOS", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: false, name: "赤色LED (5mm)", desc: "ドレイン主電流で点灯するLED" },
-        { id: "MOS_2N7000", type: "mosfet", model: "2N7000", subtype: "N_CHANNEL", pinS: `C${mosCol}`, pinG: `C${mosCol + 1}`, pinD: `C${mosCol + 2}`, pinA: `C${mosCol}`, pinB: `C${mosCol + 2}`, name: "NチャネルMOSFET (2N7000)", desc: "ゲート電圧(Vgs)で開閉する電圧制御スイッチング素子" },
+    if (pattern === 0) {
+      // 構図A: 左右ダイナミック散開配置
+      const rdCol = Math.floor(Math.random() * 2) + 2;     // ゾーン1: 列2〜3
+      const ledCol = Math.floor(Math.random() * 2) + 8;    // ゾーン2: 列8〜9
+      const mosCol = Math.floor(Math.random() * 2) + 13;   // ゾーン3: 列13〜14 (S: mosCol, G: +1, D: +2)
+      const pdEndCol = Math.floor(Math.random() * 3) + 18; // ゾーン4: 列18〜20
+      const swCol = Math.floor(Math.random() * 3) + 22;    // ゾーン5: 列22〜24
 
-        // 2. ゲート制御回路
-        { id: "SW_MOS_GATE", type: "tact_switch", subType: "tact", pinA: `C${swCol}`, pinB: `C${swCol + 3}`, isPressed: false, name: "ゲート制御スイッチ", desc: "ゲート電圧を投入・遮断するタクトスイッチ" },
-        { id: "R_MOS_PULLDOWN", type: "resistor", val_ohm: 100000, pinA: `D${mosCol + 1}`, pinB: `D${pdEndCol}`, isVertical: false, colors: ["#78350f", "#000000", "#eab308", "#d97706"], name: "100kΩ ゲートプルダウン抵抗", desc: "スイッチOFF時の浮遊電荷を放電し確実な0V遮断を保つ抵抗" }
-      ],
-      answerWires: [
-        // 1. ドレイン主電源: +9V ➔ 1kΩ負荷抵抗
-        { id: "W_MOS_VCC1", fromHole: `BUS_TOP_PLUS_${rdCol}`, toHole: `A${rdCol}`, color: "#ef4444" },
-        // 2. 負荷抵抗 ➔ LEDアノード
-        { id: "W_MOS_RD_TO_LED", fromHole: `A${rdCol + 4}`, toHole: `A${ledCol}`, color: "#eab308" },
-        // 3. LEDカソード ➔ MOSFET ドレイン端子(D)
-        { id: "W_MOS_LED_TO_D", fromHole: `A${ledCol + 2}`, toHole: `A${mosCol + 2}`, color: "#f97316" },
-        // 4. ソース端子(S) ➔ GND接地
-        { id: "W_MOS_GND", fromHole: `E${mosCol}`, toHole: `BUS_BOTTOM_MINUS_${mosCol}`, color: "#3b82f6" },
-        // 5. ゲート制御電源: +9V ➔ タクトスイッチ入力
-        { id: "W_MOS_VCC2", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `A${swCol}`, color: "#ef4444" },
-        // 6. タクトスイッチ出力 ➔ ゲート端子(G)
-        { id: "W_MOS_GATE_FEED", fromHole: `A${swCol + 3}`, toHole: `A${mosCol + 1}`, color: "#a855f7" },
-        // 7. プルダウン抵抗下流 ➔ GND接地
-        { id: "W_MOS_PD_GND", fromHole: `E${pdEndCol}`, toHole: `BUS_BOTTOM_MINUS_${pdEndCol}`, color: "#3b82f6" }
-      ]
-    };
+      return {
+        name: "NチャネルMOSFET・超高効率スイッチング回路 (構図A: 左右ダイナミック散開)",
+        desc: "ドレイン主回路とゲート制御タクトスイッチが独立ゾーンへ散開配置されます。ゲート電流ゼロ(完全電圧制御)でドレイン電流を開閉し、100kΩプルダウン抵抗により確実な0V遮断を維持します。",
+        components: [
+          { id: "R_MOS_D", type: "resistor", val_ohm: 1000, pinA: `C${rdCol}`, pinB: `C${rdCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ ドレイン負荷抵抗", desc: "ドレイン電流制限抵抗" },
+          { id: "LED_MOS", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: false, name: "赤色LED (5mm)", desc: "ドレイン主電流で点灯するLED" },
+          { id: "MOS_2N7000", type: "mosfet", model: "2N7000", subtype: "N_CHANNEL", pinS: `C${mosCol}`, pinG: `C${mosCol + 1}`, pinD: `C${mosCol + 2}`, pinA: `C${mosCol}`, pinB: `C${mosCol + 2}`, name: "NチャネルMOSFET (2N7000)", desc: "ゲート電圧(Vgs)で開閉する電圧制御スイッチング素子" },
+          { id: "SW_MOS_GATE", type: "tact_switch", subType: "tact", pinA: `C${swCol}`, pinB: `C${swCol + 3}`, isPressed: false, name: "ゲート制御スイッチ", desc: "ゲート電圧を投入・遮断するタクトスイッチ" },
+          { id: "R_MOS_PULLDOWN", type: "resistor", val_ohm: 100000, pinA: `D${mosCol + 1}`, pinB: `D${pdEndCol}`, isVertical: false, colors: ["#78350f", "#000000", "#eab308", "#d97706"], name: "100kΩ ゲートプルダウン抵抗", desc: "スイッチOFF時の浮遊電荷を放電し確実な0V遮断を保つ抵抗" }
+        ],
+        answerWires: [
+          { id: "W_MOS_VCC1", fromHole: `BUS_TOP_PLUS_${rdCol}`, toHole: `A${rdCol}`, color: "#ef4444" },
+          { id: "W_MOS_RD_TO_LED", fromHole: `A${rdCol + 4}`, toHole: `A${ledCol}`, color: "#eab308" },
+          { id: "W_MOS_LED_TO_D", fromHole: `A${ledCol + 2}`, toHole: `A${mosCol + 2}`, color: "#f97316" },
+          { id: "W_MOS_GND", fromHole: `E${mosCol}`, toHole: `BUS_BOTTOM_MINUS_${mosCol}`, color: "#3b82f6" },
+          { id: "W_MOS_VCC2", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `A${swCol}`, color: "#ef4444" },
+          { id: "W_MOS_GATE_FEED", fromHole: `A${swCol + 3}`, toHole: `A${mosCol + 1}`, color: "#a855f7" },
+          { id: "W_MOS_PD_GND", fromHole: `E${pdEndCol}`, toHole: `BUS_BOTTOM_MINUS_${pdEndCol}`, color: "#3b82f6" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // 構図B: 上段ドレイン主回路 ＆ 下段ゲート制御セパレート
+      const rdCol = Math.floor(Math.random() * 2) + 3;     // 上段: 列3〜4
+      const ledCol = Math.floor(Math.random() * 2) + 10;   // 上段: 列10〜11
+      const mosCol = Math.floor(Math.random() * 2) + 15;   // 上段: 列15〜16 (S: mosCol, G: +1, D: +2)
+      const gateCol = mosCol + 1;                          // ゲート列: 列16〜17
+      const swCol = Math.floor(Math.random() * 2) + 7;     // 下段: 列7〜8 (終端: 10〜11)
+      const pdEndCol = gateCol + 4;                        // 下段プルダウン終端: 列20〜21
+
+      return {
+        name: "NチャネルMOSFET・超高効率スイッチング回路 (構図B: 上段主回路 ＆ 下段ゲート制御)",
+        desc: "上段にドレイン主回路、下段にゲート制御スイッチと100kΩプルダウン抵抗を分離配置。中央溝を跨いでゲート酸化膜へ制御電圧を印加します。",
+        components: [
+          { id: "R_MOS_D", type: "resistor", val_ohm: 1000, pinA: `C${rdCol}`, pinB: `C${rdCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ ドレイン負荷抵抗", desc: "ドレイン電流制限抵抗" },
+          { id: "LED_MOS", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: false, name: "赤色LED (5mm)", desc: "ドレイン主電流で点灯するLED" },
+          { id: "MOS_2N7000", type: "mosfet", model: "2N7000", subtype: "N_CHANNEL", pinS: `C${mosCol}`, pinG: `C${gateCol}`, pinD: `C${mosCol + 2}`, pinA: `C${mosCol}`, pinB: `C${mosCol + 2}`, name: "NチャネルMOSFET (2N7000)", desc: "ゲート電圧(Vgs)で開閉する電圧制御スイッチング素子" },
+          { id: "SW_MOS_GATE", type: "tact_switch", subType: "tact", pinA: `G${swCol}`, pinB: `G${swCol + 3}`, isPressed: false, name: "ゲート制御スイッチ", desc: "ゲート電圧を投入・遮断するタクトスイッチ" },
+          { id: "R_MOS_PULLDOWN", type: "resistor", val_ohm: 100000, pinA: `I${gateCol}`, pinB: `I${pdEndCol}`, isVertical: false, colors: ["#78350f", "#000000", "#eab308", "#d97706"], name: "100kΩ ゲートプルダウン抵抗", desc: "スイッチOFF時の浮遊電荷を放電し確実な0V遮断を保つ抵抗" }
+        ],
+        answerWires: [
+          { id: "W_MOS_VCC1", fromHole: `BUS_TOP_PLUS_${rdCol}`, toHole: `A${rdCol}`, color: "#ef4444" },
+          { id: "W_MOS_RD_TO_LED", fromHole: `A${rdCol + 4}`, toHole: `A${ledCol}`, color: "#eab308" },
+          { id: "W_MOS_LED_TO_D", fromHole: `A${ledCol + 2}`, toHole: `A${mosCol + 2}`, color: "#f97316" },
+          { id: "W_MOS_GND", fromHole: `E${mosCol}`, toHole: `BUS_BOTTOM_MINUS_${mosCol}`, color: "#3b82f6" },
+          { id: "W_MOS_VCC2", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `F${swCol}`, color: "#ef4444" },
+          { id: "W_MOS_GATE_FEED", fromHole: `H${swCol + 3}`, toHole: `H${gateCol}`, color: "#a855f7" },
+          { id: "W_MOS_GATE_BRIDGE", fromHole: `E${gateCol}`, toHole: `F${gateCol}`, color: "#a855f7" },
+          { id: "W_MOS_PD_GND", fromHole: `J${pdEndCol}`, toHole: `BUS_BOTTOM_MINUS_${pdEndCol}`, color: "#3b82f6" }
+        ]
+      };
+    } else {
+      // 構図C: 溝跨ぎ縦挿しRd ＆ 上下立体駆動
+      const rdCol = Math.floor(Math.random() * 2) + 3;     // 溝跨ぎ: 列3〜4
+      const ledCol = Math.floor(Math.random() * 2) + 8;    // 下段: 列8〜9
+      const mosCol = Math.floor(Math.random() * 2) + 13;   // 下段: 列13〜14 (S: mosCol, G: +1, D: +2)
+      const gateCol = mosCol + 1;                          // ゲート列: 列14〜15
+      const swCol = Math.floor(Math.random() * 2) + 8;     // 上段: 列8〜9 (終端: 11〜12)
+      const pdEndCol = gateCol + 4;                        // 上段プルダウン終端: 列18〜19
+
+      return {
+        name: "NチャネルMOSFET・超高効率スイッチング回路 (構図C: 溝跨ぎRd ＆ 上下立体駆動)",
+        desc: "負荷抵抗が中央溝を縦挿しで跨ぎ、上段のゲート制御回路から下段のMOSFETゲートへ電圧を供給する立体駆動レイアウトです。",
+        components: [
+          { id: "R_MOS_D", type: "resistor", val_ohm: 1000, pinA: `E${rdCol}`, pinB: `F${rdCol}`, isVertical: true, spanCols: 1, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ ドレイン負荷抵抗", desc: "ドレイン電流制限抵抗" },
+          { id: "LED_MOS", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `I${ledCol}`, pinB: `I${ledCol + 2}`, isOn: false, name: "赤色LED (5mm)", desc: "ドレイン主電流で点灯するLED" },
+          { id: "MOS_2N7000", type: "mosfet", model: "2N7000", subtype: "N_CHANNEL", pinS: `I${mosCol}`, pinG: `I${gateCol}`, pinD: `I${mosCol + 2}`, pinA: `I${mosCol}`, pinB: `I${mosCol + 2}`, name: "NチャネルMOSFET (2N7000)", desc: "ゲート電圧(Vgs)で開閉する電圧制御スイッチング素子" },
+          { id: "SW_MOS_GATE", type: "tact_switch", subType: "tact", pinA: `B${swCol}`, pinB: `B${swCol + 3}`, isPressed: false, name: "ゲート制御スイッチ", desc: "ゲート電圧を投入・遮断するタクトスイッチ" },
+          { id: "R_MOS_PULLDOWN", type: "resistor", val_ohm: 100000, pinA: `C${gateCol}`, pinB: `C${pdEndCol}`, isVertical: false, colors: ["#78350f", "#000000", "#eab308", "#d97706"], name: "100kΩ ゲートプルダウン抵抗", desc: "スイッチOFF時の浮遊電荷を放電し確実な0V遮断を保つ抵抗" }
+        ],
+        answerWires: [
+          { id: "W_MOS_VCC1", fromHole: `BUS_TOP_PLUS_${rdCol}`, toHole: `A${rdCol}`, color: "#ef4444" },
+          { id: "W_MOS_RD_TO_LED", fromHole: `G${rdCol}`, toHole: `G${ledCol}`, color: "#eab308" },
+          { id: "W_MOS_LED_TO_D", fromHole: `G${ledCol + 2}`, toHole: `G${mosCol + 2}`, color: "#f97316" },
+          { id: "W_MOS_GND", fromHole: `J${mosCol}`, toHole: `BUS_BOTTOM_MINUS_${mosCol}`, color: "#3b82f6" },
+          { id: "W_MOS_VCC2", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `A${swCol}`, color: "#ef4444" },
+          { id: "W_MOS_GATE_FEED", fromHole: `D${swCol + 3}`, toHole: `D${gateCol}`, color: "#a855f7" },
+          { id: "W_MOS_GATE_BRIDGE", fromHole: `E${gateCol}`, toHole: `F${gateCol}`, color: "#a855f7" },
+          { id: "W_MOS_PD_GND", fromHole: `E${pdEndCol}`, toHole: `BUS_BOTTOM_MINUS_${pdEndCol}`, color: "#3b82f6" }
+        ]
+      };
+    }
   },
 
 
 
 
 
-// Stage 13: MOSFETパルス駆動 ＆ オシロスコープ波形彫刻回路 (動的ランダムジェネレータ)
+// Stage 13: MOSFETパルス駆動 ＆ オシロスコープ波形彫刻回路 (難易度維持型 3大マルチ構図ジェネレータ)
   STAGE_13_MOSFET_BUZZER_WAVE: () => {
-    const rdCol = Math.floor(Math.random() * 2) + 2;     // ゾーン1: 列2〜3
-    const bzCol = Math.floor(Math.random() * 2) + 8;     // ゾーン2: 列8〜9 (出力端: bzCol + 3)
-    const mosCol = Math.floor(Math.random() * 2) + 14;   // ゾーン3: 列14〜15 (S: mosCol, G: +1, D: +2)
-    const pdEndCol = Math.floor(Math.random() * 3) + 19; // ゾーン4: 列19〜21
-    const swCol = Math.floor(Math.random() * 3) + 23;    // ゾーン5: 列23〜25
+    const pattern = Math.floor(Math.random() * 3);
+
+    if (pattern === 0) {
+      // 構図A: 左右ダイナミック散開配置
+      const rdCol = Math.floor(Math.random() * 2) + 2;     // ゾーン1: 列2〜3
+      const bzCol = Math.floor(Math.random() * 2) + 8;     // ゾーン2: 列8〜9 (出力端: bzCol + 3)
+      const mosCol = Math.floor(Math.random() * 2) + 14;   // ゾーン3: 列14〜15 (S: mosCol, G: +1, D: +2)
+      const pdEndCol = Math.floor(Math.random() * 3) + 19; // ゾーン4: 列19〜21
+      const swCol = Math.floor(Math.random() * 3) + 23;    // ゾーン5: 列23〜25
+
+      return {
+        name: "MOSFETパルス駆動 ＆ オシロスコープ波形彫刻回路 (構図A: 左右ダイナミック散開)",
+        desc: "ドレイン音響回路とゲートパルススイッチが独立ゾーンへ散開配置されます。2N7000で2.4kHz圧電ブザーを高速スイッチング駆動し、並列平滑コンデンサによって矩形波が三角波へ彫刻される過渡現象を観測します。",
+        components: [
+          { id: "R_BUZZ_D", type: "resistor", val_ohm: 330, pinA: `C${rdCol}`, pinB: `C${rdCol + 4}`, isVertical: false, colors: ["#ea580c", "#ea580c", "#78350f", "#d97706"], name: "330Ω ドレイン負荷抵抗", desc: "ブザー駆動電流制限抵抗" },
+          { id: "BZ_PIEZO", type: "buzzer", freq_hz: 2400, val_ohm: 16, capacitance_nF: 25, pinA: `D${bzCol}`, pinB: `D${bzCol + 3}`, name: "圧電ブザー (2.4kHz)", desc: "2.4kHzパルス波形を出力する音響素子" },
+          { id: "C_WAVE_SHAPE", type: "capacitor", subType: "electrolytic", val_uF: 10, pinA: `E${bzCol}`, pinB: `E${bzCol + 3}`, isVertical: false, name: "電解コンデンサ (10µF)", desc: "矩形波のエッジをなまらせて三角波へ彫刻する並列平滑コンデンサ" },
+          { id: "MOS_2N7000", type: "mosfet", model: "2N7000", subtype: "N_CHANNEL", pinS: `C${mosCol}`, pinG: `C${mosCol + 1}`, pinD: `C${mosCol + 2}`, pinA: `C${mosCol}`, pinB: `C${mosCol + 2}`, name: "NチャネルMOSFET (2N7000)", desc: "ゲート電圧で超高速開閉する電圧制御スイッチング素子" },
+          { id: "SW_GATE_PULSE", type: "tact_switch", subType: "tact", pinA: `C${swCol}`, pinB: `C${swCol + 3}`, isPressed: false, name: "ゲートパルススイッチ", desc: "ゲートに制御電圧を投入するモーメンタリ接点" },
+          { id: "R_GATE_PD", type: "resistor", val_ohm: 100000, pinA: `D${mosCol + 1}`, pinB: `D${pdEndCol}`, isVertical: false, colors: ["#78350f", "#000000", "#eab308", "#d97706"], name: "100kΩ ゲートプルダウン抵抗", desc: "スイッチOFF時の浮遊電荷を放電し確実な0V遮断を保つ抵抗" }
+        ],
+        answerWires: [
+          { id: "W_BZ_VCC1", fromHole: `BUS_TOP_PLUS_${rdCol}`, toHole: `A${rdCol}`, color: "#ef4444" },
+          { id: "W_BZ_RD_TO_IN", fromHole: `A${rdCol + 4}`, toHole: `A${bzCol}`, color: "#eab308" },
+          { id: "W_BZ_OUT_TO_D", fromHole: `A${bzCol + 3}`, toHole: `A${mosCol + 2}`, color: "#f97316" },
+          { id: "W_BZ_GND", fromHole: `E${mosCol}`, toHole: `BUS_BOTTOM_MINUS_${mosCol}`, color: "#3b82f6" },
+          { id: "W_BZ_VCC2", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `A${swCol}`, color: "#ef4444" },
+          { id: "W_BZ_GATE_FEED", fromHole: `A${swCol + 3}`, toHole: `A${mosCol + 1}`, color: "#a855f7" },
+          { id: "W_BZ_PD_GND", fromHole: `E${pdEndCol}`, toHole: `BUS_BOTTOM_MINUS_${pdEndCol}`, color: "#3b82f6" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // 構図B: 上段ドレイン音響主回路 ＆ 下段ゲート制御セパレート
+      const rdCol = Math.floor(Math.random() * 2) + 2;     // 上段: 列2〜3
+      const bzCol = Math.floor(Math.random() * 2) + 8;     // 上段: 列8〜9 (出力端: 11〜12)
+      const mosCol = Math.floor(Math.random() * 2) + 14;   // 上段: 列14〜15 (S: mosCol, G: +1, D: +2)
+      const gateCol = mosCol + 1;                          // ゲート列: 列15〜16
+      const swCol = Math.floor(Math.random() * 2) + 7;     // 下段: 列7〜8 (終端: 10〜11)
+      const pdEndCol = gateCol + 4;                        // 下段プルダウン終端: 列19〜20
+
+      return {
+        name: "MOSFETパルス駆動 ＆ オシロスコープ波形彫刻回路 (構図B: 上段主回路 ＆ 下段ゲート制御)",
+        desc: "上段に圧電ブザーと並列平滑コンデンサの音響主回路、下段にゲート制御スイッチと100kΩプルダウン抵抗を分離配置したセパレート構成です。",
+        components: [
+          { id: "R_BUZZ_D", type: "resistor", val_ohm: 330, pinA: `C${rdCol}`, pinB: `C${rdCol + 4}`, isVertical: false, colors: ["#ea580c", "#ea580c", "#78350f", "#d97706"], name: "330Ω ドレイン負荷抵抗", desc: "ブザー駆動電流制限抵抗" },
+          { id: "BZ_PIEZO", type: "buzzer", freq_hz: 2400, val_ohm: 16, capacitance_nF: 25, pinA: `D${bzCol}`, pinB: `D${bzCol + 3}`, name: "圧電ブザー (2.4kHz)", desc: "2.4kHzパルス波形を出力する音響素子" },
+          { id: "C_WAVE_SHAPE", type: "capacitor", subType: "electrolytic", val_uF: 10, pinA: `E${bzCol}`, pinB: `E${bzCol + 3}`, isVertical: false, name: "電解コンデンサ (10µF)", desc: "矩形波のエッジをなまらせて三角波へ彫刻する並列平滑コンデンサ" },
+          { id: "MOS_2N7000", type: "mosfet", model: "2N7000", subtype: "N_CHANNEL", pinS: `C${mosCol}`, pinG: `C${gateCol}`, pinD: `C${mosCol + 2}`, pinA: `C${mosCol}`, pinB: `C${mosCol + 2}`, name: "NチャネルMOSFET (2N7000)", desc: "ゲート電圧で超高速開閉する電圧制御スイッチング素子" },
+          { id: "SW_GATE_PULSE", type: "tact_switch", subType: "tact", pinA: `G${swCol}`, pinB: `G${swCol + 3}`, isPressed: false, name: "ゲートパルススイッチ", desc: "ゲートに制御電圧を投入するモーメンタリ接点" },
+          { id: "R_GATE_PD", type: "resistor", val_ohm: 100000, pinA: `I${gateCol}`, pinB: `I${pdEndCol}`, isVertical: false, colors: ["#78350f", "#000000", "#eab308", "#d97706"], name: "100kΩ ゲートプルダウン抵抗", desc: "スイッチOFF時の浮遊電荷を放電し確実な0V遮断を保つ抵抗" }
+        ],
+        answerWires: [
+          { id: "W_BZ_VCC1", fromHole: `BUS_TOP_PLUS_${rdCol}`, toHole: `A${rdCol}`, color: "#ef4444" },
+          { id: "W_BZ_RD_TO_IN", fromHole: `A${rdCol + 4}`, toHole: `A${bzCol}`, color: "#eab308" },
+          { id: "W_BZ_OUT_TO_D", fromHole: `A${bzCol + 3}`, toHole: `A${mosCol + 2}`, color: "#f97316" },
+          { id: "W_BZ_GND", fromHole: `E${mosCol}`, toHole: `BUS_BOTTOM_MINUS_${mosCol}`, color: "#3b82f6" },
+          { id: "W_BZ_VCC2", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `F${swCol}`, color: "#ef4444" },
+          { id: "W_BZ_GATE_FEED", fromHole: `H${swCol + 3}`, toHole: `H${gateCol}`, color: "#a855f7" },
+          { id: "W_BZ_GATE_BRIDGE", fromHole: `E${gateCol}`, toHole: `F${gateCol}`, color: "#a855f7" },
+          { id: "W_BZ_PD_GND", fromHole: `J${pdEndCol}`, toHole: `BUS_BOTTOM_MINUS_${pdEndCol}`, color: "#3b82f6" }
+        ]
+      };
+    } else {
+      // 構図C: 溝跨ぎ縦挿しRd ＆ 上下立体パルス駆動
+      const rdCol = Math.floor(Math.random() * 2) + 3;     // 溝跨ぎ: 列3〜4
+      const bzCol = Math.floor(Math.random() * 2) + 7;     // 下段: 列7〜8 (出力端: 10〜11)
+      const mosCol = Math.floor(Math.random() * 2) + 13;   // 下段: 列13〜14 (S: mosCol, G: +1, D: +2)
+      const gateCol = mosCol + 1;                          // ゲート列: 列14〜15
+      const swCol = Math.floor(Math.random() * 2) + 8;     // 上段: 列8〜9 (終端: 11〜12)
+      const pdEndCol = gateCol + 4;                        // 上段プルダウン終端: 列18〜19
+
+      return {
+        name: "MOSFETパルス駆動 ＆ オシロスコープ波形彫刻回路 (構図C: 溝跨ぎRd ＆ 上下立体パルス駆動)",
+        desc: "負荷抵抗が中央溝を縦挿しで跨ぎ、上段のゲートパルス回路から下段のMOSFET・ブザー並列回路を立体的にスイッチング駆動します。",
+        components: [
+          { id: "R_BUZZ_D", type: "resistor", val_ohm: 330, pinA: `E${rdCol}`, pinB: `F${rdCol}`, isVertical: true, spanCols: 1, colors: ["#ea580c", "#ea580c", "#78350f", "#d97706"], name: "330Ω ドレイン負荷抵抗", desc: "ブザー駆動電流制限抵抗" },
+          { id: "BZ_PIEZO", type: "buzzer", freq_hz: 2400, val_ohm: 16, capacitance_nF: 25, pinA: `I${bzCol}`, pinB: `I${bzCol + 3}`, name: "圧電ブザー (2.4kHz)", desc: "2.4kHzパルス波形を出力する音響素子" },
+          { id: "C_WAVE_SHAPE", type: "capacitor", subType: "electrolytic", val_uF: 10, pinA: `J${bzCol}`, pinB: `J${bzCol + 3}`, isVertical: false, name: "電解コンデンサ (10µF)", desc: "矩形波のエッジをなまらせて三角波へ彫刻する並列平滑コンデンサ" },
+          { id: "MOS_2N7000", type: "mosfet", model: "2N7000", subtype: "N_CHANNEL", pinS: `I${mosCol}`, pinG: `I${gateCol}`, pinD: `I${mosCol + 2}`, pinA: `I${mosCol}`, pinB: `I${mosCol + 2}`, name: "NチャネルMOSFET (2N7000)", desc: "ゲート電圧で超高速開閉する電圧制御スイッチング素子" },
+          { id: "SW_GATE_PULSE", type: "tact_switch", subType: "tact", pinA: `B${swCol}`, pinB: `B${swCol + 3}`, isPressed: false, name: "ゲートパルススイッチ", desc: "ゲートに制御電圧を投入するモーメンタリ接点" },
+          { id: "R_GATE_PD", type: "resistor", val_ohm: 100000, pinA: `C${gateCol}`, pinB: `C${pdEndCol}`, isVertical: false, colors: ["#78350f", "#000000", "#eab308", "#d97706"], name: "100kΩ ゲートプルダウン抵抗", desc: "スイッチOFF時の浮遊電荷を放電し確実な0V遮断を保つ抵抗" }
+        ],
+        answerWires: [
+          { id: "W_BZ_VCC1", fromHole: `BUS_TOP_PLUS_${rdCol}`, toHole: `A${rdCol}`, color: "#ef4444" },
+          { id: "W_BZ_RD_TO_IN", fromHole: `G${rdCol}`, toHole: `G${bzCol}`, color: "#eab308" },
+          { id: "W_BZ_OUT_TO_D", fromHole: `G${bzCol + 3}`, toHole: `G${mosCol + 2}`, color: "#f97316" },
+          { id: "W_BZ_GND", fromHole: `J${mosCol}`, toHole: `BUS_BOTTOM_MINUS_${mosCol}`, color: "#3b82f6" },
+          { id: "W_BZ_VCC2", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `A${swCol}`, color: "#ef4444" },
+          { id: "W_BZ_GATE_FEED", fromHole: `D${swCol + 3}`, toHole: `D${gateCol}`, color: "#a855f7" },
+         { id: "W_BZ_GATE_BRIDGE", fromHole: `E${gateCol}`, toHole: `F${gateCol}`, color: "#a855f7" },
+          { id: "W_BZ_PD_GND", fromHole: `E${pdEndCol}`, toHole: `BUS_BOTTOM_MINUS_${pdEndCol}`, color: "#3b82f6" }
+        ]
+      };
+    }
+  },
+
+// Stage 20: ハードボイルド・プログレッシブ故障診断ドリル (Lv.1〜Lv.5 周回 / 配線ミス・実装ミス対応)
+  STAGE_20_SHORT_REPAIR: () => {
+    const lv = typeof stage20DrillLevel === "number" ? stage20DrillLevel : 1;
+    const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    const wireColors = ["#ef4444", "#eab308", "#22c55e", "#3b82f6", "#a855f7", "#f97316", "#06b6d4"];
+
+    const components = [];
+    const answerWires = [];
+    const hotNodes = [];
+    const bypassTargets = [];
+    const polarTargets = [];
+    const usedCols = new Set();
+
+    const reserveCols = (start, len) => {
+      for (let i = 0; i < len; i++) usedCols.add(start + i);
+    };
+
+    if (lv === 1) {
+      // Lv.1: 単灯LED基本回路
+      const isUpper = Math.random() < 0.5;
+      const rCol = randInt(2, 11);
+      const ledCol = randInt(rCol + 6, 25);
+      reserveCols(rCol, 5);
+      reserveCols(ledCol, 3);
+
+      const ledSpec = pick([
+        { colorType: "red", color: "#ef4444", vf: 2.0, name: "赤色LED" },
+        { colorType: "green", color: "#22c55e", vf: 2.2, name: "緑色LED" },
+        { colorType: "yellow", color: "#eab308", vf: 2.1, name: "黄色LED" }
+      ]);
+
+      const rRow = isUpper ? "C" : "H";
+      const wInRow = isUpper ? "A" : "F";
+      const wMidRow = isUpper ? "B" : "G";
+      const wGndRow = isUpper ? "E" : "J";
+
+      components.push(
+        { id: "R_D1", type: "resistor", val_ohm: 1000, pinA: `${rRow}${rCol}`, pinB: `${rRow}${rCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 抵抗", desc: "電流制限抵抗" },
+        { id: "LED_D1", type: "led", colorType: ledSpec.colorType, color: ledSpec.color, vf: ledSpec.vf, pinA: `${rRow}${ledCol}`, pinB: `${rRow}${ledCol + 2}`, isOn: false, name: ledSpec.name, desc: "負荷LED" }
+      );
+
+      answerWires.push(
+        { id: "W_D1_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `${wInRow}${rCol}`, color: "#ef4444" },
+        { id: "W_D1_MID", fromHole: `${wMidRow}${rCol + 4}`, toHole: `${wMidRow}${ledCol}`, color: pick(wireColors) },
+        { id: "W_D1_GND", fromHole: `${wGndRow}${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
+      );
+
+      hotNodes.push({ trapHole: `${wGndRow}${rCol}`, busGndCol: rCol });
+      bypassTargets.push({ from: `${wGndRow}${rCol}`, to: `${wGndRow}${rCol + 4}` });
+    } else if (lv === 2) {
+      // Lv.2: 2灯並列回路
+      const r1Col = randInt(2, 5);
+      const l1Col = randInt(r1Col + 5, 13);
+      const r2Col = randInt(6, 10);
+      const l2Col = randInt(17, 25);
+      reserveCols(r1Col, 5);
+      reserveCols(l1Col, 3);
+      reserveCols(r2Col, 5);
+      reserveCols(l2Col, 3);
+
+      components.push(
+        { id: "R_D2_1", type: "resistor", val_ohm: 1000, pinA: `B${r1Col}`, pinB: `B${r1Col + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 抵抗1", desc: "系統1制限抵抗" },
+        { id: "LED_D2_1", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `B${l1Col}`, pinB: `B${l1Col + 2}`, isOn: false, name: "赤色LED", desc: "系統1LED" },
+        { id: "R_D2_2", type: "resistor", val_ohm: 1000, pinA: `I${r2Col}`, pinB: `I${r2Col + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 抵抗2", desc: "系統2制限抵抗" },
+        { id: "LED_D2_2", type: "led", colorType: "green", color: "#22c55e", vf: 2.2, pinA: `I${l2Col}`, pinB: `I${l2Col + 2}`, isOn: false, name: "緑色LED", desc: "系統2LED" }
+      );
+
+      answerWires.push(
+        { id: "W_D2_VCC1", fromHole: `BUS_TOP_PLUS_${r1Col}`, toHole: `A${r1Col}`, color: "#ef4444" },
+        { id: "W_D2_MID1", fromHole: `C${r1Col + 4}`, toHole: `A${l1Col}`, color: pick(wireColors) },
+        { id: "W_D2_GND1", fromHole: `E${l1Col + 2}`, toHole: `BUS_BOTTOM_MINUS_${l1Col + 2}`, color: "#3b82f6" },
+        { id: "W_D2_VCC2", fromHole: `BUS_TOP_PLUS_${r2Col}`, toHole: `F${r2Col}`, color: "#ef4444" },
+        { id: "W_D2_MID2", fromHole: `J${r2Col + 4}`, toHole: `J${l2Col}`, color: pick(wireColors) },
+        { id: "W_D2_GND2", fromHole: `G${l2Col + 2}`, toHole: `BUS_BOTTOM_MINUS_${l2Col + 2}`, color: "#3b82f6" }
+      );
+
+      hotNodes.push({ trapHole: `E${r1Col}`, busGndCol: r1Col });
+      hotNodes.push({ trapHole: `J${r2Col}`, busGndCol: r2Col });
+      bypassTargets.push({ from: `E${r1Col}`, to: `E${r1Col + 4}` });
+    } else if (lv === 3) {
+      // Lv.3: 整流ダイオード ＆ 溝跨ぎ抵抗回路 (ここから実装ミス解禁)
+      const rCol = randInt(3, 6);
+      const dCol = randInt(10, 14);
+      const ledCol = randInt(19, 24);
+      reserveCols(rCol, 1);
+      reserveCols(dCol, 4);
+      reserveCols(ledCol, 3);
+
+      components.push(
+        { id: "R_D3", type: "resistor", val_ohm: 1000, pinA: `E${rCol}`, pinB: `F${rCol}`, isVertical: true, spanCols: 1, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 抵抗", desc: "溝跨ぎ制限抵抗" },
+        { id: "D_D3", type: "diode", model: "1N4007", vf: 0.7, pinA: `H${dCol}`, pinB: `H${dCol + 3}`, isVertical: false, name: "整流ダイオード", desc: "順方向電圧降下素子" },
+        { id: "LED_D3", type: "led", colorType: "blue", color: "#3b82f6", vf: 3.0, pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: false, name: "青色LED", desc: "高輝度LED" }
+      );
+
+      answerWires.push(
+        { id: "W_D3_VCC", fromHole: `BUS_TOP_PLUS_${rCol}`, toHole: `A${rCol}`, color: "#ef4444" },
+        { id: "W_D3_M1", fromHole: `G${rCol}`, toHole: `G${dCol}`, color: pick(wireColors) },
+        { id: "W_D3_M2", fromHole: `I${dCol + 3}`, toHole: `E${ledCol}`, color: pick(wireColors) },
+        { id: "W_D3_GND", fromHole: `A${ledCol + 2}`, toHole: `BUS_BOTTOM_MINUS_${ledCol + 2}`, color: "#3b82f6" }
+      );
+
+      hotNodes.push({ trapHole: `C${rCol}`, busGndCol: rCol });
+      bypassTargets.push({ from: `C${rCol}`, to: `I${rCol}` });
+      polarTargets.push("D_D3", "LED_D3");
+    } else if (lv === 4) {
+      // Lv.4: NPNトランジスタ・スイッチング回路
+      const rcCol = randInt(2, 4);
+      const ledCol = randInt(8, 10);
+      const trCol = randInt(14, 16);
+      const rbCol = randInt(20, 23);
+      reserveCols(rcCol, 5);
+      reserveCols(ledCol, 3);
+      reserveCols(trCol, 3);
+      reserveCols(rbCol, 5);
+
+      components.push(
+        { id: "R_D4_RC", type: "resistor", val_ohm: 1000, pinA: `C${rcCol}`, pinB: `C${rcCol + 4}`, isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ 負荷抵抗", desc: "コレクタ制限抵抗" },
+        { id: "LED_D4_TR", type: "led", colorType: "red", color: "#ef4444", vf: 2.0, pinA: `C${ledCol}`, pinB: `C${ledCol + 2}`, isOn: false, name: "赤色LED", desc: "負荷LED" },
+        { id: "TR_D4_1815", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: `C${trCol}`, pinC: `C${trCol + 1}`, pinB: `C${trCol + 2}`, pinA: `C${trCol}`, pinCOM: `C${trCol + 1}`, name: "NPNトランジスタ", desc: "スイッチング素子" },
+        { id: "R_D4_RB", type: "resistor", val_ohm: 10000, pinA: `D${trCol + 2}`, pinB: `D${rbCol}`, isVertical: false, colors: ["#78350f", "#000000", "#f97316", "#d97706"], name: "10kΩ ベース抵抗", desc: "ベース電流制限抵抗" }
+      );
+
+      answerWires.push(
+        { id: "W_D4_VCC1", fromHole: `BUS_TOP_PLUS_${rcCol}`, toHole: `A${rcCol}`, color: "#ef4444" },
+        { id: "W_D4_MID1", fromHole: `A${rcCol + 4}`, toHole: `A${ledCol}`, color: pick(wireColors) },
+        { id: "W_D4_MID2", fromHole: `A${ledCol + 2}`, toHole: `A${trCol + 1}`, color: pick(wireColors) },
+        { id: "W_D4_GND", fromHole: `E${trCol}`, toHole: `BUS_BOTTOM_MINUS_${trCol}`, color: "#3b82f6" },
+        { id: "W_D4_VCC2", fromHole: `BUS_TOP_PLUS_${rbCol}`, toHole: `A${rbCol}`, color: "#ef4444" }
+      );
+
+      hotNodes.push({ trapHole: `E${rcCol}`, busGndCol: rcCol });
+      hotNodes.push({ trapHole: `E${rbCol}`, busGndCol: rbCol });
+      bypassTargets.push({ from: `E${rcCol}`, to: `E${rcCol + 4}` });
+      polarTargets.push("LED_D4_TR");
+    } else {
+      // Lv.5: NチャネルMOSFET ＆ 圧電ブザー複合駆動回路
+      const rdCol = randInt(2, 3);
+      const bzCol = randInt(8, 9);
+      const mosCol = randInt(14, 15);
+      const pdEndCol = randInt(19, 21);
+      const gateFeedCol = randInt(24, 26);
+      reserveCols(rdCol, 5);
+      reserveCols(bzCol, 4);
+      reserveCols(mosCol, 3);
+      reserveCols(pdEndCol, 1);
+      reserveCols(gateFeedCol, 1);
+
+      components.push(
+        { id: "R_D5_RD", type: "resistor", val_ohm: 330, pinA: `C${rdCol}`, pinB: `C${rdCol + 4}`, isVertical: false, colors: ["#ea580c", "#ea580c", "#78350f", "#d97706"], name: "330Ω 負荷抵抗", desc: "ドレイン電流制限抵抗" },
+        { id: "BZ_D5", type: "buzzer", freq_hz: 2400, val_ohm: 16, capacitance_nF: 25, pinA: `D${bzCol}`, pinB: `D${bzCol + 3}`, name: "圧電ブザー", desc: "音響負荷素子" },
+        { id: "MOS_D5", type: "mosfet", model: "2N7000", subtype: "N_CHANNEL", pinS: `C${mosCol}`, pinG: `C${mosCol + 1}`, pinD: `C${mosCol + 2}`, pinA: `C${mosCol}`, pinB: `C${mosCol + 2}`, name: "NチャネルMOSFET", desc: "電圧制御スイッチング素子" },
+        { id: "R_D5_PD", type: "resistor", val_ohm: 100000, pinA: `D${mosCol + 1}`, pinB: `D${pdEndCol}`, isVertical: false, colors: ["#78350f", "#000000", "#eab308", "#d97706"], name: "100kΩ プルダウン抵抗", desc: "ゲート安定化抵抗" }
+      );
+
+      answerWires.push(
+        { id: "W_D5_VCC1", fromHole: `BUS_TOP_PLUS_${rdCol}`, toHole: `A${rdCol}`, color: "#ef4444" },
+        { id: "W_D5_M1", fromHole: `A${rdCol + 4}`, toHole: `A${bzCol}`, color: pick(wireColors) },
+        { id: "W_D5_M2", fromHole: `A${bzCol + 3}`, toHole: `A${mosCol + 2}`, color: pick(wireColors) },
+        { id: "W_D5_GND", fromHole: `E${mosCol}`, toHole: `BUS_BOTTOM_MINUS_${mosCol}`, color: "#3b82f6" },
+        { id: "W_D5_VCC2", fromHole: `BUS_TOP_PLUS_${gateFeedCol}`, toHole: `A${mosCol + 1}`, color: "#a855f7" },
+        { id: "W_D5_PD_GND", fromHole: `E${pdEndCol}`, toHole: `BUS_BOTTOM_MINUS_${pdEndCol}`, color: "#3b82f6" }
+      );
+
+      hotNodes.push({ trapHole: `E${rdCol}`, busGndCol: rdCol });
+      hotNodes.push({ trapHole: `E${mosCol + 1}`, busGndCol: gateFeedCol });
+      bypassTargets.push({ from: `E${rdCol}`, to: `E${rdCol + 4}` });
+    }
+
+    // 故障モード抽選:
+    // Lv.1-2: "REWIRE" (繋ぎ直し配線ミス: 高確率), "BYPASS" (余分な短絡線)
+    // Lv.3-5: "REWIRE", "BYPASS", "POLARITY" (極性逆挿し実装ミス), "SHORT_LOAD" (負荷バイパス実装ミス)
+    const modePool = lv <= 2
+      ? ["REWIRE", "REWIRE", "BYPASS"]
+      : ["REWIRE", "BYPASS", "POLARITY", "SHORT_LOAD"];
+    const faultMode = pick(modePool);
+
+    const initialWires = JSON.parse(JSON.stringify(answerWires));
+    const targetHot = pick(hotNodes);
+    let symptomHint = "症状: 電源ラインと基準電位（GND）が短絡している。";
+
+    const usedGndBusCols = new Set(
+      initialWires
+        .filter(w => String(w.toHole).startsWith("BUS_BOTTOM_MINUS_"))
+        .map(w => Number(String(w.toHole).replace("BUS_BOTTOM_MINUS_", "")))
+    );
+    const getSafeGndBusCol = (preferredCol) => {
+      if (!usedGndBusCols.has(preferredCol)) {
+        usedGndBusCols.add(preferredCol);
+        return preferredCol;
+      }
+      for (let c = 2; c <= 28; c++) {
+        if (!usedGndBusCols.has(c)) {
+          usedGndBusCols.add(c);
+          return c;
+        }
+      }
+      return 29;
+    };
+
+    if (faultMode === "POLARITY" && polarTargets.length > 0) {
+      // 実装ミスA: 有極性素子の逆挿し (pinA と pinB を反転)
+      const targetId = pick(polarTargets);
+      const comp = components.find(c => c.id === targetId);
+      if (comp) {
+        const tmp = comp.pinA;
+        comp.pinA = comp.pinB;
+        comp.pinB = tmp;
+        symptomHint = "症状: 回路開放（OPEN）。経路は繋がっているが逆方向阻止により電流が遮断されている。";
+      }
+    } else if (faultMode === "SHORT_LOAD" && bypassTargets.length > 0) {
+      // 実装ミスB: 電流制限要素のバイパス短絡（保護機能が死んでいる実装ミス）
+      const bp = pick(bypassTargets);
+      initialWires.push({
+        id: "W_FAULT_LOAD_BYPASS",
+        fromHole: bp.from,
+        toHole: bp.to,
+        color: pick(wireColors)
+      });
+      symptomHint = "症状: 保護機能喪失。電流制限要素がバイパスされ過電流状態になっている。";
+    } else if (faultMode === "REWIRE") {
+      // 配線ミス: 既存の正常GND接地線が電源側ノードへ誤接続されている（抜いて繋ぎ直す必要あり）
+      const gndWireIdx = initialWires.findIndex(w => String(w.toHole).startsWith("BUS_BOTTOM_MINUS_"));
+      if (gndWireIdx !== -1) {
+        initialWires[gndWireIdx].fromHole = targetHot.trapHole;
+        symptomHint = "症状: 帰還経路不全。基準電位（GND）への接続先が誤っており短絡している。";
+      } else {
+        const gndCol = getSafeGndBusCol(targetHot.busGndCol);
+        initialWires.push({
+          id: "W_FAULT_MISWIRE",
+          fromHole: targetHot.trapHole,
+          toHole: `BUS_BOTTOM_MINUS_${gndCol}`,
+          color: "#3b82f6"
+        });
+        symptomHint = "症状: 電源ラインと基準電位（GND）が短絡している。";
+      }
+    } else {
+      // 配線ミス: 余分なバイパス短絡線の混入
+      const gndCol = getSafeGndBusCol(targetHot.busGndCol);
+      initialWires.push({
+        id: "W_FAULT_BYPASS",
+        fromHole: targetHot.trapHole,
+        toHole: `BUS_BOTTOM_MINUS_${gndCol}`,
+        color: pick(wireColors)
+      });
+      symptomHint = "症状: 電源ラインと基準電位（GND）が短絡している。";
+    }
 
     return {
-      name: "MOSFETパルス駆動 ＆ オシロスコープ波形彫刻回路 (ランダム配置)",
-      desc: "ドレイン主回路とゲートパルススイッチが独立ゾーンへ散開配置されます。2N7000で2.4kHz圧電ブザーを高速スイッチング駆動し、並列平滑コンデンサによって矩形波が美麗な三角波へ変調・彫刻される過渡現象をリアルタイムオシロスコープ上で観測します。",
-      components: [
-        // 1. ドレイン主回路
-        { id: "R_BUZZ_D", type: "resistor", val_ohm: 330, pinA: `C${rdCol}`, pinB: `C${rdCol + 4}`, isVertical: false, colors: ["#ea580c", "#ea580c", "#78350f", "#d97706"], name: "330Ω ドレイン負荷抵抗", desc: "ブザー駆動電流制限抵抗" },
-        { id: "BZ_PIEZO", type: "buzzer", freq_hz: 2400, val_ohm: 16, capacitance_nF: 25, pinA: `D${bzCol}`, pinB: `D${bzCol + 3}`, name: "圧電ブザー (2.4kHz)", desc: "2.4kHzパルス波形を出力する音響素子" },
-        { id: "C_WAVE_SHAPE", type: "capacitor", subType: "electrolytic", val_uF: 10, pinA: `E${bzCol}`, pinB: `E${bzCol + 3}`, isVertical: false, name: "電解コンデンサ (10µF)", desc: "矩形波のエッジをなまらせて三角波へ彫刻する並列平滑コンデンサ" },
-        { id: "MOS_2N7000", type: "mosfet", model: "2N7000", subtype: "N_CHANNEL", pinS: `C${mosCol}`, pinG: `C${mosCol + 1}`, pinD: `C${mosCol + 2}`, pinA: `C${mosCol}`, pinB: `C${mosCol + 2}`, name: "NチャネルMOSFET (2N7000)", desc: "ゲート電圧で超高速開閉する電圧制御スイッチング素子" },
-
-        // 2. ゲート制御回路
-        { id: "SW_GATE_PULSE", type: "tact_switch", subType: "tact", pinA: `C${swCol}`, pinB: `C${swCol + 3}`, isPressed: false, name: "ゲートパルススイッチ", desc: "ゲートに制御電圧を投入するモーメンタリ接点" },
-        { id: "R_GATE_PD", type: "resistor", val_ohm: 100000, pinA: `D${mosCol + 1}`, pinB: `D${pdEndCol}`, isVertical: false, colors: ["#78350f", "#000000", "#eab308", "#d97706"], name: "100kΩ ゲートプルダウン抵抗", desc: "スイッチOFF時の浮遊電荷を放電し確実な0V遮断を保つ抵抗" }
-      ],
-      answerWires: [
-        // 1. ドレイン主電源: +9V ➔ 330Ω抵抗
-        { id: "W_BZ_VCC1", fromHole: `BUS_TOP_PLUS_${rdCol}`, toHole: `A${rdCol}`, color: "#ef4444" },
-        // 2. 負荷抵抗 ➔ ブザー＆コンデンサ並列入力
-        { id: "W_BZ_RD_TO_IN", fromHole: `A${rdCol + 4}`, toHole: `A${bzCol}`, color: "#eab308" },
-        // 3. ブザー＆コンデンサ並列出力 ➔ MOSFET ドレイン端子(D)
-        { id: "W_BZ_OUT_TO_D", fromHole: `A${bzCol + 3}`, toHole: `A${mosCol + 2}`, color: "#f97316" },
-        // 4. ソース端子(S) ➔ GND接地
-        { id: "W_BZ_GND", fromHole: `E${mosCol}`, toHole: `BUS_BOTTOM_MINUS_${mosCol}`, color: "#3b82f6" },
-        // 5. ゲート制御電源: +9V ➔ タクトスイッチ入力
-        { id: "W_BZ_VCC2", fromHole: `BUS_TOP_PLUS_${swCol}`, toHole: `A${swCol}`, color: "#ef4444" },
-        // 6. タクトスイッチ出力 ➔ ゲート端子(G)
-        { id: "W_BZ_GATE_FEED", fromHole: `A${swCol + 3}`, toHole: `A${mosCol + 1}`, color: "#a855f7" },
-        // 7. プルダウン抵抗下流 ➔ GND接地
-        { id: "W_BZ_PD_GND", fromHole: `E${pdEndCol}`, toHole: `BUS_BOTTOM_MINUS_${pdEndCol}`, color: "#3b82f6" }
-      ]
+      name: `DRILL Lv.${lv}/5`,
+      desc: `${symptomHint} 原因を特定し正常動作へ復旧せよ。`,
+      components,
+      initialWires,
+      answerWires
     };
   }
 };
@@ -1954,8 +2323,10 @@ const STAGE_PRESET_MAP = {
   11: "STAGE_11_CDS_NIGHTLIGHT",
 // ★ Stage 12: NチャネルMOSFET・電子スイッチング回路 (2N7000)
   12: "STAGE_12_MOSFET_SWITCH",
-  // ★ Stage 13: MOSFETパルス駆動 ＆ オシロスコープ波形彫刻回路
-  13: "STAGE_13_MOSFET_BUZZER_WAVE"
+ // ★ Stage 13: MOSFETパルス駆動 ＆ オシロスコープ波形彫刻回路
+  13: "STAGE_13_MOSFET_BUZZER_WAVE",
+  // ★ Stage 20: 故障診断・ショート修復チャレンジ
+  20: "STAGE_20_SHORT_REPAIR"
 };
 
 
@@ -1963,18 +2334,20 @@ const STAGE_PRESET_MAP = {
 // プリセット状態管理
 let currentActiveStage = null;
 let isAnswerShown = false;
+let stage20DrillLevel = 1;
+let stage20ClearCount = 0;
+let stage20CurrentSolved = false;
 
 
+function updateStage20ButtonLabel() {
+  const btn20 = document.getElementById("btn-stage-20");
+  if (btn20) {
+    btn20.textContent = `20 [${stage20ClearCount}]`;
+  }
+}
+window.addEventListener("DOMContentLoaded", updateStage20ButtonLabel);
 
-
-/**
- * ★ 2回押し回答トグルハンドラ (loadPresetCircuit 完全連携版)
- * 1回目押下: パーツのみ配置 (手動挑戦モード / 青色ボタン)
- * 2回目押下: 正解ジャンパ線を自動接続 (回答お手本モード / 緑色ボタン)
- * 3回目押下: 再び未配線状態へ復帰 (トグル動作)
- */
-function handlePresetClick(stageNo) {
-const subContainer7 = document.getElementById("sub-stage-container");
+function handlePresetClick(stageNo) {const subContainer7 = document.getElementById("sub-stage-container");
   const subContainer3 = document.getElementById("sub-stage-container-3");
   const subContainer4 = document.getElementById("sub-stage-container-4");
   const subContainer5 = document.getElementById("sub-stage-container-5");
@@ -2023,7 +2396,8 @@ const subContainer7 = document.getElementById("sub-stage-container");
     if (subContainer10) subContainer10.style.display = "flex";
     handlePresetClick("10-1");
     return;
-  } else if (!isNaN(numStage) && !String(stageNo).includes("-")) {
+
+ } else if (!isNaN(numStage) && !String(stageNo).includes("-")) {
     // 他の単独ステージが押された時は全サブバーを閉じる
     if (subContainer3) subContainer3.style.display = "none";
     if (subContainer4) subContainer4.style.display = "none";
@@ -2031,19 +2405,47 @@ const subContainer7 = document.getElementById("sub-stage-container");
     if (subContainer7) subContainer7.style.display = "none";
     if (subContainer10) subContainer10.style.display = "none";
   }
-  // 1. 同一番号の再クリックか判定し、回答フラグをトグル
-  if (currentActiveStage === stageNo) {
-    isAnswerShown = !isAnswerShown;
+
+// Stage 20 専用: ハードボイルド・ドリル進行 (回答トグル禁止 / 修理完了時のみ次レベル昇格)
+  if (numStage === 20) {
+    if (currentActiveStage === 20) {
+      const phys = typeof calculateCircuitPhysics === "function" ? calculateCircuitPhysics() : null;
+      const isRepaired = phys && phys.status === "CLOSED" && phys.i_total_mA > 0.05;
+    if (isRepaired) {
+        if (!stage20CurrentSolved) {
+          stage20ClearCount++;
+        }
+        stage20DrillLevel = (stage20DrillLevel % 5) + 1;
+      }
+    } else {
+      currentActiveStage = 20;
+    }
+    stage20CurrentSolved = false;
+    isAnswerShown = false; // 答え合わせ表示は一切許可しない
+    currentCachedPreset = null;
+    updateStage20ButtonLabel();
   } else {
-    currentActiveStage = stageNo;
-    isAnswerShown = false; // 新しいステージ選択時は挑戦モードから開始
+
+    // 1. 通常ステージ: 同一番号の再クリックか判定し、回答フラグをトグル
+    if (currentActiveStage === stageNo) {
+      isAnswerShown = !isAnswerShown;
+    } else {
+      currentActiveStage = stageNo;
+      isAnswerShown = false;
+    }
   }
 
-  // 2. 全ステージボタン＆サブボタンのスタイルを初期リセット
+ // 2. 全ステージボタン＆サブボタンのスタイルを初期リセット
   document.querySelectorAll(".stage-btn, .sub-stage-btn").forEach(btn => {
-    btn.style.background = "#1e293b";
-    btn.style.color = "#94a3b8";
-    btn.style.borderColor = "#475569";
+    if (btn.id === "btn-stage-20") {
+      btn.style.background = "#450a0a";
+      btn.style.color = "#fca5a5";
+      btn.style.borderColor = "#ef4444";
+    } else {
+      btn.style.background = "#1e293b";
+      btn.style.color = "#94a3b8";
+      btn.style.borderColor = "#475569";
+    }
   });
 
 // 親ボタン（3, 4, 5 または 7）の連動ハイライト
@@ -2165,9 +2567,12 @@ function loadPresetCircuit(presetKey, loadWires = true) {
   if (Array.isArray(preset.components)) {
     preset.components.forEach(c => components.push(JSON.parse(JSON.stringify(c))));
   }
-    // 3. ★ 配線の制御: loadWires が true の場合のみ、正解ジャンパ線を両配列へ完全同期投入
-  if (loadWires) {
-    const wiresToLoad = preset.answerWires || preset.wires || [];
+   // 3. ★ 配線の制御: 回答モードは answerWires、挑戦モードでも initialWires があれば初期展開
+  const wiresToLoad = loadWires
+    ? (preset.answerWires || preset.wires || [])
+    : (preset.initialWires || []);
+
+  if (wiresToLoad.length > 0) {
     wiresToLoad.forEach(w => {
       const cloned = JSON.parse(JSON.stringify(w));
       if (Array.isArray(activeJumperWires)) activeJumperWires.push(cloned);
@@ -2182,13 +2587,24 @@ function loadPresetCircuit(presetKey, loadWires = true) {
   window.selectedComponent = null;
   window.selectedWire = null;
 
-  // 5. 物理計算・描画・インスペクターの全体再同期
+ // 5. 物理計算・描画・インスペクターの全体再同期
   if (typeof analyzeEnergizedNodes === "function") analyzeEnergizedNodes();
   if (typeof calculateCircuitPhysics === "function") calculateCircuitPhysics();
   if (typeof renderScene === "function") renderScene();
   if (typeof updateInspectorUI === "function") updateInspectorUI(null);
 }
 
+function checkStage20ClearProgress(physics) {
+  if (window.isCircuitAuditing) return;
+  if (currentActiveStage === 20 && !stage20CurrentSolved && physics) {
+    if (physics.status === "CLOSED" && physics.i_total_mA > 0.05) {
+      stage20CurrentSolved = true;
+      stage20ClearCount++;
+      localStorage.setItem("bbsim_s20_clear_count", String(stage20ClearCount));
+      updateStage20ButtonLabel();
+    }
+  }
+}
 
 
 
@@ -2911,7 +3327,7 @@ function calculateCircuitPhysics() {
   const v_in = (typeof selectedBatteryVoltage !== "undefined") ? selectedBatteryVoltage : 9.0;
   const BATTERY_INTERNAL_R = 2.0;
 
-  // プリセットの参照を完全維持し、未登録の手動配線のみを安全に合流
+// プリセットの参照を完全維持し、未登録の手動配線のみを安全に合流
   const wires = Array.isArray(activeJumperWires) ? [...activeJumperWires] : [];
   if (typeof window.wires !== "undefined" && Array.isArray(window.wires)) {
     window.wires.forEach(w => {
@@ -2920,6 +3336,84 @@ function calculateCircuitPhysics() {
       }
     });
   }
+
+  // 0. 全パターン対応・完全短絡(デッドショート)最優先検知エンジン
+  if (isPowered) {
+    const zeroOhmAdj = new Map();
+    const linkZeroOhm = (n1, n2) => {
+      if (!n1 || !n2) return;
+      if (!zeroOhmAdj.has(n1)) zeroOhmAdj.set(n1, []);
+      if (!zeroOhmAdj.has(n2)) zeroOhmAdj.set(n2, []);
+      zeroOhmAdj.get(n1).push(n2);
+      zeroOhmAdj.get(n2).push(n1);
+    };
+
+    wires.forEach(w => {
+      linkZeroOhm(getNodeByHoleId(w.fromHole || w.from), getNodeByHoleId(w.toHole || w.to));
+    });
+
+    components.forEach(c => {
+      if (c.type === "switch" && c.isOn) {
+        linkZeroOhm(getNodeByHoleId(c.pinA), getNodeByHoleId(c.pinB));
+      } else if (c.type === "tact_switch" && c.isPressed) {
+        linkZeroOhm(getNodeByHoleId(c.pinA), getNodeByHoleId(c.pinB));
+      } else if (c.type === "switch_spdt") {
+        const comHole = c.pinCOM || c.pinCom;
+        const activePin = (c.state === "L2") ? c.pinB : c.pinA;
+        linkZeroOhm(getNodeByHoleId(comHole), getNodeByHoleId(activePin));
+      } else if (c.type === "potentiometer" && (c.cur_ratio === 0 || c.val_ohm <= 2)) {
+        linkZeroOhm(getNodeByHoleId(c.pinA), getNodeByHoleId(c.pinB));
+      }
+    });
+
+    const startNodes = ["NODE_POWER_TOP_PLUS", "NODE_POWER_BOTTOM_PLUS"].filter(n => energized.has(n));
+    const gndNodes = new Set(["NODE_POWER_BOTTOM_MINUS", "NODE_POWER_TOP_MINUS"]);
+    const visitedZero = new Set(startNodes);
+    const queue = [...startNodes];
+    let isDeadShort = false;
+
+    while (queue.length > 0) {
+      const curr = queue.shift();
+      if (gndNodes.has(curr)) {
+        isDeadShort = true;
+        break;
+      }
+      const neighbors = zeroOhmAdj.get(curr) || [];
+      for (const nxt of neighbors) {
+        if (!visitedZero.has(nxt)) {
+          visitedZero.add(nxt);
+          queue.push(nxt);
+        }
+      }
+    }
+
+    if (isDeadShort) {
+      const shortCurrent_mA = (v_in / BATTERY_INTERNAL_R) * 1000;
+      components.forEach(c => {
+        c.current_mA = 0;
+        c.voltageDrop = 0;
+        c.power_mW = 0;
+        if (c.type === "led") c.isOn = false;
+      });
+      wires.forEach(w => {
+        const nf = getNodeByHoleId(w.fromHole || w.from);
+        const nt = getNodeByHoleId(w.toHole || w.to);
+        w.current_mA = (visitedZero.has(nf) && visitedZero.has(nt)) ? shortCurrent_mA : 0;
+      });
+      const shortResult = {
+        status: "SHORT",
+        v_in: 0.15,
+        r_total_ohm: BATTERY_INTERNAL_R,
+        i_total_mA: shortCurrent_mA,
+        p_total_mW: v_in * shortCurrent_mA,
+        energized
+      };
+      if (typeof updateCircuitTreePanel === "function") updateCircuitTreePanel(shortResult);
+      if (typeof updatePhysicsLogEngine === "function") updatePhysicsLogEngine(shortResult, energized);
+      return shortResult;
+    }
+  }
+
 // 1. 可変抵抗器の実効抵抗値取得ヘルパー (ツマミ比率優先・平衡復帰完全保証版)
   const getPotEffOhm = (c) => {
     const maxOhm = c.val_max_ohm || 10000;
@@ -3415,8 +3909,10 @@ let branchR = 0;
       dropV += activeTransistors.reduce((sum, t) => sum + (t.vce_sat || 0.10), 0);
 
 // ★ 給電ノードごとのアーム動的クラスタリング (上流＋下流・可変抵抗の完全統合版)
+      const hasTransistorInCircuit = components.some(c => c.type === "transistor");
       const feedNodeList = Array.from(powerFeedNodes);
-      const isMultiArm = feedNodeList.length >= 2;
+      const isMultiArm = !hasTransistorInCircuit && feedNodeList.length >= 2;
+
 
       // 各給電ノードから連なる全素子(上流抵抗＋下流抵抗/可変抵抗)を完全抽出
       const getArmComponents = (feedNode) => {
@@ -3625,10 +4121,19 @@ let branchR = 0;
  // 8. 抵抗器の過熱焼損＆パラメータ一括同期 (★ トランジスタ個別ブランチ電流の保護対応)
   const isTrActive = components.some(c => c.type === "transistor" && c.state === "SATURATED");
 
-  components.forEach(comp => {
+ components.forEach(comp => {
     if (comp.isBurned) {
-      comp.current_mA = 0; comp.voltageDrop = 0; comp.power_mW = 0;
-      return;
+      const nA = getNodeByHoleId(comp.pinA || comp.pinE || comp.pinS);
+      const nB = getNodeByHoleId(comp.pinB || comp.pinC || comp.pinD);
+      const isConn = energized.has(nA) && energized.has(nB);
+      const branchR = comp.branchR || 0;
+      if (comp.type !== "led" && comp.type !== "resistor" && isConn && branchR >= 100) {
+        comp.isBurned = false;
+      } else {
+        comp.current_mA = 0; comp.voltageDrop = 0; comp.power_mW = 0;
+        if (comp.type !== "led") hasBurnedComponent = true;
+        return;
+      }
     }
 
     // トランジスタ動作時は、各素子が独自に算出した current_mA を厳格に最優先保持する
@@ -3704,13 +4209,28 @@ let branchR = 0;
         comp.voltageDrop = comp.charge_V || effectiveV;
         comp.power_mW = (comp.voltageDrop * i_total_mA);
       }
-        } else if (comp.type === "cds") {
+       } else if (comp.type === "cds") {
       // CdS光導電セルの物理諸元同期 (オームの法則追従)
       const rOhm = getEffOhm(comp);
       comp.val_ohm = rOhm;
       comp.current_mA = compI;
       comp.voltageDrop = (compI / 1000) * rOhm;
       comp.power_mW = comp.voltageDrop * compI;
+    } else if (["diode", "transistor", "mosfet", "buzzer"].includes(comp.type)) {
+      const nA = getNodeByHoleId(comp.pinA || comp.pinE || comp.pinS);
+      const nB = getNodeByHoleId(comp.pinB || comp.pinC || comp.pinD);
+      const isConn = energized.has(nA) && energized.has(nB);
+      const limit_mA = comp.type === "buzzer" ? 50.0 : (comp.type === "diode" ? 100.0 : 150.0);
+      const activeI = (comp.type === "transistor" || comp.type === "mosfet")
+        ? (comp.ic_mA || comp.current_mA || 0)
+        : compI;
+      if (isConn && isPowered && activeI > limit_mA) {
+        comp.isBurned = true;
+        comp.current_mA = 0;
+        hasBurnedComponent = true;
+        const p = (typeof getHoleCoord === "function") ? getHoleCoord(comp.pinA || comp.pinC || comp.pinG) : null;
+        if (p && typeof triggerBurnExplosion === "function") triggerBurnExplosion(p.x + 15, p.y);
+      }
     }
   });
 
@@ -3739,7 +4259,17 @@ let branchR = 0;
         // ベース電位が 0.68V (Vbe閾値) 以上で飽和・自動点灯、未満で遮断・消灯
         trComp.state = (vBase >= 0.68) ? "SATURATED" : "CUTOFF";
 
-       // トランジスタが遮断(CUTOFF)の場合は主コレクタ回路を即時遮断
+    const iDiv_mA = (effectiveV / (rPair + rCds + BATTERY_INTERNAL_R)) * 1000;
+        pairRes.current_mA = iDiv_mA;
+        pairRes.voltageDrop = (iDiv_mA / 1000) * rPair;
+        pairRes.power_mW = pairRes.voltageDrop * iDiv_mA;
+
+        cdsComp.val_ohm = rCds;
+        cdsComp.current_mA = iDiv_mA;
+        cdsComp.voltageDrop = (iDiv_mA / 1000) * rCds;
+        cdsComp.power_mW = cdsComp.voltageDrop * iDiv_mA;
+
+        // トランジスタが遮断(CUTOFF)の場合は主コレクタ回路を即時遮断し分圧電流のみ反映
         if (trComp.state === "CUTOFF") {
           const cLed = components.find(c => c.type === "led" && !c.isBurned);
           const cRes = components.find(r => {
@@ -3752,7 +4282,23 @@ let branchR = 0;
           if (cRes) { cRes.current_mA = 0.0; cRes.voltageDrop = 0.0; cRes.power_mW = 0.0; }
           trComp.current_mA = 0.0;
           trComp.ic_mA = 0.0;
-          trComp.voltageDrop = effectiveV; // 開放時は電源電圧がそのままかかる
+          trComp.ib_uA = 0.0;
+          trComp.voltageDrop = effectiveV;
+
+          const nPairA = getNodeByHoleId(pairRes.pinA);
+          const nPairB = getNodeByHoleId(pairRes.pinB);
+          wires.forEach(w => {
+            const nf = getNodeByHoleId(w.fromHole || w.from);
+            const nt = getNodeByHoleId(w.toHole || w.to);
+            const isDivWire = (nf === nPairA || nt === nPairA || nf === nPairB || nt === nPairB ||
+                               nf === nCdsA || nt === nCdsA || nf === nCdsB || nt === nCdsB);
+            const isBaseBridge = (nf === nBase || nt === nBase) && (nf !== nPairA && nt !== nPairA && nf !== nCdsB && nt !== nCdsB);
+            w.current_mA = (isDivWire && !isBaseBridge) ? iDiv_mA : 0.0;
+          });
+
+          i_total_mA = iDiv_mA;
+          r_total_ohm = rPair + rCds + BATTERY_INTERNAL_R;
+          p_total_mW = effectiveV * i_total_mA;
         }
       }
     }
@@ -4052,9 +4598,14 @@ function renderOscilloscope(ctx) {
     const smoothFactor = activeCap ? Math.min((activeCap.val_uF || 10) / 10.0, 1.0) : 0.0; // 0.0(完全矩形) 〜 1.0(平滑三角波)
     const ringAmp = activeRes ? Math.min((activeRes.val_ohm || 1000) / 2000.0, 1.5) : 0.0; // 直列抵抗によるリンギング振幅
 
-   const liveV = (typeof cap !== "undefined" && cap && !physics.isPowered && cap.charge_V > 0.05) ? cap.charge_V : physics.v_in;
-    const displayV = physics.status === "CLOSED" ? (liveV + (Math.random() * 0.06 - 0.03)) : 0.0;
-    const displayI = physics.status === "CLOSED" ? (physics.i_total_mA + (Math.random() * 0.04 - 0.02)) : 0.0;
+ const isShort = physics.status === "SHORT";
+    const liveV = (typeof cap !== "undefined" && cap && !physics.isPowered && cap.charge_V > 0.05) ? cap.charge_V : physics.v_in;
+    const displayV = isShort
+      ? (0.2 + Math.random() * 1.4)
+      : (physics.status === "CLOSED" ? (liveV + (Math.random() * 0.06 - 0.03)) : 0.0);
+    const displayI = isShort
+      ? (physics.i_total_mA + (Math.random() * 400 - 200))
+      : (physics.status === "CLOSED" ? (physics.i_total_mA + (Math.random() * 0.04 - 0.02)) : 0.0);
 
     scopeDataBufferV.push(displayV);
     scopeDataBufferI.push(displayI);
@@ -4062,13 +4613,18 @@ function renderOscilloscope(ctx) {
     const stepX = w / (scopeDataBufferV.length - 1);
     const timePhase = (Date.now() / 1000) * 24.0; // 時間経過による位相スクロール
 
-    // CH1: 電圧波形 (黄色)
-    ctx.strokeStyle = physics.status === "CLOSED" ? "#eab308" : "#64748b";
-    ctx.lineWidth = 2;
+    // CH1: 電圧波形 (通常CLOSED: 黄色 / SHORT: 赤色スパイク / OPEN: 灰色)
+    ctx.strokeStyle = isShort ? "#ef4444" : (physics.status === "CLOSED" ? "#eab308" : "#64748b");
+    ctx.lineWidth = isShort ? 2.5 : 2;
     ctx.beginPath();
     scopeDataBufferV.forEach((val, idx) => {
       const x = idx * stepX;
       let y = h * 0.7 - (val / 12.0) * (h * 0.5);
+
+      if (isShort) {
+        const spike = (Math.random() > 0.72) ? -(Math.random() * 16 + 4) : (Math.random() * 6 - 3);
+        y = Math.min(Math.max(y + spike, 18), h - 8);
+      }
 
       // ブザー発振時の動的パルス波形変調
       if (activeBuzzer && physics.status === "CLOSED") {
@@ -4110,9 +4666,12 @@ function renderOscilloscope(ctx) {
     }
   }
 
-  // 4. テキスト表示
+// 4. テキスト表示
   ctx.font = "bold 10px monospace";
-  if (physics.status === "CLOSED") {
+  if (physics.status === "SHORT") {
+    ctx.fillStyle = "#ef4444";
+    ctx.fillText(`[STATE] SHORT (完全短絡/過負荷)  [V_drop] 0.15 V  [I] ${(physics.i_total_mA / 1000).toFixed(2)} A (OVERLOAD)`, 8, 14);
+  } else if (physics.status === "CLOSED") {
     const rText = physics.r_total_ohm >= 1000
       ? `${(physics.r_total_ohm / 1000).toFixed(2)} kΩ`
       : `${physics.r_total_ohm.toFixed(0)} Ω`;
@@ -5488,10 +6047,10 @@ const rw = 24; // JIS抵抗長方形の幅
 // 5-2. 実物リアル外観描画モジュール
 // ----------------------------------------------------------------------
 
-function drawRealResistor(ctx, pA, pB, colors, isHovered) {
+function drawRealResistor(ctx, pA, pB, colors, isHovered, comp) {
   ctx.save();
-  const midX = (pA.x + pB.x) / 2;
-  const midY = (pA.y + pB.y) / 2;
+  const isBurned = !!(comp && comp.isBurned);
+  const midX = (pA.x + pB.x) / 2;  const midY = (pA.y + pB.y) / 2;
   const angle = Math.atan2(pB.y - pA.y, pB.x - pA.x);
   const distance = Math.hypot(pB.x - pA.x, pB.y - pA.y);
   const bodyW = 24;
@@ -5527,8 +6086,13 @@ function drawRealResistor(ctx, pA, pB, colors, isHovered) {
   ctx.shadowBlur = 4;
   ctx.shadowOffsetY = 2;
 
-  ctx.fillStyle = isHovered ? "#fde047" : "#fef08a";
-  ctx.strokeStyle = isHovered ? "#ca8a04" : "#d97706";
+ if (isBurned) {
+    ctx.fillStyle = isHovered ? "#3f3f46" : "#27272a";
+    ctx.strokeStyle = "#09090b";
+  } else {
+    ctx.fillStyle = isHovered ? "#fde047" : "#fef08a";
+    ctx.strokeStyle = isHovered ? "#ca8a04" : "#d97706";
+  }
   ctx.lineWidth = 1.2;
 
   ctx.beginPath();
@@ -5544,12 +6108,19 @@ function drawRealResistor(ctx, pA, pB, colors, isHovered) {
   const bandWidth = 2.0;
   const bandPositions = [leftX + 5, leftX + 9, leftX + 13, rightX - 5];
   colors.forEach((color, idx) => {
-    ctx.fillStyle = color;
+    ctx.fillStyle = isBurned ? "#18181b" : color;
     ctx.fillRect(bandPositions[idx] - bandWidth / 2, -bodyH / 2 - 0.5, bandWidth, bodyH + 1);
   });
 
-  ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
-  ctx.fillRect(leftX + 2, -bodyH / 2 + 1.2, bodyW - 4, 1.8);
+  if (isBurned) {
+    ctx.fillStyle = "rgba(9, 9, 11, 0.75)";
+    ctx.beginPath();
+    ctx.arc(0, 0, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+    ctx.fillRect(leftX + 2, -bodyH / 2 + 1.2, bodyW - 4, 1.8);
+  }
 
   ctx.restore();
 }
@@ -6233,8 +6804,9 @@ function drawSnapPinRing(ctx, x, y) {
 const COMP_RENDERERS = {
   resistor: (ctx, pA, pB, comp, isHovered) => {
     if (DISPLAY_MODE && DISPLAY_MODE.isSymbolON) drawSymbolResistor(ctx, pA, pB, comp, isHovered);
-    else drawRealResistor(ctx, pA, pB, comp.colors || ["#78350f", "#000000", "#dc2626", "#d97706"], isHovered);
+    else drawRealResistor(ctx, pA, pB, comp.colors || ["#78350f", "#000000", "#dc2626", "#d97706"], isHovered, comp);
   },
+
   switch: (ctx, pA, pB, comp, isHovered) => {
     if (DISPLAY_MODE && DISPLAY_MODE.isSymbolON) drawSymbolSwitch(ctx, pA, pB, comp, isHovered);
     else drawRealSwitch(ctx, pA, pB, comp, isHovered);
@@ -6344,11 +6916,28 @@ drawSnapPinRing(ctx, pA.x, pA.y);
       if (pG) drawSnapPinRing(ctx, pG.x, pG.y);
     }
 
-    const renderer = COMP_RENDERERS[comp.type];
+   const renderer = COMP_RENDERERS[comp.type];
     if (typeof renderer === "function") {
       renderer(ctx, pA, pB, comp, isHovered);
     } else {
       drawRealResistor(ctx, pA, pB, comp.colors || ["#78350f", "#000000", "#dc2626", "#d97706"], isHovered);
+    }
+
+    if (comp.isBurned && comp.type !== "resistor" && comp.type !== "led") {
+      const mx = (pA.x + pB.x) / 2;
+      const my = (pA.y + pB.y) / 2;
+      ctx.save();
+      ctx.fillStyle = "rgba(9, 9, 11, 0.78)";
+      ctx.beginPath();
+      ctx.arc(mx, my, 9, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#ef4444";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(mx - 4, my - 4); ctx.lineTo(mx + 4, my + 4);
+      ctx.moveTo(mx + 4, my - 4); ctx.lineTo(mx - 4, my + 4);
+      ctx.stroke();
+      ctx.restore();
     }
   });
 }
@@ -7269,13 +7858,13 @@ function updateCircuitTreePanel(physics) {
         <p style="margin: 0 0 12px 0; color: #cbd5e1;">
           電源(+9V)からGND(0V)まで導通させると、各パーツの電圧と電流が自動計算されます。
         </p>
-        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; border-radius: 6px; padding: 10px 12px; color: #e2e8f0; font-size: 12px;">
-          <div style="font-weight: bold; color: #38bdf8; margin-bottom: 4px;">基本操作（掌の石板・スマホ/タブレットでも相応に挑める）</div>
+       <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; border-radius: 6px; padding: 10px 12px; color: #e2e8f0; font-size: 12px;">
+          <div style="font-weight: bold; color: #38bdf8; margin-bottom: 4px;">基本操作（PC・スマホ・タブレット対応）</div>
           <ul style="margin: 0; padding-left: 18px; line-height: 1.7;">
-           <li><strong>試練の石碑を一度触れよ:</strong> 盤面に古の素子が召喚される。孔を触れれば導きの色が灯り、次なる孔を触れれば黄金の架橋（ジャンパ）が結ばれよう。</li>
-            <li><strong>二度目の接触:</strong> 迷える者への慈悲として、正しき導線が自動で編まれる。</li>
-            <li><strong>三度目の接触:</strong> 運命は移ろい、素子は異なる陣形へと再誕する。</li>
-            <li><strong>深淵の目録（ドロップダウン）:</strong> 己が意志のままに、新たな素子を盤面へ呼び出すがよい。</li>
+            <li><strong>ステージ選択（1回目）:</strong> パーツを配置します。2つの穴を順にクリックしてジャンパ線を配線します。</li>
+            <li><strong>2回目クリック:</strong> 正解の配線を自動接続します（※Stage 20は除く）。</li>
+            <li><strong>3回目クリック:</strong> パーツの配置を再抽選します。</li>
+            <li><strong>パーツ追加:</strong> 上部メニューから任意の素子を基板へ追加できます。</li>
           </ul>
         </div>
       </div>`;
@@ -9100,18 +9689,9 @@ if (clickedWireIdx !== -1) {
     }
   });
 
+// ==================================================================
+  // 5. ボタン・コントロールのイベントバインド (回転機能はインスペクタへ集約済み)
   // ==================================================================
-  // 5. ボタン・コントロールのイベントバインド
-  // ==================================================================
-  const btnRotate = document.getElementById("btn-rotate");
-  if (btnRotate) {
-    btnRotate.onclick = function() {
-      if (components.length === 0) return;
-      const target = selectedComponent || dragComponent || components[components.length - 1];
-      if (typeof rotateTargetComponent === "function") rotateTargetComponent(target);
-    };
-  }
-
 
 
 
@@ -9933,140 +10513,164 @@ console.log("--------------------------------------------------");
  * CIRCUIT_PRESETS 内の全回路を順次ロードし、パーツ穴参照・短絡・物理計算(NaN/Inf)・
  * ツリー生成の破綻がないかを全数自動検証します。(実行前のボード状態は100%復元)
  */
-function runPresetCircuitAudit() {
-  console.log("%c[監査開始] [F12 全プリセット回路 総合健全性マトリクス全自動監査]", "color: #06b6d4; font-weight: bold; font-size: 15px;");
+function runPresetCircuitAudit(rounds = 20) {
+  window.isCircuitAuditing = true;
+  console.log(`%c[監査開始] [F12 全プリセット回路 総合健全性マトリクス全自動監査 (各${rounds}周連続検証)]`, "color: #06b6d4; font-weight: bold; font-size: 15px;");
   console.log("==================================================");
+
 
   if (typeof CIRCUIT_PRESETS === "undefined") {
     console.error("[監査エラー] CIRCUIT_PRESETS が定義されていません。");
     return;
   }
-  // 1. 現在のボード状態（パーツ＆手動配線）を完全バックアップ
+
+// 1. 現在のボード状態（パーツ＆手動配線＆ドリル進行度）を完全バックアップ
   const backupComponents = JSON.parse(JSON.stringify(components));
   const backupWires = JSON.parse(JSON.stringify(activeJumperWires));
+  const backupDrillLevel = typeof stage20DrillLevel !== "undefined" ? stage20DrillLevel : 1;
 
   const presetKeys = Object.keys(CIRCUIT_PRESETS);
-  let totalTests = 0;
+  let totalPresets = 0;
   let passCount = 0;
   let failCount = 0;
 
- presetKeys.forEach((key) => {
-    totalTests++;
+  presetKeys.forEach((key) => {
+    totalPresets++;
     const rawPreset = CIRCUIT_PRESETS[key];
-    const preset = typeof rawPreset === "function" ? rawPreset() : rawPreset;
-    let hasError = false;
-    const errors = [];
+    const isDrillPreset = key === "STAGE_20_SHORT_REPAIR";
+    const loopCount = isDrillPreset ? rounds * 5 : (typeof rawPreset === "function" ? rounds : 1);
+    let presetHasError = false;
+    let lastPresetNam// 2. テスト前のユーザーのボード状態へ100%完全復元e = isDrillPreset ? "DRILL Lv.1-5 (ALL LEVELS)" : key;
+    const aggregatedErrors = [];
 
-    // プリセットデータの仮想展開 (動的関数・静的オブジェクト両対応)
-    components.length = 0;
-    activeJumperWires.length = 0;
+    for (let r = 1; r <= loopCount; r++) {
+      if (isDrillPreset && typeof stage20DrillLevel !== "undefined") {
+        stage20DrillLevel = ((r - 1) % 5) + 1;
+      }
+      const preset = typeof rawPreset === "function" ? rawPreset() : rawPreset;
+      if (!isDrillPreset && preset && preset.name) lastPresetName = preset.name;
+      const errors = [];
 
-    const compList = preset ? (preset.components || preset.parts || (preset.circuit && preset.circuit.components)) : null;
-    const wireList = preset ? (preset.wires || preset.answerWires || (preset.circuit && preset.circuit.wires)) : null;
+      components.length = 0;
+      activeJumperWires.length = 0;
 
-    if (!Array.isArray(compList)) {
-      hasError = true;
-      errors.push(`プリセット [${key}] のパーツ配列 (components/parts) が未定義または不正です`);
-    } else {
-      compList.forEach(c => components.push(JSON.parse(JSON.stringify(c))));
-    }
+      const compList = preset ? (preset.components || preset.parts || (preset.circuit && preset.circuit.components)) : null;
+      const wireList = preset ? (preset.wires || preset.answerWires || (preset.circuit && preset.circuit.wires)) : null;
 
-    if (Array.isArray(wireList)) {
-      wireList.forEach(w => activeJumperWires.push(JSON.parse(JSON.stringify(w))));
-    }
+      if (!Array.isArray(compList)) {
+        errors.push(`プリセット [${key}] のパーツ配列 (components/parts) が未定義または不正です`);
+      } else {
+        compList.forEach(c => components.push(JSON.parse(JSON.stringify(c))));
+      }
 
-    // 検証A: 不正な穴ID（存在しないスルーホール）の参照チェック
-    components.forEach(c => {
-      ["pinA", "pinB", "pinC", "pinE"].forEach(pin => {
-        if (c[pin] && !getNodeByHoleId(c[pin])) {
-          hasError = true;
-          errors.push(`パーツ [${c.id}] の端子 ${pin} (${c[pin]}) が基板上に存在しません`);
+      if (Array.isArray(wireList)) {
+        wireList.forEach(w => activeJumperWires.push(JSON.parse(JSON.stringify(w))));
+      }
+
+      // 検証A: 不正な穴ID（存在しないスルーホール）の参照チェック
+      components.forEach(c => {
+        ["pinA", "pinB", "pinC", "pinE", "pinG", "pinD", "pinS"].forEach(pin => {
+          if (c[pin] && !getNodeByHoleId(c[pin])) {
+            errors.push(`[${r}周目] パーツ [${c.id}] の端子 ${pin} (${c[pin]}) が基板上に存在しません`);
+          }
+        });
+      });
+      activeJumperWires.forEach(w => {
+        if (w.fromHole && !getNodeByHoleId(w.fromHole)) {
+          errors.push(`[${r}周目] ジャンパー線 [${w.id}] の始点 (${w.fromHole}) が基板上に存在しません`);
+        }
+        if (w.toHole && !getNodeByHoleId(w.toHole)) {
+          errors.push(`[${r}周目] ジャンパー線 [${w.id}] の終点 (${w.toHole}) が基板上に存在しません`);
         }
       });
-    });
-    activeJumperWires.forEach(w => {
-      if (w.fromHole && !getNodeByHoleId(w.fromHole)) {
-        hasError = true;
-        errors.push(`ジャンパー線 [${w.id}] の始点 (${w.fromHole}) が基板上に存在しません`);
-      }
-     if (w.toHole && !getNodeByHoleId(w.toHole)) {
-        hasError = true;
-        errors.push(`ジャンパー線 [${w.id}] の終点 (${w.toHole}) が基板上に存在しません`);
-      }
-    });
 
-    // 検証A-2: 同一スルーホールへの物理的二重挿し（ピン重複）チェック
-    const holeUsageMap = new Map();
-    components.forEach(c => {
-      // 同一パーツ内のエイリアス(pinEとpinAなど)を除外するためSetでユニーク化
-      const uniquePins = new Set();
-      ["pinA", "pinB", "pinC", "pinE", "pinCOM"].forEach(pin => {
-        if (c[pin]) uniquePins.add(c[pin]);
-      });
-      uniquePins.forEach(holeId => {
-        if (!holeUsageMap.has(holeId)) holeUsageMap.set(holeId, []);
-        holeUsageMap.get(holeId).push(`パーツ[${c.name || c.id}]`);
-      });
-    });
-    activeJumperWires.forEach(w => {
-      [w.fromHole, w.toHole].forEach(holeId => {
-        if (holeId) {
+      // 検証A-2: 同一スルーホールへの物理的二重挿し（ピン重複）チェック
+      const holeUsageMap = new Map();
+      components.forEach(c => {
+        const uniquePins = new Set();
+        ["pinA", "pinB", "pinC", "pinE", "pinCOM", "pinG", "pinD", "pinS"].forEach(pin => {
+          if (c[pin]) uniquePins.add(c[pin]);
+        });
+        uniquePins.forEach(holeId => {
           if (!holeUsageMap.has(holeId)) holeUsageMap.set(holeId, []);
-          holeUsageMap.get(holeId).push(`配線[${w.id || "Wire"}]`);
+          holeUsageMap.get(holeId).push(`パーツ[${c.name || c.id}]`);
+        });
+      });
+      activeJumperWires.forEach(w => {
+        [w.fromHole, w.toHole].forEach(holeId => {
+          if (holeId) {
+            if (!holeUsageMap.has(holeId)) holeUsageMap.set(holeId, []);
+            holeUsageMap.get(holeId).push(`配線[${w.id || "Wire"}]`);
+          }
+        });
+      });
+      holeUsageMap.forEach((users, holeId) => {
+        if (users.length > 1) {
+          errors.push(`[${r}周目] 同一穴重複エラー: 穴 [${holeId}] に複数の端子が二重挿しされています (${users.join(" と ")})`);
         }
       });
-    });
-    holeUsageMap.forEach((users, holeId) => {
-      if (users.length > 1) {
-        hasError = true;
-        errors.push(`同一穴重複エラー: 穴 [${holeId}] に複数の端子が二重挿しされています (${users.join(" と ")})`);
+
+      // 検証B & C & D: 物理エンジン計算・ツリー描画・正解ショート防止チェック
+      try {
+        analyzeEnergizedNodes();
+        const physics = calculateCircuitPhysics();
+
+        if (!physics) {
+          errors.push(`[${r}周目] 物理計算結果が null または undefined です`);
+        } else {
+          if (isNaN(physics.i_total_mA) || isNaN(physics.v_in)) {
+            errors.push(`[${r}周目] 物理計算に NaN が発生しました (I: ${physics.i_total_mA}, V: ${physics.v_in})`);
+          }
+          if (physics.status === "SHORT") {
+            errors.push(`[${r}周目] 正解配線(answerWires)にもかかわらずデッドショート(SHORT)が発生しています`);
+          }
+        }
+
+        updateCircuitTreePanel(physics);
+        const treeEl = document.getElementById("circuit-tree-content") || document.getElementById("circuit-tree-container");
+        const html = treeEl ? treeEl.innerHTML : "";
+        if (html.includes("NaN") || html.includes("undefined")) {
+          errors.push(`[${r}周目] 分圧ツリー描画内に NaN または undefined が混入しました`);
+        }
+
+      // 検証E: 故障診断ステージ(initialWires保持時)の初期ショート成立チェック
+        if (preset && Array.isArray(preset.initialWires) && preset.initialWires.length > 0) {
+          activeJumperWires.length = 0;
+          preset.initialWires.forEach(w => activeJumperWires.push(JSON.parse(JSON.stringify(w))));
+          analyzeEnergizedNodes();
+          const faultPhysics = calculateCircuitPhysics();
+          if (!faultPhysics || faultPhysics.status !== "SHORT") {
+            errors.push(`[${r}周目] 故障診断問題(initialWires)でデッドショート(SHORT)が発生しませんでした (status: ${faultPhysics ? faultPhysics.status : "null"})`);
+          }
+        }
+
+
+      } catch (err) {
+        errors.push(`[${r}周目] 解析実行中に例外エラーが発生しました: ${err.message}`);
       }
-    });
 
-    // 検証B: 物理エンジン計算の健全性チェック (NaN, Infinity, 未定義)
-
-    // 検証B: 物理エンジン計算の健全性チェック (NaN, Infinity, 未定義)
-    try {
-      analyzeEnergizedNodes();
-      const physics = calculateCircuitPhysics();
-
-      if (!physics) {
-        hasError = true;
-        errors.push("物理計算結果が null または undefined です");
-      } else if (isNaN(physics.i_total_mA) || isNaN(physics.v_in)) {
-        hasError = true;
-        errors.push(`物理計算に NaN が発生しました (I: ${physics.i_total_mA}, V: ${physics.v_in})`);
+      if (errors.length > 0) {
+        presetHasError = true;
+        aggregatedErrors.push(...errors);
+        break; // 1回でも異常が見つかったら該当プリセットのループを打ち切り報告
       }
-
-      // 検証C: 分圧ツリー描画の例外チェック
-      updateCircuitTreePanel(physics);
-      const treeEl = document.getElementById("circuit-tree-content") || document.getElementById("circuit-tree-container");
-      const html = treeEl ? treeEl.innerHTML : "";
-      if (html.includes("NaN") || html.includes("undefined")) {
-        hasError = true;
-        errors.push("分圧ツリー描画内に NaN または undefined が混入しました");
-      }
-    } catch (err) {
-      hasError = true;
-      errors.push(`解析実行中に例外エラーが発生しました: ${err.message}`);
     }
 
-  // 判定
-    if (!hasError) {
+   if (!presetHasError) {
       passCount++;
-      console.log(`    [PASS] プリセット「${preset.name || key}」: 正常`);
+      console.log(`    [PASS] プリセット「${lastPresetName}」 (${loopCount}/${loopCount}周 正常)`);
     } else {
       failCount++;
-      console.error(`    [FAIL] プリセット「${preset.name || key}」: 異常検出 ➔`, errors);
+      console.error(`    [FAIL] プリセット「${lastPresetName}」: ${aggregatedErrors.join(" / ")}`);
     }
   });
 
-  // 2. テスト前のユーザーのボード状態へ100%完全復元
+// 2. テスト前のユーザーのボード状態へ100%完全復元
   components.length = 0;
   backupComponents.forEach(c => components.push(c));
   activeJumperWires.length = 0;
   backupWires.forEach(w => activeJumperWires.push(w));
-
+  if (typeof stage20DrillLevel !== "undefined") stage20DrillLevel = backupDrillLevel;
   analyzeEnergizedNodes();
   const restoredPhysics = calculateCircuitPhysics();
   updateCircuitTreePanel(restoredPhysics);
@@ -10075,13 +10679,16 @@ function runPresetCircuitAudit() {
   // 3. 総合結果レポート出力
   console.log("--------------------------------------------------");
   if (failCount === 0) {
-    console.log(`%c[監査完了: 100% PASSED] (全 ${totalTests} プリセット全数合格)`, "color: #06b6d4; font-weight: bold;");
-    console.log("[検証完了] すべてのプリセット回路において、穴配置・通電探索・物理計算・ツリー生成が完全正常であることを確認しました。");
+    console.log(`%c[監査完了: 100% PASSED] (全 ${totalPresets} プリセット / 各${rounds}周連続検証 全数合格)`, "color: #06b6d4; font-weight: bold;");
+    console.log("[検証完了] すべてのプリセット回路において、穴配置・通電探索・物理計算・ショート整合性・ツリー生成が完全正常であることを確認しました。");
   } else {
     console.warn(`%c[監査完了: 異常あり] 成功: ${passCount} / 失敗: ${failCount}`, "color: #ef4444; font-weight: bold;");
   }
   console.log("==================================================");
 }
+
+
+
 
 /**
  * ★ 【F12 バッテリー4種盛り 物理精度マトリクス全自動監査エンジン】
@@ -10394,6 +11001,8 @@ function runTreeKvlAndHoleAudit() {
     console.warn(`⚠️ %c【ツリー監査: 異常検出】 成功: ${passCount} / 失敗: ${failCount}`, "color: #ef4444; font-weight: bold;");
   }
   console.log("==================================================");
+  window.isCircuitAuditing = false;
+
 }
 
 
@@ -10661,6 +11270,23 @@ const devLogs = [
       "【次回実装予定】"
     ]
   },
+
+{
+    tag: "FEATURE / UI",
+    date: "2026-11-13",
+    title: "Stage 20 プログレッシブ・ドリル化 ＆ クリア回数カウンター実装 ＆ UIテキスト簡素化",
+    details: [
+      "Stage 20（STAGE_20_SHORT_REPAIR）をLv.1〜Lv.5の5段階周回プログレッシブ・ドリル仕様（5,490通り以上）へ刷新",
+      "修理完了（SHORT解消 ＆ CLOSED正常通電）後に20ボタン再押下で次レベルへ昇格し、回答表示トグルを禁止する硬派仕様を実装",
+      "Stage 20 ボタンラベルにクリア回数を直接刻印する「20 [N]」カウンター（localStorage永続保存対応）を実装",
+      "Stage 20（Lv.4）におけるトランジスタベース端子とベース抵抗の同一穴重複（C17）をD行へ分離して解消",
+      "runPresetCircuitAudit() を各プリセット20周連続ランダム検証およびショート整合性自動チェック仕様へ強化",
+      "基本操作ガイドのRPG風フレーバーテキストを削除し、PC・スマホ・タブレット対応の実用的な操作説明へ統一",
+      "【次回実装予定】インスペクター初期表示および各プリセット説明文のフレーバーテキスト削減（ハードボイルドUI化の継続）"
+    ]
+  },
+
+
 
 {
     tag: "品質保証・回路監査",
