@@ -10540,7 +10540,9 @@ function runPresetCircuitAudit(rounds = 20) {
     const isDrillPreset = key === "STAGE_20_SHORT_REPAIR";
     const loopCount = isDrillPreset ? rounds * 5 : (typeof rawPreset === "function" ? rounds : 1);
     let presetHasError = false;
-    let lastPresetNam// 2. テスト前のユーザーのボード状態へ100%完全復元e = isDrillPreset ? "DRILL Lv.1-5 (ALL LEVELS)" : key;
+  let lastPresetName = isDrillPreset
+  ? "DRILL Lv.1-5 (ALL LEVELS)"
+  : key;
     const aggregatedErrors = [];
 
     for (let r = 1; r <= loopCount; r++) {
@@ -11282,7 +11284,7 @@ const devLogs = [
       "Stage 20（Lv.4）におけるトランジスタベース端子とベース抵抗の同一穴重複（C17）をD行へ分離して解消",
       "runPresetCircuitAudit() を各プリセット20周連続ランダム検証およびショート整合性自動チェック仕様へ強化",
       "基本操作ガイドのRPG風フレーバーテキストを削除し、PC・スマホ・タブレット対応の実用的な操作説明へ統一",
-      "【次回実装予定】インスペクター初期表示および各プリセット説明文のフレーバーテキスト削減（ハードボイルドUI化の継続）"
+      "【次回実装予定】インスペクター初期表示および各プリセット説明文のフレーバーテキスト削減（ハードボイルドUI化の継続）問題① バッテリー説明文のIDが不一致＞修正した。  問題② インスペクターのCSSクラスが不一致＞修正した  問題④ F12監査の変数宣言が壊れている＞修正する  、「現状ではページを再読み込みするとクリア回数がリセットされる。」＞試験運用中なのでこのままで良い。問題6と問題7は再考してみる。「起動直後に実行されるテスト」＞正式公開時には分離する。"
     ]
   },
 
