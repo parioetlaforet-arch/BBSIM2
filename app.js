@@ -1,5 +1,7 @@
-
-
+Gmail	Laforet Pario <parioetlaforet@gmail.com>
+app
+ms.morimoto <ms.morimoto@suido.city.kyoto.lg.jp>	2026年11月17日 10:17
+To: parioetlaforet@gmail.com
 // ======================================================================
 // 【第1章：基盤環境・幾何座標・システム設定 (Environment & Layout)】
 // ブレッドボード寸法、端子穴ピッチ、電源レール座標、および表示モード定数
@@ -2719,10 +2721,10 @@ const CIRCUIT_PRESETS = {
           { id: "W_15_3_S_GND", fromHole: "E23", toHole: "BUS_BOTTOM_MINUS_23", color: "#3b82f6" },
           { id: "W_15_3_VCC_RD", fromHole: "BUS_TOP_PLUS_10", toHole: "A10", color: "#ef4444" },
           { id: "W_15_3_RD_D", fromHole: "E14", toHole: "E25", color: "#f97316" },
-          { id: "W_15_3_D_LED", fromHole: "A25", toHole: "A4", color: "#22c55e" },
+         { id: "W_15_3_D_LED", fromHole: "A25", toHole: "A4", color: "#22c55e" },
           { id: "W_15_3_LED_GND", fromHole: "E6", toHole: "BUS_BOTTOM_MINUS_6", color: "#3b82f6" },
           { id: "W_15_3_D_CLIP1", fromHole: "D25", toHole: "F2", color: "#eab308" },
-          { id: "W_15_3_CLIP1_GND", fromHole: "J6", toHole: "BUS_BOTTOM_MINUS_6", color: "#3b82f6" },
+          { id: "W_15_3_CLIP1_GND", fromHole: "J6", toHole: "BUS_BOTTOM_MINUS_7", color: "#3b82f6" },
           { id: "W_15_3_D_CLIP2", fromHole: "B25", toHole: "F12", color: "#eab308" },
           { id: "W_15_3_CLIP2_GND", fromHole: "J8", toHole: "BUS_BOTTOM_MINUS_8", color: "#3b82f6" },
           { id: "W_15_3_D_TONE", fromHole: "E10", toHole: "F16", color: "#38bdf8" },
@@ -2730,6 +2732,159 @@ const CIRCUIT_PRESETS = {
         ]
       };
     }
+  },
+
+// Stage 16-1: 王道3ノブ・オーバードライブ/ディストーション (GAIN・TONE・VOLUME 独立制御 / 3大マルチ構図)
+  STAGE_16_FX_1: () => {
+    const pattern = Math.floor(Math.random() * 3);
+
+    if (pattern === 0) {
+      // 構図A: 上段GAIN・増幅 ＆ 下段対称クリップ・TONE・VOLUME 順行レイアウト
+      return {
+        name: "Stage 16-1: 3ノブ・エフェクター GAIN/TONE/VOL (構図A: 上段増幅 ＆ 下段トーン・音量)",
+        desc: "GAIN(歪み)・TONE(高域カット)・VOLUME(出力音量)の3つの可変抵抗を備えた王道3ノブ構成です。全つまみにストッパー固定抵抗を直列配置し、0Ωでもショートしない安全設計です。",
+        components: [
+          { id: "POT_16_1_GAIN", type: "potentiometer", val_ohm: 4000, val_max_ohm: 10000, cur_ratio: 0.4, pin1: "C1", pin2: "C3", pin3: "C5", pinA: "C1", pinB: "C3", name: "GAIN 10kΩ 可変抵抗", desc: "左(0Ω)に回すほどゲインと歪みが深くなるつまみ" },
+          { id: "R_16_1_GSTOP", type: "resistor", val_ohm: 330, pinA: "C7", pinB: "C10", isVertical: false, colors: ["#f97316", "#f97316", "#78350f", "#d97706"], name: "330Ω GAINストッパー抵抗", desc: "GAINを0Ωにしてもベース過電流・ショートを防ぐ保護抵抗" },
+          { id: "TR_16_1", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: "C13", pinC: "C14", pinB: "C15", pinA: "C13", pinB: "C15", name: "NPNトランジスタ (2SC1815)", desc: "信号を増幅するメインゲインステージ" },
+          { id: "R_16_1_RC", type: "resistor", val_ohm: 1000, pinA: "C18", pinB: "C22", isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "増幅出力の動作点を決める負荷抵抗" },
+          { id: "D_16_1_1", type: "diode", model: "1N4007", pinA: "H2", pinB: "H5", isVertical: false, name: "クリッピングダイオード1 (1N4007)", desc: "正側の波形ピークを制限するダイオード" },
+          { id: "D_16_1_2", type: "diode", model: "1N4007", pinA: "H10", pinB: "H7", isVertical: false, name: "クリッピングダイオード2 (1N4007逆向き)", desc: "負側の波形ピークを制限するダイオード" },
+          { id: "POT_16_1_TONE", type: "potentiometer", val_ohm: 5000, val_max_ohm: 10000, cur_ratio: 0.5, pin1: "H13", pin2: "H15", pin3: "H17", pinA: "H13", pinB: "H15", name: "TONE 10kΩ 可変抵抗", desc: "左(0Ω)に回すほどローパスフィルタが効き波形が丸まるつまみ" },
+          { id: "C_16_1_TONE", type: "capacitor", subType: "electrolytic", val_uF: 47, pinA: "H19", pinB: "H22", isVertical: false, name: "47µF トーンコンデンサ", desc: "高域成分をGNDへバイパスするトーン用コンデンサ" },
+          { id: "POT_16_1_VOL", type: "potentiometer", val_ohm: 3000, val_max_ohm: 10000, cur_ratio: 0.3, pin1: "C24", pin2: "C26", pin3: "C28", pinA: "C24", pinB: "C26", name: "VOLUME 10kΩ 可変抵抗", desc: "左(0Ω)に回すほど出力レベルが最大になるマスター音量つまみ" },
+          { id: "LED_16_1", type: "led", colorType: "green", color: "#22c55e", vf: 2.0, pinA: "H25", pinB: "H27", isOn: true, name: "マスター出力LED (緑色)", desc: "VOLUMEつまみに連動して明るさが変化する出力インジケータ" }
+        ],
+        answerWires: [
+          { id: "W_16_1_VCC_G", fromHole: "BUS_TOP_PLUS_1", toHole: "A1", color: "#ef4444" },
+          { id: "W_16_1_G_STOP", fromHole: "A3", toHole: "A7", color: "#eab308" },
+          { id: "W_16_1_STOP_B", fromHole: "A10", toHole: "A15", color: "#a855f7" },
+          { id: "W_16_1_E_GND", fromHole: "E13", toHole: "BUS_BOTTOM_MINUS_13", color: "#3b82f6" },
+          { id: "W_16_1_VCC_RC", fromHole: "BUS_TOP_PLUS_18", toHole: "A18", color: "#ef4444" },
+          { id: "W_16_1_RC_C", fromHole: "E22", toHole: "E14", color: "#f97316" },
+          { id: "W_16_1_C_D1", fromHole: "D14", toHole: "F2", color: "#eab308" },
+          { id: "W_16_1_D1_GND", fromHole: "J5", toHole: "BUS_BOTTOM_MINUS_5", color: "#3b82f6" },
+          { id: "W_16_1_C_D2", fromHole: "B14", toHole: "F10", color: "#eab308" },
+          { id: "W_16_1_D2_GND", fromHole: "J7", toHole: "BUS_BOTTOM_MINUS_7", color: "#3b82f6" },
+          { id: "W_16_1_C_TONE", fromHole: "A14", toHole: "F13", color: "#38bdf8" },
+          { id: "W_16_1_TONE_C", fromHole: "J15", toHole: "J19", color: "#38bdf8" },
+          { id: "W_16_1_TC_GND", fromHole: "J22", toHole: "BUS_BOTTOM_MINUS_22", color: "#3b82f6" },
+          { id: "W_16_1_RC_VOL", fromHole: "D22", toHole: "D24", color: "#22c55e" },
+          { id: "W_16_1_VOL_LED", fromHole: "E26", toHole: "F25", color: "#22c55e" },
+          { id: "W_16_1_LED_GND", fromHole: "J27", toHole: "BUS_BOTTOM_MINUS_27", color: "#3b82f6" }
+        ]
+      };
+    } else if (pattern === 1) {
+      // 構図B: 上段3ノブ並列配置（GAIN・TONE・VOL） ＆ 下段トランジスタ・クリッパー集約
+      return {
+        name: "Stage 16-1: 3ノブ・エフェクター GAIN/TONE/VOL (構図B: 上段3ノブ一列 ＆ 下段コア回路)",
+        desc: "実機エフェクターの筐体パネルのように上段へGAIN・TONE・VOLUMEの3つの可変抵抗を一列に並べ、下段のトランジスタ・ダイオード・トーンコンデンサへ立体配線する構成です。",
+        components: [
+          { id: "POT_16_1_GAIN", type: "potentiometer", val_ohm: 4000, val_max_ohm: 10000, cur_ratio: 0.4, pin1: "C2", pin2: "C4", pin3: "C6", pinA: "C2", pinB: "C4", name: "GAIN 10kΩ 可変抵抗", desc: "左ノブ: 歪みゲイン調整" },
+          { id: "POT_16_1_TONE", type: "potentiometer", val_ohm: 5000, val_max_ohm: 10000, cur_ratio: 0.5, pin1: "C12", pin2: "C14", pin3: "C16", pinA: "C12", pinB: "C14", name: "TONE 10kΩ 可変抵抗", desc: "中央ノブ: 高域トーン調整" },
+          { id: "POT_16_1_VOL", type: "potentiometer", val_ohm: 3000, val_max_ohm: 10000, cur_ratio: 0.3, pin1: "C22", pin2: "C24", pin3: "C26", pinA: "C22", pinB: "C24", name: "VOLUME 10kΩ 可変抵抗", desc: "右ノブ: マスター音量調整" },
+          { id: "R_16_1_GSTOP", type: "resistor", val_ohm: 330, pinA: "H2", pinB: "H5", isVertical: false, colors: ["#f97316", "#f97316", "#78350f", "#d97706"], name: "330Ω GAINストッパー抵抗", desc: "GAIN最小抵抗時の保護抵抗" },
+          { id: "TR_16_1", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: "H8", pinC: "H9", pinB: "H10", pinA: "H8", pinB: "H10", name: "NPNトランジスタ (2SC1815)", desc: "下段配置の増幅トランジスタ" },
+          { id: "R_16_1_RC", type: "resistor", val_ohm: 1000, pinA: "E19", pinB: "F19", isVertical: true, spanCols: 1, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "中央溝を跨ぐコレクタ負荷抵抗" },
+          { id: "D_16_1_1", type: "diode", model: "1N4007", pinA: "H12", pinB: "H15", isVertical: false, name: "クリッピングダイオード1 (1N4007)", desc: "正側クリッパー" },
+          { id: "D_16_1_2", type: "diode", model: "1N4007", pinA: "H20", pinB: "H17", isVertical: false, name: "クリッピングダイオード2 (1N4007逆向き)", desc: "負側クリッパー" },
+          { id: "C_16_1_TONE", type: "capacitor", subType: "electrolytic", val_uF: 47, pinA: "H22", pinB: "H25", isVertical: false, name: "47µF トーンコンデンサ", desc: "下段右のトーン用コンデンサ" },
+          { id: "LED_16_1", type: "led", colorType: "green", color: "#22c55e", vf: 2.0, pinA: "H27", pinB: "H29", isOn: true, name: "マスター出力LED (緑色)", desc: "右下端の出力モニターLED" }
+        ],
+        answerWires: [
+          { id: "W_16_1_VCC_G", fromHole: "BUS_TOP_PLUS_2", toHole: "A2", color: "#ef4444" },
+          { id: "W_16_1_G_STOP", fromHole: "E4", toHole: "F2", color: "#eab308" },
+          { id: "W_16_1_STOP_B", fromHole: "J5", toHole: "J10", color: "#a855f7" },
+          { id: "W_16_1_E_GND", fromHole: "J8", toHole: "BUS_BOTTOM_MINUS_8", color: "#3b82f6" },
+          { id: "W_16_1_VCC_RC", fromHole: "BUS_TOP_PLUS_19", toHole: "A19", color: "#ef4444" },
+          { id: "W_16_1_RC_C", fromHole: "G19", toHole: "G9", color: "#f97316" },
+          { id: "W_16_1_C_D1", fromHole: "I9", toHole: "I12", color: "#eab308" },
+          { id: "W_16_1_D1_GND", fromHole: "J15", toHole: "BUS_BOTTOM_MINUS_15", color: "#3b82f6" },
+          { id: "W_16_1_C_D2", fromHole: "F9", toHole: "F20", color: "#eab308" },
+          { id: "W_16_1_D2_GND", fromHole: "J17", toHole: "BUS_BOTTOM_MINUS_17", color: "#3b82f6" },
+          { id: "W_16_1_C_TONE", fromHole: "J9", toHole: "E12", color: "#38bdf8" },
+          { id: "W_16_1_TONE_C", fromHole: "E14", toHole: "F22", color: "#38bdf8" },
+          { id: "W_16_1_TC_GND", fromHole: "J25", toHole: "BUS_BOTTOM_MINUS_25", color: "#3b82f6" },
+          { id: "W_16_1_RC_VOL", fromHole: "I19", toHole: "E22", color: "#22c55e" },
+          { id: "W_16_1_VOL_LED", fromHole: "E24", toHole: "F27", color: "#22c55e" },
+          { id: "W_16_1_LED_GND", fromHole: "J29", toHole: "BUS_BOTTOM_MINUS_29", color: "#3b82f6" }
+        ]
+      };
+    } else {
+      // 構図C: 右上GAINスタート ＆ 左下VOLUMEフィニッシュの大逆走3ノブ配置
+      return {
+        name: "Stage 16-1: 3ノブ・エフェクター GAIN/TONE/VOL (構図C: 右上GAIN ＆ 左下VOL大逆走)",
+        desc: "右上のGAINから中央の増幅・クリッパーを経て、左下のTONEとVOLUMEへ信号が逆走する上級者向け3ノブレイアウトです。",
+        components: [
+          { id: "POT_16_1_GAIN", type: "potentiometer", val_ohm: 4000, val_max_ohm: 10000, cur_ratio: 0.4, pin1: "C23", pin2: "C25", pin3: "C27", pinA: "C23", pinB: "C25", name: "GAIN 10kΩ 可変抵抗", desc: "右上配置のゲインつまみ" },
+          { id: "R_16_1_GSTOP", type: "resistor", val_ohm: 330, pinA: "C18", pinB: "C21", isVertical: false, colors: ["#f97316", "#f97316", "#78350f", "#d97706"], name: "330Ω GAINストッパー抵抗", desc: "上段右の保護抵抗" },
+          { id: "TR_16_1", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: "C13", pinC: "C14", pinB: "C15", pinA: "C13", pinB: "C15", name: "NPNトランジスタ (2SC1815)", desc: "上段中央の増幅トランジスタ" },
+          { id: "R_16_1_RC", type: "resistor", val_ohm: 1000, pinA: "C7", pinB: "C11", isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "上段左の負荷抵抗" },
+          { id: "D_16_1_1", type: "diode", model: "1N4007", pinA: "H25", pinB: "H28", isVertical: false, name: "クリッピングダイオード1 (1N4007)", desc: "右下配置の正側クリッパー" },
+          { id: "D_16_1_2", type: "diode", model: "1N4007", pinA: "H22", pinB: "H19", isVertical: false, name: "クリッピングダイオード2 (1N4007逆向き)", desc: "右下配置の負側クリッパー" },
+          { id: "POT_16_1_TONE", type: "potentiometer", val_ohm: 5000, val_max_ohm: 10000, cur_ratio: 0.5, pin1: "H13", pin2: "H15", pin3: "H17", pinA: "H13", pinB: "H15", name: "TONE 10kΩ 可変抵抗", desc: "下段中央のトーンつまみ" },
+          { id: "C_16_1_TONE", type: "capacitor", subType: "electrolytic", val_uF: 47, pinA: "H9", pinB: "H11", isVertical: false, name: "47µF トーンコンデンサ", desc: "下段中央のローパスコンデンサ" },
+          { id: "POT_16_1_VOL", type: "potentiometer", val_ohm: 3000, val_max_ohm: 10000, cur_ratio: 0.3, pin1: "H4", pin2: "H6", pin3: "H8", pinA: "H4", pinB: "H6", name: "VOLUME 10kΩ 可変抵抗", desc: "左下配置のボリュームつまみ" },
+          { id: "LED_16_1", type: "led", colorType: "green", color: "#22c55e", vf: 2.0, pinA: "H1", pinB: "H2", isOn: true, name: "マスター出力LED (緑色)", desc: "左下端の出力インジケータ" }
+        ],
+        answerWires: [
+          { id: "W_16_1_VCC_G", fromHole: "BUS_TOP_PLUS_23", toHole: "A23", color: "#ef4444" },
+          { id: "W_16_1_G_STOP", fromHole: "A25", toHole: "A21", color: "#eab308" },
+          { id: "W_16_1_STOP_B", fromHole: "A18", toHole: "A15", color: "#a855f7" },
+          { id: "W_16_1_E_GND", fromHole: "E13", toHole: "BUS_BOTTOM_MINUS_13", color: "#3b82f6" },
+          { id: "W_16_1_VCC_RC", fromHole: "BUS_TOP_PLUS_7", toHole: "A7", color: "#ef4444" },
+          { id: "W_16_1_RC_C", fromHole: "E11", toHole: "E14", color: "#f97316" },
+          { id: "W_16_1_C_D1", fromHole: "D14", toHole: "F25", color: "#eab308" },
+          { id: "W_16_1_D1_GND", fromHole: "J28", toHole: "BUS_BOTTOM_MINUS_28", color: "#3b82f6" },
+          { id: "W_16_1_C_D2", fromHole: "B14", toHole: "F22", color: "#eab308" },
+          { id: "W_16_1_D2_GND", fromHole: "J19", toHole: "BUS_BOTTOM_MINUS_19", color: "#3b82f6" },
+          { id: "W_16_1_C_TONE", fromHole: "A14", toHole: "F13", color: "#38bdf8" },
+          { id: "W_16_1_TONE_C", fromHole: "J15", toHole: "J11", color: "#38bdf8" },
+          { id: "W_16_1_TC_GND", fromHole: "J9", toHole: "BUS_BOTTOM_MINUS_9", color: "#3b82f6" },
+          { id: "W_16_1_RC_VOL", fromHole: "D11", toHole: "F4", color: "#22c55e" },
+          { id: "W_16_1_VOL_LED", fromHole: "J6", toHole: "J1", color: "#22c55e" },
+          { id: "W_16_1_LED_GND", fromHole: "F2", toHole: "BUS_BOTTOM_MINUS_2", color: "#3b82f6" }
+        ]
+      };
+    }
+  },
+
+
+// Stage 16-2: 3ノブ・非対称ゲートファズ (FUZZ > TONE > VOLUME 統一配置 / 絶対ショート防止)
+  STAGE_16_FX_2: {
+    name: "Stage 16-2: 3ノブ・非対称ゲートファズ (FUZZ > TONE > VOLUME)",
+    desc: "上段左からFUZZ(歪み量)・TONE(高域丸め)・VOLUME(出力音量)の統一配置です。下段の非対称ダイオード3本構成により、上下非対称の荒々しいファズ波形を生成します。",
+    components: [
+      { id: "POT_16_2_FUZZ", type: "potentiometer", val_ohm: 3000, val_max_ohm: 10000, cur_ratio: 0.3, pin1: "C2", pin2: "C4", pin3: "C6", pinA: "C2", pinB: "C4", name: "FUZZ 10kΩ 可変抵抗", desc: "左ノブ(効果): 左に回すほどトランジスタを強く飽和させるファズ量調整" },
+      { id: "POT_16_2_TONE", type: "potentiometer", val_ohm: 5000, val_max_ohm: 10000, cur_ratio: 0.5, pin1: "C12", pin2: "C14", pin3: "C16", pinA: "C12", pinB: "C14", name: "TONE 10kΩ 可変抵抗", desc: "中央ノブ(トーン): 左に回すほどファズの高域エッジを丸める調整" },
+      { id: "POT_16_2_VOL", type: "potentiometer", val_ohm: 3000, val_max_ohm: 10000, cur_ratio: 0.3, pin1: "C22", pin2: "C24", pin3: "C26", pinA: "C22", pinB: "C24", name: "VOLUME 10kΩ 可変抵抗", desc: "右ノブ(音量): 左に回すほど最終出力レベルが上がるマスター音量" },
+      { id: "R_16_2_FSTOP", type: "resistor", val_ohm: 330, pinA: "H1", pinB: "H4", isVertical: false, colors: ["#f97316", "#f97316", "#78350f", "#d97706"], name: "330Ω FUZZストッパー抵抗", desc: "FUZZを0Ωにしても過電流・ショートを防ぐ保護固定抵抗" },
+      { id: "TR_16_2", type: "transistor", model: "2SC1815", subtype: "NPN", pinE: "H6", pinC: "H7", pinB: "H8", pinA: "H6", pinB: "H8", name: "NPNトランジスタ (2SC1815)", desc: "ファズ増幅ステージ" },
+      { id: "R_16_2_RC", type: "resistor", val_ohm: 1000, pinA: "H10", pinB: "H13", isVertical: false, colors: ["#78350f", "#000000", "#dc2626", "#d97706"], name: "1.0kΩ コレクタ負荷抵抗", desc: "コレクタ動作点を安定させる負荷抵抗" },
+      { id: "D_16_2_1", type: "diode", model: "1N4007", pinA: "H15", pinB: "H17", isVertical: false, name: "非対称ダイオード1 (順方向1段目)", desc: "正側クリップ1段目" },
+      { id: "D_16_2_2", type: "diode", model: "1N4007", pinA: "H17", pinB: "H19", isVertical: false, name: "非対称ダイオード2 (順方向2段目)", desc: "正側クリップを1.4Vへ広げる2段目ダイオード" },
+      { id: "D_16_2_3", type: "diode", model: "1N4007", pinA: "H22", pinB: "H20", isVertical: false, name: "非対称ダイオード3 (逆方向1本)", desc: "負側を0.7Vで鋭くクリップする逆向きダイオード" },
+      { id: "C_16_2_TONE", type: "capacitor", subType: "electrolytic", val_uF: 47, pinA: "H24", pinB: "H26", isVertical: false, name: "47µF トーンコンデンサ", desc: "高域バイパス用コンデンサ" },
+      { id: "LED_16_2", type: "led", colorType: "amber", color: "#f59e0b", vf: 2.0, pinA: "H28", pinB: "H30", isOn: true, name: "ファズ出力LED (アンバー)", desc: "VOLUME連動の出力インジケータ" }
+    ],
+    answerWires: [
+      { id: "W_16_2_VCC_F", fromHole: "BUS_TOP_PLUS_2", toHole: "A2", color: "#ef4444" },
+      { id: "W_16_2_F_STOP", fromHole: "E4", toHole: "F1", color: "#eab308" },
+      { id: "W_16_2_STOP_B", fromHole: "J4", toHole: "J8", color: "#a855f7" },
+      { id: "W_16_2_E_GND", fromHole: "J6", toHole: "BUS_BOTTOM_MINUS_6", color: "#3b82f6" },
+      { id: "W_16_2_VCC_RC", fromHole: "BUS_TOP_PLUS_10", toHole: "F10", color: "#ef4444" },
+      { id: "W_16_2_RC_C", fromHole: "J13", toHole: "J7", color: "#f97316" },
+      { id: "W_16_2_C_D1", fromHole: "I7", toHole: "I15", color: "#eab308" },
+      { id: "W_16_2_D2_GND", fromHole: "J19", toHole: "BUS_BOTTOM_MINUS_19", color: "#3b82f6" },
+      { id: "W_16_2_C_D3", fromHole: "G7", toHole: "G22", color: "#eab308" },
+      { id: "W_16_2_D3_GND", fromHole: "J20", toHole: "BUS_BOTTOM_MINUS_20", color: "#3b82f6" },
+      { id: "W_16_2_C_TONE", fromHole: "F7", toHole: "E12", color: "#38bdf8" },
+      { id: "W_16_2_TONE_C", fromHole: "E14", toHole: "F24", color: "#38bdf8" },
+      { id: "W_16_2_TC_GND", fromHole: "J26", toHole: "BUS_BOTTOM_MINUS_26", color: "#3b82f6" },
+      { id: "W_16_2_RC_VOL", fromHole: "G13", toHole: "E22", color: "#22c55e" },
+      { id: "W_16_2_VOL_LED", fromHole: "E24", toHole: "F28", color: "#22c55e" },
+      { id: "W_16_2_LED_GND", fromHole: "J30", toHole: "BUS_BOTTOM_MINUS_30", color: "#3b82f6" }
+    ]
   },
 
 
@@ -3096,11 +3251,15 @@ const STAGE_PRESET_MAP = {
  "15-1": "STAGE_15_FX_1",
  "15-2": "STAGE_15_FX_2",
  "15-3": "STAGE_15_FX_3",
+// ★ Stage 16: 3ノブ・空間＆モジュレーション工房シリーズ
+ "16-1": "STAGE_16_FX_1",
+ "16-2": "STAGE_16_FX_2",
+ "16-3": "STAGE_16_FX_3",
+ "16-4": "STAGE_16_FX_4",
+ "16-5": "STAGE_16_FX_5",
   // ★ Stage 20: 故障診断・ショート修復チャレンジ
   20: "STAGE_20_SHORT_REPAIR"
 };
-
-
 
 // プリセット状態管理
 let currentActiveStage = null;
@@ -3125,7 +3284,8 @@ function handlePresetClick(stageNo) {
   const subContainer5 = document.getElementById("sub-stage-container-5");
  const subContainer10 = document.getElementById("sub-stage-container-10");
   const subContainer14 = document.getElementById("sub-stage-container-14");
-  const subContainer15 = document.getElementById("sub-stage-container-15");
+const subContainer15 = document.getElementById("sub-stage-container-15");
+  const subContainer16 = document.getElementById("sub-stage-container-16");
 
   const closeAllSubContainers = () => {
     if (subContainer3) subContainer3.style.display = "none";
@@ -3134,12 +3294,13 @@ function handlePresetClick(stageNo) {
     if (subContainer7) subContainer7.style.display = "none";
     if (subContainer10) subContainer10.style.display = "none";
     if (subContainer14) subContainer14.style.display = "none";
-    if (subContainer15) subContainer15.style.display = "none";
+   if (subContainer15) subContainer15.style.display = "none";
+    if (subContainer16) subContainer16.style.display = "none";
   };
 
   const numStage = Number(stageNo);
 
-  // メイン「3」「4」「5」「7」「10」「14」「15」が押された時のサブバー展開ルーティング
+ // メイン「3」「4」「5」「7」「10」「14」「15」「16」が押された時のサブバー展開ルーティング
   if (numStage === 3) {
     closeAllSubContainers();
     if (subContainer3) subContainer3.style.display = "flex";
@@ -3170,18 +3331,23 @@ function handlePresetClick(stageNo) {
     if (subContainer14) subContainer14.style.display = "flex";
     handlePresetClick("14-1");
     return;
-  } else if (numStage === 15) {
+ } else if (numStage === 15) {
     closeAllSubContainers();
     if (subContainer15) subContainer15.style.display = "flex";
     handlePresetClick("15-1");
+    return;
+  } else if (numStage === 16) {
+    closeAllSubContainers();
+    if (subContainer16) subContainer16.style.display = "flex";
+    handlePresetClick("16-1");
     return;
   } else if (!isNaN(numStage) && !String(stageNo).includes("-")) {
     // 他の単独ステージが押された時は全サブバーを閉じる
     closeAllSubContainers();
   }
 
-  // Stage 15(歪み工房)選択時はACギター正弦波入力を自動でONへ連動
-  if (String(stageNo).startsWith("15-") && typeof isGuitarSignalActive !== "undefined" && !isGuitarSignalActive) {
+  // Stage 15・16(エフェクター工房)選択時はACギター正弦波入力を自動でONへ連動
+  if ((String(stageNo).startsWith("15-") || String(stageNo).startsWith("16-")) && typeof isGuitarSignalActive !== "undefined" && !isGuitarSignalActive) {
     if (typeof toggleGuitarSignal === "function") toggleGuitarSignal();
   }
 
@@ -3272,14 +3438,22 @@ function handlePresetClick(stageNo) {
       parent14Btn.style.color = "#38bdf8";
       parent14Btn.style.borderColor = "#0284c7";
     }
-  } else if (String(stageNo).startsWith("15-")) {
+} else if (String(stageNo).startsWith("15-")) {
     const parent15Btn = document.getElementById("btn-stage-15");
     if (parent15Btn) {
       parent15Btn.style.background = "#0f172a";
       parent15Btn.style.color = "#38bdf8";
       parent15Btn.style.borderColor = "#0284c7";
     }
+  } else if (String(stageNo).startsWith("16-")) {
+    const parent16Btn = document.getElementById("btn-stage-16");
+    if (parent16Btn) {
+      parent16Btn.style.background = "#0f172a";
+      parent16Btn.style.color = "#38bdf8";
+      parent16Btn.style.borderColor = "#0284c7";
+    }
   }
+
 
   // 3. アクティブボタンの視覚フィードバック (青: 挑戦中 / 緑: 回答表示中)
   const isSubStage = String(stageNo).includes("-");
@@ -5427,17 +5601,27 @@ function renderOscilloscope(ctx) {
     const smoothFactor = activeCap ? Math.min((activeCap.val_uF || 10) / 10.0, 1.0) : 0.0; // 0.0(完全矩形) 〜 1.0(平滑三角波)
     const ringAmp = activeRes ? Math.min((activeRes.val_ohm || 2000) / 2000.0, 1.5) : 0.0; // 直列抵抗によるリンギング振幅
 
-  // ACギター正弦波モード解析 (可変抵抗・ダイオード・トランジスタ/MOSFET・コンデンサ連動)
+// ACギター正弦波モード解析 (可変抵抗・ダイオード・トランジスタ/MOSFET・コンデンサ連動)
     const isGuitarActive = (typeof isGuitarSignalActive !== "undefined" && isGuitarSignalActive && !window.isCircuitAuditing);
-    const potComp = components.find(c => c.type === "potentiometer");
-    const potMax = potComp ? (potComp.val_max_ohm || 10000) : 10000;
-    const potCur = potComp && potComp.val_ohm !== undefined ? potComp.val_ohm : (potMax * 0.5);
-    const potGain = potComp ? (1.0 + Math.max(0, 1.0 - (potCur / potMax)) * 5.0) : 1.5; // 0Ωで最大ゲイン(6.0倍)、最大抵抗で最小(1.0倍)
+   const pots = components.filter(c => c.type === "potentiometer");
+    const gainPot = pots.find(c => (c.id || "").includes("GAIN") || (c.id || "").includes("FUZZ")) || pots[0];
+    const tonePot = pots.find(c => (c.id || "").includes("TONE"));
+    const volPot = pots.find(c => (c.id || "").includes("VOL"));
+    const calcPotFactor = (p) => {
+      if (!p) return 0.5;
+      const m = p.val_max_ohm || 10000;
+      const cur = p.val_ohm !== undefined ? p.val_ohm : (m * 0.5);
+      return Math.max(0, Math.min(1, 1.0 - (cur / m)));
+    };
+    const potGain = gainPot ? (1.0 + calcPotFactor(gainPot) * 5.0) : 1.5;
+    const potToneFactor = tonePot ? calcPotFactor(tonePot) : 0.5;
+    const potVolScale = volPot ? (0.25 + calcPotFactor(volPot) * 0.95) : 1.0;
     const activeDiodes = components.filter(c => c.type === "diode");
 
-    const hasActiveSemicon = components.some(c => (c.type === "transistor" || c.type === "mosfet"));
+   const hasActiveSemicon = components.some(c => (c.type === "transistor" || c.type === "mosfet"));
     const toneCap = components.find(c => c.type === "capacitor");
-    const toneCut = toneCap ? Math.min((toneCap.val_uF || 10) / 47.0, 0.65) : 0.0;
+    const baseToneCut = toneCap ? Math.min((toneCap.val_uF || 10) / 47.0, 0.72) : 0.0;
+    const toneCut = tonePot ? (baseToneCut * (0.15 + potToneFactor * 0.85)) : baseToneCut;
 
     const isShort = physics.status === "SHORT";
     const liveV = (typeof cap !== "undefined" && cap && !physics.isPowered && cap.charge_V > 0.05) ? cap.charge_V : physics.v_in;
@@ -5509,10 +5693,13 @@ function renderOscilloscope(ctx) {
           sig = Math.max(Math.min(sig, 1.45), -1.45);
         }
 
-        // 3. トーンコンデンサによる高域丸め(ローパス効果)
+      // 3. トーンコンデンサによる高域丸め(ローパス効果)
         if (toneCut > 0) {
           sig = sig * (1.0 - toneCut * 0.35) + Math.sin(theta - 0.3) * (toneCut * 0.35);
         }
+
+        // 4. VOLUME可変抵抗による最終出力レベル調整
+        sig *= potVolScale;
 
         y = Math.min(Math.max(centerY - sig * (h * 0.24), 16), h - 12);
       } else if (activeBuzzer && physics.status === "CLOSED") {
@@ -8924,6 +9111,25 @@ const PRESET_MISSIONS = {
       },
 
 
+"16-1": {
+        title: "Stage 16-1: 3ノブ・エフェクター (GAIN / TONE / VOLUME 独立制御)",
+        goal: "GAIN・TONE・VOLUMEの3つの可変抵抗と保護固定抵抗を接続し、歪みの深さ・高域の丸み・最終出力レベルを3ノブで自在にコントロールしましょう。",
+        route: "GAIN: +9V->GAIN->330Ω->TR[B] / 増幅・歪み: +9V->1kΩ->TR[C]->(D1 & D2)->GND / TONE: TR[C]->TONE->47µF->GND / VOL: 1kΩ->VOL->緑LED->GND"
+      },
+
+
+
+"16-2": {
+        title: "Stage 16-2: 3ノブ・非対称ゲートファズ (FUZZ > TONE > VOLUME)",
+        goal: "左からFUZZ・TONE・VOLUMEの統一3ノブ配置を配線し、直列2段＋逆1段の非対称ダイオードクリッパーによるファズ歪みを確認しましょう。",
+        route: "FUZZ: +9V->FUZZ->330Ω->TR[B] / 非対称歪み: +9V->1kΩ->TR[C]->(D1+D2 & D3)->GND / TONE: TR[C]->TONE->47µF->GND / VOL: 1kΩ->VOL->アンバーLED->GND"
+      },
+
+
+
+
+
+
       "20": {
         title: "Stage 20: 故障診断・ショート修復チャレンジ",
         goal: "回路内の短絡配線や素子の極性逆挿し原因を特定し、正常な閉回路（CLOSED）へ修復しましょう。",
@@ -11793,6 +11999,9 @@ function runPresetCircuitAudit(rounds = 20) {
           }
           if (physics.status === "SHORT") {
             errors.push(`[${r}周目] 正解配線(answerWires)にもかかわらずデッドショート(SHORT)が発生しています`);
+          }
+          if (key.startsWith("STAGE_15_FX_") && physics.status !== "CLOSED") {
+            errors.push(`[${r}周目] エフェクター回路(${key})の正解配線が導通(CLOSED)になっていません (status: ${physics.status})`);
           }
         }
 
